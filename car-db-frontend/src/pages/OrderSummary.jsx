@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import Chatbot from "../components/Chatbot";
 
 function OrderSummary() {
   return (
     <>
+      <Chatbot />
       {/* ORDER SUMMARY SECTION */}
       <section className="bg-white min-h-screen antialiased dark:bg-gray-900 py-8">
         <div className="mx-auto max-w-screen-xl 2xl:px-0 pb-6">

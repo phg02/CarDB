@@ -23,7 +23,8 @@ function UsedCar() {
             <Result count={4} />
             
             <div className="grid grid-cols-1 sm:grid-cols-2 min-[1400px]:grid-cols-3 gap-6 sm:gap-8 auto-rows-fr">
-              <ProductCard 
+              <ProductCard
+                    id={1}
                     img="https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg" 
                     status="Used" 
                     name="Tesla Model 3 Standard Range Plus" 
@@ -34,7 +35,8 @@ function UsedCar() {
                     fuel="Electric" 
                     seats={5}/>
 
-                  <ProductCard 
+                  <ProductCard
+                    id={2}
                     img="https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg" 
                     status="Used" 
                     name="BMW i4 M50" 
@@ -46,7 +48,8 @@ function UsedCar() {
                     seats={5} 
                   />
 
-                  <ProductCard 
+                  <ProductCard
+                    id={3}
                     img="https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg" 
                     status="Used" 
                     name="Mercedes-Benz C-Class 300" 
@@ -58,7 +61,8 @@ function UsedCar() {
                     seats={5} 
                   />
 
-                  <ProductCard 
+                  <ProductCard
+                    id={4}
                     img="https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp" 
                     status="Used" 
                     name="Audi e-tron GT" 

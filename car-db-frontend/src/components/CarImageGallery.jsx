@@ -4,7 +4,7 @@ const CarImageGallery = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState(0);
 
   return (
-    <div className="container mx-auto px-4 pb-6">
+    <div className="container mx-auto px-4 pb-6 flex justify-center">
       <div className="flex gap-3 overflow-x-auto pb-2">
         {images.map((image, index) => (
           <button

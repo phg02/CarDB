@@ -1,8 +1,37 @@
+import { Link } from "react-router-dom";
+
 function OrderSummary() {
   return (
     <>
       {/* ORDER SUMMARY SECTION */}
-      <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">
+      <section className="bg-white min-h-screen antialiased dark:bg-gray-900 py-8">
+        <div className="mx-auto max-w-screen-xl 2xl:px-0 pb-6">
+          <nav className="flex items-center mx-auto max-w-3xl text-sm text-gray-400 gap-2">
+            <Link to="/" className="hover:text-white transition-colors">
+              Homepage
+            </Link>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+
+            <Link to="/newcar" className="hover:text-white transition-colors">
+              New Car List
+            </Link>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+
+            <Link to="/car/:id" className="hover:text-white transition-colors">
+              Car Detail
+            </Link>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+
+            <span className="text-white">Order Summary</span>
+          </nav>
+        </div>
+
         <form className="mx-auto max-w-screen-xl px-4 2xl:px-0">
           <div className="mx-auto max-w-3xl">
             <p className="text-3xl font-semibold text-white">

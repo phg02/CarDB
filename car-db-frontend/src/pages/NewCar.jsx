@@ -7,11 +7,11 @@ function NewCar() {
   return (
     <div className="bg-black min-h-screen flex justify-center py-10">
       {/* This wrapper controls the whole layout width */}
-      <div className="flex flex-col lg:flex-row lg:gap-20 lg:w-[1200px]">
+      <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px] mx-auto">
           <Filter />
 
           {/* Right panel has custom width */}
-          <div className="flex flex-col gap-9 w-[450px] lg:w-[800px]">
+          <div className="flex flex-col gap-9 py-5 lg:py-0 w-full max-w-[800px]">
             <Result count={4} />
             
             <div className="flex flex-wrap gap-x-10 gap-y-16">

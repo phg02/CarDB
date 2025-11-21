@@ -6,7 +6,6 @@ function Result({ count = 0, onSortChange }) {
     const handleSort = (value) => {
         setSort(value);
 
-        // If parent component wants to react to sorting
         if (onSortChange) {
             onSortChange(value);
         }
@@ -15,11 +14,19 @@ function Result({ count = 0, onSortChange }) {
     return (
         <div>
             <div>
-                <dl className="flex items-center justify-between">
+                <dl
+                    className="
+                        flex flex-wrap items-center 
+                        gap-3 
+                        justify-start gap-19
+                        sm:justify-between
+                    "
+                >
                     <dt className="text-3xl font-medium text-white">
                         {count} Results
                     </dt>
-                    <dd className="text-base text-white">
+
+                    <dd>
                         <select
                             value={sort}
                             onChange={(e) => handleSort(e.target.value)}
@@ -32,7 +39,7 @@ function Result({ count = 0, onSortChange }) {
                             <option value="year_old">Year: Oldest first</option>
                         </select>
                     </dd>
-                </dl>    
+                </dl>
             </div>
         </div>
     );

@@ -10,7 +10,7 @@ function Filter() {
     const [openFuelType, setOpenFuelType] = useState(false);
     const [openDrivetrain, setOpenDrivetrain] = useState(false);
     const [openSeats, setOpenSeats] = useState(false);
-    const [openColor, setOpenColor] = useState(false);
+    const [openCity, setOpenCity] = useState(false);
 
     const [years, setYears] = useState([]);
     const [brands, setBrands] = useState([]);
@@ -20,7 +20,7 @@ function Filter() {
     const [fuelTypes, setFuelTypes] = useState([]);
     const [drivetrains, setDrivetrains] = useState([]);
     const [seats, setSeats] = useState([]);
-    const [colors, setColors] = useState([]);
+    const [cities, setCities] = useState([]);
 
     const yearOptions = ["2025", "2024", "2023", "2022"];
     const brandOptions = ["Tesla", "BMW", "Toyota", "Ford"];
@@ -30,7 +30,7 @@ function Filter() {
     const fuelTypeOptions = ["Gasoline", "Diesel", "Electric", "Hybrid"];
     const drivetrainOptions = ["FWD", "RWD", "AWD"];
     const seatsOptions = ["2", "4", "5", "7"];
-    const colorOptions = ["Red", "Blue", "Black", "White"];
+    const cityOptions = ["New York", "Los Angeles", "Chicago", "Houston", "Miami", "San Francisco"];
 
     const toggleYear = (value) => {
         setYears((prev) =>
@@ -96,8 +96,8 @@ function Filter() {
         );
     };
 
-    const toggleColor = (value) => {
-        setColors((prev) =>
+    const toggleCity = (value) => {
+        setCities((prev) =>
             prev.includes(value)
                 ? prev.filter((v) => v !== value)
                 : [...prev, value]
@@ -318,24 +318,24 @@ function Filter() {
                     )}
                 </div>
 
-                {/* COLOR FILTER */}
+                {/* CITY FILTER */}
                 <div className="relative">
                     <button
-                        onClick={() => setOpenColor(!openColor)}
+                        onClick={() => setOpenCity(!openCity)}
                         className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
                     >
-                        Color
-                        <span>{openColor ? "▲" : "▼"}</span>
+                        City
+                        <span>{openCity ? "▲" : "▼"}</span>
                     </button>
 
-                    {openColor && (
+                    {openCity && (
                         <div className="absolute left-0 right-0 mt-1 rounded shadow-lg bg-gray-700 p-3 z-20">
-                            {colorOptions.map((c) => (
+                            {cityOptions.map((c) => (
                                 <label key={c} className="flex items-center gap-2 py-1 text-sm text-gray-900 text-white">
                                     <input
                                         type="checkbox"
-                                        checked={colors.includes(c)}
-                                        onChange={() => toggleColor(c)}
+                                        checked={cities.includes(c)}
+                                        onChange={() => toggleCity(c)}
                                     />
                                     {c}
                                 </label>

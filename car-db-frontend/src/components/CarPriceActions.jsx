@@ -6,9 +6,12 @@ const CarPriceActions = ({ price }) => {
           <p className="text-sm text-gray-400 mb-2">Price</p>
           <p className="text-3xl font-bold text-blue-500">{price}</p>
         </div>
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center">
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
-            BUY
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
+          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
+            Buy
+          </button>
+          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
+            Compare Car
           </button>
         </div>
       </div>

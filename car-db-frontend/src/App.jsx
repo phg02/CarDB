@@ -2,6 +2,7 @@ import './index.css';
 import NewCar from './pages/NewCar';
 import UsedCar from './pages/UsedCar';
 import OrderSummary from './pages/OrderSummary';
+import OrderForm from './pages/OrderForm';
 import CarDetails from './pages/CarDetails';
 import Navbar from './components/Navbar';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
@@ -15,6 +16,7 @@ function App() {
           <Route path="/newcar" element={<NewCar />} />
           <Route path="/usedcar" element={<UsedCar />} />
           <Route path="/car/:id" element={<CarDetails />} />
+          <Route path="/order" element={<OrderForm />} />
         </Routes>
       </Navbar>
     </BrowserRouter>

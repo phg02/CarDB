@@ -1,4 +1,13 @@
+import { useNavigate } from 'react-router-dom';
+
 const CarPriceActions = ({ price }) => {
+  const navigate = useNavigate();
+
+  function handleBuy() {
+    // navigate to the OrderForm page
+    navigate('/order');
+  }
+
   return (
     <div className="container mx-auto px-4 pb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -7,7 +16,7 @@ const CarPriceActions = ({ price }) => {
           <p className="text-3xl font-bold text-blue-500">{price}</p>
         </div>
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
-          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
+          <button onClick={handleBuy} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
             Buy
           </button>
           <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors">

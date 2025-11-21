@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import CarHeroSection from '../components/CarHeroSection';
 import CarImageGallery from '../components/CarImageGallery';
 import CarPriceActions from '../components/CarPriceActions';
@@ -8,6 +9,7 @@ import ScrollToTop from '../components/ScrollToTop';
 
 const CarDetails = () => {
   const { id } = useParams();
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Sample data - replace with API call using the id
   const carData = {
@@ -15,12 +17,10 @@ const CarDetails = () => {
     heroImage: "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
     images: [
       "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
+      "https://www.thedrive.com/wp-content/uploads/images-by-url-td/content/archive-images/031116-mercedes-amg-e43-hero.jpg?quality=85",
+      "https://www.clinkardcars.co.uk/blobs/Images/Stock/247/befd7306-8ffb-4463-a549-a7fb596cf5ef.JPG?width=2000&height=1333",
+      "https://www.autoblog.com/.image/w_3840,q_auto:good,c_limit/MjA5MTMwNzQ5NDQ3MTg2Mjc2/image-placeholder-title.jpg",
+      "https://cdn.dealeraccelerate.com/mankato/1/4085/309291/1920x1440/1967-mercedes-benz-250sl-pagoda",
     ],
     price: "700,000,000 vnd",
     specifications: {
@@ -111,8 +111,8 @@ const CarDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <CarHeroSection carName={carData.name} heroImage={carData.heroImage} />
-      <CarImageGallery images={carData.images} />
+      <CarHeroSection carName={carData.name} heroImage={carData.images[selectedImageIndex]} />
+      <CarImageGallery images={carData.images} selectedImage={selectedImageIndex} onImageSelect={setSelectedImageIndex} />
       <CarPriceActions price={carData.price} />
       
       <div className="container mx-auto px-4 pb-12">

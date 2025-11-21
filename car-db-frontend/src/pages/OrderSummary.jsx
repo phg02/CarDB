@@ -1,7 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Chatbot from "../components/Chatbot";
 
 function OrderSummary() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { phone, address } = (location && location.state) || {};
+
+  const handleReturn = () => {
+    navigate('/newcar');
+  };
+
   return (
     <>
       <Chatbot />
@@ -30,6 +38,13 @@ function OrderSummary() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
 
+            <Link to="/order" className="hover:text-white transition-colors">
+              Order info
+            </Link>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+
             <span className="text-white">Order Summary</span>
           </nav>
         </div>
@@ -53,13 +68,13 @@ function OrderSummary() {
                 </div>
 
                 <div className="text-white">
-                    <p>Phone number</p>
-                    <p>+1 234 567 890</p>
+                  <p>Phone number</p>
+                  <p>{phone}</p>
                 </div>
 
                 <div className="text-white">
-                    <p>Address</p>
-                    <p>123 Main St, City, Country</p>
+                  <p>Address</p>
+                  <p>{address}</p>
                 </div>
               </div>
             </div>
@@ -167,6 +182,7 @@ function OrderSummary() {
                 <div className="gap-4 sm:flex sm:items-center">
                   <button
                     type="button"
+                    onClick={handleReturn}
                     className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                   >
                     Return to Shopping

@@ -18,6 +18,7 @@ function App() {
           <Route path="/usedcar" element={<UsedCar />} />
           <Route path="/car/:id" element={<CarDetails />} />
           <Route path="/order" element={<OrderForm />} />
+          <Route path="/ordersummary" element={<OrderSummary />} />
           <Route path="/compare" element={<CompareCar />} />
         </Routes>
       </Navbar>

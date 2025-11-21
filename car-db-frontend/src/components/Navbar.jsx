@@ -17,7 +17,7 @@ function classNames(...classes) {
 
 export default function Navbar(props) {
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
     <Disclosure
       as="nav"
       className="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
@@ -98,8 +98,10 @@ export default function Navbar(props) {
         </div>
       </DisclosurePanel>
     </Disclosure>
-    {props.children}
+    <main className="flex-grow">
+      {props.children}
+    </main>
     <Footer />
-    </>
+    </div>
   );
 }

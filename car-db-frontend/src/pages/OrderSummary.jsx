@@ -3,12 +3,7 @@ import Chatbot from "../components/Chatbot";
 
 function OrderSummary() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { phone, address } = (location && location.state) || {};
-
-  const handleReturn = () => {
-    navigate('/newcar');
-  };
 
   return (
     <>
@@ -181,18 +176,10 @@ function OrderSummary() {
                 {/* BUTTONS */}
                 <div className="gap-4 sm:flex sm:items-center">
                   <button
-                    type="button"
-                    onClick={handleReturn}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                  >
-                    Return to Shopping
-                  </button>
-
-                  <button
                     type="submit"
-                    className="mt-4 flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 sm:mt-0"
+                    className="mt-4 flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:mt-0"
                   >
-                    Send the order
+                    Confirm order
                   </button>
                 </div>
               </div>

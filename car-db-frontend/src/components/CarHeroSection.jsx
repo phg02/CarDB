@@ -22,8 +22,15 @@ const CarHeroSection = ({ carName, heroImage }) => {
         </nav>
       </div>
 
+    {/* Title Section */}
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold text-white mb-2">
+          {carName}
+        </h1>
+      </div>
+      
       {/* Hero Image */}
-      <div className="relative w-full h-[600px] overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
+      <div className="relative w-full h-[300px] md:h-[400px] lg:h-[600px] overflow-hidden pb-12">
         <img
           src={heroImage}
           alt={carName}
@@ -31,12 +38,7 @@ const CarHeroSection = ({ carName, heroImage }) => {
         />
       </div>
 
-      {/* Title Section */}
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-white mb-2">
-          {carName}
-        </h1>
-      </div>
+      
     </section>
   );
 };

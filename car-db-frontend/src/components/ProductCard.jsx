@@ -1,10 +1,12 @@
+import { Link } from 'react-router-dom';
+
 function ProductCard(props) {
     return (
         <div className="w-[80%] max-w-[355px] rounded-[3px] border p-4 max-h-[530px] border-blue-300 bg-gray-900">
             <div className="h-[12rem] w-full">
-            <a href="#">
+            <Link to={`/car/${props.id || 1}`}>
                 <img className="mx-auto h-full block rounded-[3px]" src={props.img} alt="" />
-            </a>
+            </Link>
             </div>
             <div className="pt-2">
             <div className="mb-2 flex items-center justify-between gap-4">
@@ -28,7 +30,7 @@ function ProductCard(props) {
                 </div>
             </div>
 
-            <a href="#" className="text-xl font-semibold leading-tight hover:underline text-white">{props.name}</a>
+            <Link to={`/car/${props.id || 1}`} className="text-xl font-semibold leading-tight hover:underline text-white">{props.name}</Link>
 
             <div className="mt-3 flex flex-col gap-2">
                 <p className="text-xl font-medium text-blue-500">{props.price}</p>

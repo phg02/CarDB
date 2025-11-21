@@ -105,11 +105,11 @@ function Filter() {
     };
 
     return (
-        <div className="w-full max-w-[360px] max-h-[760px] bg-gray-800 px-3 py-3 rounded-[3px]">
-            <p className="text-2xl text-white">Filters</p>
-            <hr className="h-px mb-7 mt-3 bg-white border-0"></hr>
+        <div className="w-full lg:max-w-[360px] max-h-none lg:max-h-[760px] bg-gray-800 px-3 py-3 rounded-[3px] mb-6 lg:mb-0">
+            <p className="text-xl sm:text-2xl text-white">Filters</p>
+            <hr className="h-px mb-4 sm:mb-7 mt-3 bg-white border-0"></hr>
 
-            <div className="grid grid-cols-3 gap-3 lg:flex lg:flex-col lg:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:flex lg:flex-col lg:gap-4">
 
                 {/* YEAR FILTER */}
                 <div className="relative">
@@ -344,7 +344,7 @@ function Filter() {
                     )}
                 </div>
 
-                <PriceRange className="col-span-3 lg:col-span-1" />
+                <PriceRange className="col-span-2 sm:col-span-3 lg:col-span-1" />
 
             </div>
         </div>

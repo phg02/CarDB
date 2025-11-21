@@ -2,19 +2,27 @@ import '../index.css';
 import ProductCard from '../components/ProductCard';
 import Filter from '../components/Filter';
 import Result from '../components/Result';
+import { Link } from 'react-router-dom';
 
 function NewCar() {
   return (
-    <div className="bg-black min-h-screen flex justify-center py-10">
+    <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-gray-400 w-full max-w-[1200px] mb-6 pr-4">
+        <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
+        <span>/</span>
+        <span className="text-white">New car</span>
+      </nav>
+      
       {/* This wrapper controls the whole layout width */}
-      <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px] mx-auto">
+      <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px]">
           <Filter />
 
           {/* Right panel has custom width */}
-          <div className="flex flex-col gap-9 py-5 lg:py-0 w-full max-w-[800px]">
+          <div className="flex flex-col gap-6 sm:gap-9 py-5 lg:py-0 w-full lg:flex-1">
             <Result count={4} />
             
-            <div className="flex flex-wrap gap-x-10 gap-y-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 min-[1400px]:grid-cols-3 gap-6 sm:gap-8 auto-rows-fr">
               <ProductCard 
                     img="https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg" 
                     status="New" 

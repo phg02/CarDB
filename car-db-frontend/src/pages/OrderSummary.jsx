@@ -5,9 +5,9 @@ function OrderSummary() {
       <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">
         <form className="mx-auto max-w-screen-xl px-4 2xl:px-0">
           <div className="mx-auto max-w-3xl">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+            <p className="text-3xl font-semibold text-white">
               Order summary
-            </h2>
+            </p>
 
             {/* BILLING INFO */}
             <div className="mt-6 space-y-4 border-b border-t border-gray-200 py-8 dark:border-gray-700 sm:mt-8">
@@ -15,19 +15,26 @@ function OrderSummary() {
                 Billing & Delivery information
               </h4>
 
-              <dl>
-                <dt className="text-base font-medium text-gray-900 dark:text-white">
-                  Individual
-                </dt>
-                <dd className="mt-1 text-base font-normal text-gray-500 dark:text-gray-400">
-                  Bonnie Green - +1 234 567 890, San Francisco, California,
-                  United States, 3454, Scott Street
-                </dd>
-              </dl>
+              <div className="flex gap-16">
+                <div className="text-white">
+                    <p>Order Date</p>
+                    <p>11 September, 2025</p>
+                </div>
+
+                <div className="text-white">
+                    <p>Phone number</p>
+                    <p>+1 234 567 890</p>
+                </div>
+
+                <div className="text-white">
+                    <p>Address</p>
+                    <p>123 Main St, City, Country</p>
+                </div>
+              </div>
             </div>
 
             {/* PRODUCT TABLE */}
-            <div className="mt-6 sm:mt-8">
+            <div>
               <div className="relative overflow-x-auto border-b border-gray-200 dark:border-gray-800">
                 <table className="w-full text-left font-medium text-gray-900 dark:text-white md:table-fixed">
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -57,9 +64,6 @@ function OrderSummary() {
                           </a>
                         </div>
                       </td>
-                      <td className="p-4 text-base font-normal text-gray-900 dark:text-white">
-                        x1
-                      </td>
                       <td className="p-4 text-right text-base font-bold text-gray-900 dark:text-white">
                         $1,499
                       </td>
@@ -88,28 +92,10 @@ function OrderSummary() {
 
                     <dl className="flex items-center justify-between gap-4">
                       <dt className="text-gray-500 dark:text-gray-400">
-                        Savings
-                      </dt>
-                      <dd className="text-base font-medium text-green-500">
-                        -$299.00
-                      </dd>
-                    </dl>
-
-                    <dl className="flex items-center justify-between gap-4">
-                      <dt className="text-gray-500 dark:text-gray-400">
                         Store Pickup
                       </dt>
                       <dd className="text-base font-medium text-gray-900 dark:text-white">
                         $99
-                      </dd>
-                    </dl>
-
-                    <dl className="flex items-center justify-between gap-4">
-                      <dt className="text-gray-500 dark:text-gray-400">
-                        Tax
-                      </dt>
-                      <dd className="text-base font-medium text-gray-900 dark:text-white">
-                        $799
                       </dd>
                     </dl>
                   </div>

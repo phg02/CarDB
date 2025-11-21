@@ -109,7 +109,7 @@ function Filter() {
             <p className="text-2xl text-white">Filters</p>
             <hr className="h-px mb-7 mt-3 bg-white border-0"></hr>
 
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-3 gap-3 lg:flex lg:flex-col lg:gap-4">
 
                 {/* YEAR FILTER */}
                 <div className="relative">
@@ -195,7 +195,7 @@ function Filter() {
                         onClick={() => setOpenBodyType(!openBodyType)}
                         className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
                     >
-                        Body Type
+                        Body type
                         <span>{openBodyType ? "▲" : "▼"}</span>
                     </button>
 
@@ -247,7 +247,7 @@ function Filter() {
                         onClick={() => setOpenFuelType(!openFuelType)}
                         className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
                     >
-                        Fuel Type
+                        Fuel type
                         <span>{openFuelType ? "▲" : "▼"}</span>
                     </button>
 
@@ -329,7 +329,7 @@ function Filter() {
                     </button>
 
                     {openColor && (
-                        <div className="absolute left-0 right-0 mt-1 rounded bg-white shadow-lg bg-gray-700 p-3 z-20">
+                        <div className="absolute left-0 right-0 mt-1 rounded shadow-lg bg-gray-700 p-3 z-20">
                             {colorOptions.map((c) => (
                                 <label key={c} className="flex items-center gap-2 py-1 text-sm text-gray-900 text-white">
                                     <input
@@ -344,7 +344,7 @@ function Filter() {
                     )}
                 </div>
 
-                <PriceRange />
+                <PriceRange className="col-span-3 lg:col-span-1" />
 
             </div>
         </div>

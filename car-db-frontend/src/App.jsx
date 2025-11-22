@@ -13,13 +13,12 @@ function App() {
     <BrowserRouter>
       <Navbar>
         <Routes>
-          <Route path="/" element={<OrderSummary />} />
           <Route path="/newcar" element={<NewCar />} />
           <Route path="/usedcar" element={<UsedCar />} />
           <Route path="/car/:id" element={<CarDetails />} />
+          <Route path="/compare" element={<CompareCar />} />
           <Route path="/order" element={<OrderForm />} />
           <Route path="/ordersummary" element={<OrderSummary />} />
-          <Route path="/compare" element={<CompareCar />} />
         </Routes>
       </Navbar>
     </BrowserRouter>

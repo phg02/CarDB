@@ -2,6 +2,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton } from 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import{ NavLink } from 'react-router-dom';
 import Footer from './Footer';
+import Chatbot from './Chatbot';
 
 const navigation = [
   { name: 'New Car', href: '/newcar' },
@@ -17,6 +18,8 @@ function classNames(...classes) {
 
 export default function Navbar(props) {
   return (
+    <>
+    <Chatbot />
     <div className="min-h-screen flex flex-col">
     <Disclosure
       as="nav"
@@ -103,5 +106,6 @@ export default function Navbar(props) {
     </main>
     <Footer />
     </div>
+    </>
   );
 }

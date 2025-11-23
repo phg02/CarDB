@@ -18,8 +18,7 @@ function Result({ count = 0, onSortChange }) {
                     className="
                         flex flex-wrap items-center 
                         gap-3 
-                        justify-start gap-19
-                        sm:justify-between
+                        justify-between
                     "
                 >
                     <dt className="text-3xl font-medium text-white">

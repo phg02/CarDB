@@ -115,10 +115,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenYear(!openYear)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Year
-                        <span>{openYear ? "▲" : "▼"}</span>
+                        <span className="truncate">Year</span>
+                        <span className="flex-shrink-0">{openYear ? "▲" : "▼"}</span>
                     </button>
 
                     {openYear && (
@@ -141,10 +141,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenBrand(!openBrand)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Brand
-                        <span>{openBrand ? "▲" : "▼"}</span>
+                        <span className="truncate">Brand</span>
+                        <span className="flex-shrink-0">{openBrand ? "▲" : "▼"}</span>
                     </button>
 
                     {openBrand && (
@@ -167,10 +167,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenModel(!openModel)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Model
-                        <span>{openModel ? "▲" : "▼"}</span>
+                        <span className="truncate">Model</span>
+                        <span className="flex-shrink-0">{openModel ? "▲" : "▼"}</span>
                     </button>
 
                     {openModel && (
@@ -193,10 +193,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenBodyType(!openBodyType)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Body type
-                        <span>{openBodyType ? "▲" : "▼"}</span>
+                        <span className="truncate">Body type</span>
+                        <span className="flex-shrink-0">{openBodyType ? "▲" : "▼"}</span>
                     </button>
 
                     {openBodyType && (
@@ -219,10 +219,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenTransmission(!openTransmission)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Transmission
-                        <span>{openTransmission ? "▲" : "▼"}</span>
+                        <span className="truncate">Transmission</span>
+                        <span className="flex-shrink-0">{openTransmission ? "▲" : "▼"}</span>
                     </button>
 
                     {openTransmission && (
@@ -245,10 +245,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenFuelType(!openFuelType)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Fuel type
-                        <span>{openFuelType ? "▲" : "▼"}</span>
+                        <span className="truncate">Fuel type</span>
+                        <span className="flex-shrink-0">{openFuelType ? "▲" : "▼"}</span>
                     </button>
 
                     {openFuelType && (
@@ -271,10 +271,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenDrivetrain(!openDrivetrain)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Drivetrain
-                        <span>{openDrivetrain ? "▲" : "▼"}</span>
+                        <span className="truncate">Drivetrain</span>
+                        <span className="flex-shrink-0">{openDrivetrain ? "▲" : "▼"}</span>
                     </button>
                     {openDrivetrain && (
                         <div className="absolute left-0 right-0 mt-1 rounded shadow-lg bg-gray-700 p-3 z-20">
@@ -296,10 +296,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenSeats(!openSeats)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        Seats
-                        <span>{openSeats ? "▲" : "▼"}</span>
+                        <span className="truncate">Seats</span>
+                        <span className="flex-shrink-0">{openSeats ? "▲" : "▼"}</span>
                     </button>
 
                     {openSeats && (
@@ -322,10 +322,10 @@ function Filter() {
                 <div className="relative">
                     <button
                         onClick={() => setOpenCity(!openCity)}
-                        className="w-full flex justify-between rounded-[3px] p-3.5 text-sm bg-gray-700 text-white"
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
                     >
-                        City
-                        <span>{openCity ? "▲" : "▼"}</span>
+                        <span className="truncate">City</span>
+                        <span className="flex-shrink-0">{openCity ? "▲" : "▼"}</span>
                     </button>
 
                     {openCity && (

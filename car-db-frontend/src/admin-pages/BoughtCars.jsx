@@ -3,7 +3,7 @@ import ProductCard from '../components/ProductCard';
 import Filter from '../components/Filter';
 import Result from '../components/Result';
 
-function BoughtCar() {
+function BoughtCars() {
   return (
     <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
       
@@ -26,9 +26,14 @@ function BoughtCar() {
                     year={2020} 
                     wheel="Rear-wheel Drive" 
                     fuel="Electric" 
-                    seats={5}/>
+                    seats={5}>
 
-                  <ProductCard
+                    <button className="w-full py-2 text-green-400 border border-green-400 rounded">
+                      Delivered
+                    </button>
+              </ProductCard>
+
+              <ProductCard
                     id={2}
                     img="https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg" 
                     status="Used" 
@@ -38,10 +43,14 @@ function BoughtCar() {
                     year={2022} 
                     wheel="All-wheel Drive" 
                     fuel="Electric" 
-                    seats={5} 
-                  />
+                    seats={5}>
 
-                  <ProductCard
+                    <button className="w-full py-2 text-yellow-400 border border-yellow-400 rounded">
+                      Not Delivered
+                    </button>
+              </ProductCard>
+
+              <ProductCard
                     id={3}
                     img="https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg" 
                     status="New" 
@@ -51,8 +60,12 @@ function BoughtCar() {
                     year={2021} 
                     wheel="Rear-wheel Drive" 
                     fuel="Gasoline" 
-                    seats={5} 
-                  />
+                    seats={5}>
+
+                    <button className="w-full py-2 text-green-400 border border-green-400 rounded">
+                      Delivered
+                    </button>
+              </ProductCard>
 
                   <ProductCard
                     id={4}
@@ -64,8 +77,12 @@ function BoughtCar() {
                     year={2023} 
                     wheel="All-wheel Drive" 
                     fuel="Electric" 
-                    seats={5} 
-                  />
+                    seats={5}>
+
+                    <button className="w-full py-2 text-green-400 border border-green-400 rounded">
+                      Delivered
+                    </button>
+              </ProductCard>
             </div>
           </div>
       </div>
@@ -73,4 +90,4 @@ function BoughtCar() {
   );
 }
 
-export default BoughtCar;
+export default BoughtCars;

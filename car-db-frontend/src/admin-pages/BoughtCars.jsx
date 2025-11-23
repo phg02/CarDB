@@ -1,7 +1,7 @@
 import '../index.css';
 import ProductCard from '../components/ProductCard';
-import Filter from '../components/Filter';
 import Result from '../components/Result';
+import DeliveredFilter from '../components/DeliveredFilter';
 
 function BoughtCars() {
   return (
@@ -9,7 +9,7 @@ function BoughtCars() {
       
       {/* This wrapper controls the whole layout width */}
       <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px]">
-          <Filter />
+          <DeliveredFilter />
 
           {/* Right panel has custom width */}
           <div className="flex flex-col gap-6 sm:gap-9 py-5 lg:py-0 w-full lg:flex-1">

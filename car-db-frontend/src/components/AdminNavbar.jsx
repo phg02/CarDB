@@ -6,7 +6,7 @@ import Chatbot from './Chatbot';
 
 const navigation = [
   { name: 'Approved Cars', href: '/approved-cars' },
-  { name: 'Not Approved Cars', href: '/not-approved-cars' },
+  { name: 'Waitlist Cars', href: '/waitlist-cars' },
   { name: 'Bought Cars', href: '/bought-cars' },
   { name: 'News', href: '/news' },
 ]
@@ -18,7 +18,6 @@ function classNames(...classes) {
 export default function AdminNavbar(props) {
   return (
     <>
-    <Chatbot />
     <div className="min-h-screen flex flex-col">
     <Disclosure
       as="nav"

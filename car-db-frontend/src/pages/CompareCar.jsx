@@ -66,8 +66,8 @@ const CompareCar = () => {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="border-b border-gray-700 bg-gray-800">
-        <div className="container mx-auto px-4 py-6">
+      <div className="">
+        <div className="container mx-auto px-4 pt-6">
           <nav className="flex items-center gap-2 text-sm text-gray-400 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
             <span>/</span>

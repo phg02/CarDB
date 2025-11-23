@@ -2,17 +2,10 @@ import '../index.css';
 import ProductCard from '../components/ProductCard';
 import Filter from '../components/Filter';
 import Result from '../components/Result';
-import { Link } from 'react-router-dom';
 
-function NewCar() {
+function BoughtCar() {
   return (
     <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-400 w-full max-w-[1200px] mb-6 pr-4">
-        <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
-        <span>/</span>
-        <span className="text-white">Car Listing</span>
-      </nav>
       
       {/* This wrapper controls the whole layout width */}
       <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px]">
@@ -80,4 +73,4 @@ function NewCar() {
   );
 }
 
-export default NewCar;
+export default BoughtCar;

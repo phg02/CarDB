@@ -126,8 +126,8 @@ const EditProfile = () => {
             </div>
 
             {/* Password Inputs */}
-            <div className="space-y-4 mb-6">
-              <div>
+            <div className="space-y-4 mb-8">
+              <div className="pb-4">
                 <label className="block text-gray-400 text-sm mb-2">Current password</label>
                 <input
                   type="password"

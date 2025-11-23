@@ -17,8 +17,8 @@ function OrderSummary() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
 
-            <Link to="/newcar" className="hover:text-white transition-colors">
-              New Car List
+            <Link to="/carlisting" className="hover:text-white transition-colors">
+              Car Listing
             </Link>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

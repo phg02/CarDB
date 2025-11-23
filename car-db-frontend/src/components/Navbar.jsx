@@ -5,8 +5,7 @@ import Footer from './Footer';
 import Chatbot from './Chatbot';
 
 const navigation = [
-  { name: 'New Car', href: '/newcar' },
-  { name: 'Used Car', href: '/usedcar' },
+  { name: 'Car Listing', href: '/carlisting' },
   { name: 'Compare', href: '/compare' },
   { name: 'Sell', href: '/sell' },
   { name: 'News', href: '/news' },

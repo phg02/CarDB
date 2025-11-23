@@ -11,7 +11,7 @@ function NewCar() {
       <nav className="flex items-center gap-2 text-sm text-gray-400 w-full max-w-[1200px] mb-6 pr-4">
         <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
         <span>/</span>
-        <span className="text-white">New car</span>
+        <span className="text-white">Car Listing</span>
       </nav>
       
       {/* This wrapper controls the whole layout width */}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import PriceRange from "./PriceRange";
 
 function Filter() {
+    const [status, setOpenStatus] = useState(false);
     const [openYear, setOpenYear] = useState(false);
     const [openBrand, setOpenBrand] = useState(false);
     const [openModel, setOpenModel] = useState(false);
@@ -10,8 +11,10 @@ function Filter() {
     const [openFuelType, setOpenFuelType] = useState(false);
     const [openDrivetrain, setOpenDrivetrain] = useState(false);
     const [openSeats, setOpenSeats] = useState(false);
+    const [openColor, setOpenColor] = useState(false);
     const [openCity, setOpenCity] = useState(false);
 
+    const [statuses, setStatuses] = useState([]);
     const [years, setYears] = useState([]);
     const [brands, setBrands] = useState([]);
     const [models, setModels] = useState([]);
@@ -20,8 +23,10 @@ function Filter() {
     const [fuelTypes, setFuelTypes] = useState([]);
     const [drivetrains, setDrivetrains] = useState([]);
     const [seats, setSeats] = useState([]);
+    const [colors, setColors] = useState([]);
     const [cities, setCities] = useState([]);
 
+    const statusOptions = ["New", "Used"];
     const yearOptions = ["2025", "2024", "2023", "2022"];
     const brandOptions = ["Tesla", "BMW", "Toyota", "Ford"];
     const modelOptions = ["Model S", "Model 3", "X5", "Camry"];
@@ -30,7 +35,16 @@ function Filter() {
     const fuelTypeOptions = ["Gasoline", "Diesel", "Electric", "Hybrid"];
     const drivetrainOptions = ["FWD", "RWD", "AWD"];
     const seatsOptions = ["2", "4", "5", "7"];
+    const colorOptions = ["Red", "Blue", "Black", "White", "Silver"];
     const cityOptions = ["New York", "Los Angeles", "Chicago", "Houston", "Miami", "San Francisco"];
+
+    const toggleStatus = (value) => {
+        setStatuses((prev) =>
+            prev.includes(value)
+                ? prev.filter((v) => v !== value)
+                : [...prev, value]
+        );
+    }
 
     const toggleYear = (value) => {
         setYears((prev) =>
@@ -96,6 +110,14 @@ function Filter() {
         );
     };
 
+    const toggleColor = (value) => {
+        setColors((prev) =>
+            prev.includes(value)
+                ? prev.filter((v) => v !== value)
+                : [...prev, value]
+        );
+    };
+
     const toggleCity = (value) => {
         setCities((prev) =>
             prev.includes(value)
@@ -105,11 +127,37 @@ function Filter() {
     };
 
     return (
-        <div className="w-full lg:max-w-[360px] max-h-none lg:max-h-[760px] bg-gray-800 px-3 py-3 rounded-[3px] mb-6 lg:mb-0">
+        <div className="w-full lg:max-w-[360px] max-h-none lg:max-h-[880px] bg-gray-800 px-3 py-3 rounded-[3px] mb-6 lg:mb-0">
             <p className="text-xl sm:text-2xl text-white">Filters</p>
             <hr className="h-px mb-4 sm:mb-7 mt-3 bg-white border-0"></hr>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:flex lg:flex-col lg:gap-4">
+
+                {/* STATUS FILTER */}
+                <div className="relative">
+                    <button
+                        onClick={() => setOpenStatus(!status)}
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
+                    >
+                        <span className="truncate">Status</span>
+                        <span className="flex-shrink-0">{status ? "▲" : "▼"}</span>
+                    </button>
+
+                    {status && (
+                        <div className="absolute left-0 right-0 mt-1 rounded shadow-lg bg-gray-700 p-3 z-20">
+                            {statusOptions.map((s) => (
+                                <label key={s} className="flex items-center gap-2 py-1 text-sm text-gray-900 text-white">
+                                    <input
+                                        type="checkbox"
+                                        checked={statuses.includes(s)}
+                                        onChange={() => toggleStatus(s)}
+                                    />
+                                    {s}
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* YEAR FILTER */}
                 <div className="relative">
@@ -316,6 +364,32 @@ function Filter() {
                             ))}
                         </div>
                     )}
+                </div>
+
+                {/* COLOR FILTER */}
+                <div className="relative">
+                    <button
+                        onClick={() => setOpenColor(!openColor)}
+                        className="w-full flex items-center justify-between gap-2 rounded-[3px] p-3.5 text-sm bg-gray-700 text-white whitespace-nowrap"
+                    >
+                        <span className="truncate">Color</span>
+                        <span className="flex-shrink-0">{openColor ? "▲" : "▼"}</span>
+                    </button>
+
+                {openColor && (
+                    <div className="absolute left-0 right-0 mt-1 rounded shadow-lg bg-gray-700 p-3 z-20">
+                        {colorOptions.map((color) => (
+                            <label key={color} className="flex items-center gap-2 py-1 text-sm text-gray-900 text-white">
+                                <input
+                                    type="checkbox"
+                                    checked={colors.includes(color)}
+                                    onChange={() => toggleColor(color)}
+                                />
+                                {color}
+                            </label>
+                        ))}
+                    </div>
+                )}
                 </div>
 
                 {/* CITY FILTER */}

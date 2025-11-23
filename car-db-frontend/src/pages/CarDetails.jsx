@@ -5,7 +5,6 @@ import CarImageGallery from '../components/CarImageGallery';
 import CarPriceActions from '../components/CarPriceActions';
 import CarSpecifications from '../components/CarSpecifications';
 import DealerInfo from '../components/DealerInfo';
-import ScrollToTop from '../components/ScrollToTop';
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -418,8 +417,6 @@ const CarDetails = () => {
           </div>
         </div>
       </div>
-
-      <ScrollToTop />
     </div>
   );
 };

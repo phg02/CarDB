@@ -1,4 +1,4 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton } from '@headlessui/react'
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import{ NavLink } from 'react-router-dom';
 import Footer from './Footer';
@@ -79,6 +79,24 @@ export default function Navbar(props) {
                   className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10"
                 />
               </MenuButton>
+              <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                <MenuItem>
+                  <NavLink
+                    to="/settings"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  >
+                    Settings
+                  </NavLink>
+                </MenuItem>
+                <MenuItem>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                    onClick={() => console.log('Sign out')}
+                  >
+                    Sign out
+                  </button>
+                </MenuItem>
+              </MenuItems>
             </Menu>
 
           </div>

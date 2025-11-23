@@ -43,12 +43,12 @@ const Settings = () => {
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="bg-black min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Mobile Menu Button */}
         <button
           onClick={() => setShowMobileMenu(!showMobileMenu)}
-          className="lg:hidden mb-4 flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg"
+          className="lg:hidden mb-4 flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-[3px]"
         >
           <Menu className="w-5 h-5" />
           <span>Menu</span>
@@ -57,7 +57,7 @@ const Settings = () => {
         <div className="flex gap-4 lg:gap-8">
           {/* Left Sidebar - Desktop */}
           <div className="hidden lg:block w-64 flex-shrink-0">
-            <div className="bg-gray-800 rounded-xl overflow-hidden sticky top-8">
+            <div className="bg-gray-800 rounded-[3px] overflow-hidden sticky top-8">
               <div className="p-5">
                 <h1 className="text-white text-xl font-semibold mb-6">Settings</h1>
                 
@@ -71,14 +71,14 @@ const Settings = () => {
                       <button
                         key={item.id}
                         onClick={() => setActiveTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] transition-colors relative ${
                           isActive
                             ? 'bg-gray-700 text-white'
                             : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
                         }`}
                       >
                         {isActive && (
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
                         )}
                         <Icon className="w-5 h-5" />
                         <span className="text-sm font-medium">{item.label}</span>
@@ -92,7 +92,7 @@ const Settings = () => {
               <div className="border-t border-gray-700 p-5 space-y-3">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-[3px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="text-sm font-medium">Logout</span>
@@ -143,14 +143,14 @@ const Settings = () => {
                             setActiveTab(item.id);
                             setShowMobileMenu(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-[3px] transition-colors relative ${
                             isActive
                               ? 'bg-gray-700 text-white'
                               : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
                           }`}
                         >
                           {isActive && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
                           )}
                           <Icon className="w-5 h-5" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -164,7 +164,7 @@ const Settings = () => {
                 <div className="border-t border-gray-700 p-5 space-y-3">
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-[3px] bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                   >
                     <LogOut className="w-5 h-5" />
                     <span className="text-sm font-medium">Logout</span>

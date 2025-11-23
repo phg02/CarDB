@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-function ProductCard(props) {
+function ProductCard({ children, ...props }) {
     return (
         <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col">
             <div className="h-[12rem] w-full flex-shrink-0">
@@ -69,6 +69,14 @@ function ProductCard(props) {
                 <p className="text-sm sm:text-md text-white">{props.seats}</p>
                 </li>
             </ul>
+
+            {/* CHILDREN EXTRA UI (admin delete button, etc.) */}
+            {children && (
+                <div className="mt-4">
+                    {children}
+                </div>
+            )}
+            
             </div>
         </div>
     );

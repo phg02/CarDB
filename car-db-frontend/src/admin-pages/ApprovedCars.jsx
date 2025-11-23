@@ -26,9 +26,14 @@ function ApprovedCar() {
                     year={2020} 
                     wheel="Rear-wheel Drive" 
                     fuel="Electric" 
-                    seats={5}/>
+                    seats={5}>
 
-                  <ProductCard
+                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
+                      Delete
+                    </button>
+              </ProductCard>
+
+              <ProductCard
                     id={2}
                     img="https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg" 
                     status="Used" 
@@ -38,10 +43,14 @@ function ApprovedCar() {
                     year={2022} 
                     wheel="All-wheel Drive" 
                     fuel="Electric" 
-                    seats={5} 
-                  />
+                    seats={5}>
 
-                  <ProductCard
+                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
+                      Delete
+                    </button>
+              </ProductCard>
+
+              <ProductCard
                     id={3}
                     img="https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg" 
                     status="New" 
@@ -51,8 +60,12 @@ function ApprovedCar() {
                     year={2021} 
                     wheel="Rear-wheel Drive" 
                     fuel="Gasoline" 
-                    seats={5} 
-                  />
+                    seats={5}>
+
+                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
+                      Delete
+                    </button>
+              </ProductCard>
 
                   <ProductCard
                     id={4}
@@ -64,8 +77,12 @@ function ApprovedCar() {
                     year={2023} 
                     wheel="All-wheel Drive" 
                     fuel="Electric" 
-                    seats={5} 
-                  />
+                    seats={5}>
+
+                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
+                      Delete
+                    </button>
+              </ProductCard>
             </div>
           </div>
       </div>

@@ -4,7 +4,7 @@ import Filter from '../components/Filter';
 import Result from '../components/Result';
 import { Link } from 'react-router-dom';
 
-function NewCar() {
+function CarListing() {
   return (
     <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
       {/* Breadcrumb */}
@@ -80,4 +80,4 @@ function NewCar() {
   );
 }
 
-export default NewCar;
+export default CarListing;

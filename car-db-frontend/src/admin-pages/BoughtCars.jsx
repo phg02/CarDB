@@ -3,7 +3,7 @@ import ProductCard from '../components/ProductCard';
 import Result from '../components/Result';
 import DeliveredFilter from '../components/DeliveredFilter';
 
-function BoughtCars() {
+function BoughtCars(props) {
   return (
     <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
       
@@ -17,7 +17,8 @@ function BoughtCars() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 min-[1400px]:grid-cols-3 gap-6 sm:gap-8 auto-rows-fr">
               <ProductCard
-                    id={1}
+                  id={1}
+                  to={`/bought-car/1`}
                     img="https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg" 
                     status="New" 
                     name="Tesla Model 3 Standard Range Plus" 
@@ -29,12 +30,13 @@ function BoughtCars() {
                     seats={5}>
 
                     <button className="w-full py-2 text-green-400 border border-green-400 rounded">
-                      Delivered
+                      {props.status}
                     </button>
               </ProductCard>
 
               <ProductCard
-                    id={2}
+                  id={2}
+                  to={`/bought-car/2`}
                     img="https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg" 
                     status="Used" 
                     name="BMW i4 M50" 
@@ -46,12 +48,13 @@ function BoughtCars() {
                     seats={5}>
 
                     <button className="w-full py-2 text-yellow-400 border border-yellow-400 rounded">
-                      Not Delivered
+                      {props.status}
                     </button>
               </ProductCard>
 
               <ProductCard
-                    id={3}
+                  id={3}
+                  to={`/bought-car/3`}
                     img="https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg" 
                     status="New" 
                     name="Mercedes-Benz C-Class 300" 
@@ -63,12 +66,13 @@ function BoughtCars() {
                     seats={5}>
 
                     <button className="w-full py-2 text-green-400 border border-green-400 rounded">
-                      Delivered
+                      {props.status}
                     </button>
               </ProductCard>
 
                   <ProductCard
                     id={4}
+                    to={`/bought-car/4`}
                     img="https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp" 
                     status="Used" 
                     name="Audi e-tron GT" 
@@ -80,7 +84,7 @@ function BoughtCars() {
                     seats={5}>
 
                     <button className="w-full py-2 text-green-400 border border-green-400 rounded">
-                      Delivered
+                      {props.status}
                     </button>
               </ProductCard>
             </div>

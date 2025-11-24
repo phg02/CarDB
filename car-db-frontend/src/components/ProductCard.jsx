@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 
-function ProductCard({ children, ...props }) {
+function ProductCard({ children, to, ...props }) {
+    const linkTo = to || `/car/${props.id || 1}`;
     return (
         <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col">
             <div className="h-[12rem] w-full flex-shrink-0">
-            <Link to={`/car/${props.id || 1}`}>
+            <Link to={linkTo}>
                 <img className="mx-auto h-full w-full block rounded-[3px] object-cover" src={props.img} alt="" />
             </Link>
             </div>
@@ -30,7 +31,7 @@ function ProductCard({ children, ...props }) {
                 </div>
             </div>
 
-            <Link to={`/car/${props.id || 1}`} className="text-lg sm:text-xl font-semibold leading-tight hover:underline text-white line-clamp-2">{props.name}</Link>
+            <Link to={linkTo} className="text-lg sm:text-xl font-semibold leading-tight hover:underline text-white line-clamp-2">{props.name}</Link>
 
             <div className="mt-3 flex flex-col gap-2">
                 <p className="text-lg sm:text-xl font-medium text-blue-500">{props.price}</p>

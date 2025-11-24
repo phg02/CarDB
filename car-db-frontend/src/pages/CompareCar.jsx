@@ -138,7 +138,7 @@ const CompareCar = () => {
         )}
 
         <div className="flex justify-center pt-8">
-          <Link to="/newcar">
+          <Link to="/carlisting">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go to Car Listing

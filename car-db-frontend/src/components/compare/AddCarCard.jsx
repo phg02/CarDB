@@ -14,7 +14,7 @@ const AddCarCard = ({ onAddCar }) => {
         <p className="text-sm text-gray-400 mb-4">
           Select a vehicle from the car listing to compare
         </p>
-        <Link to="/newcar">
+        <Link to="/carlisting">
           <Button 
             variant="outline" 
             className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"

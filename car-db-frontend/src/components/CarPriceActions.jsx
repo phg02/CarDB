@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const CarPriceActions = ({ price, carData }) => {
+const CarPriceActions = ({ price, carData, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
 
@@ -45,20 +45,58 @@ const CarPriceActions = ({ price, carData }) => {
           <p className="text-sm text-gray-400 mb-2">Price</p>
           <p className="text-3xl font-bold text-blue-500">{price}</p>
         </div>
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
-          <button 
-            onClick={handleBuy}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-          >
-            Buy
-          </button>
-          <button 
-            onClick={handleCompare}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
-          >
-            Compare Car
-          </button>
-        </div>
+
+        {isUser && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
+            <button 
+              onClick={handleBuy}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+            >
+              Buy
+            </button>
+            <button 
+              onClick={handleCompare}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
+            >
+              Compare Car
+            </button>
+          </div>
+        )}
+
+        {isAdminApproved && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
+            <button
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+
+        {isAdminWaitlist && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
+            <button 
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+            >
+              Approve
+            </button>
+            <button 
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+
+        {isAdminStatus && (
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
+            <select className="p-2 rounded border bg-white text-black">
+              <option>Not Delivered</option>
+              <option>Delivered</option>
+            </select>
+          </div>
+        )}
+        
       </div>
     </div>
   );

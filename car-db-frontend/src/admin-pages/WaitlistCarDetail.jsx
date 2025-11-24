@@ -403,7 +403,7 @@ const CarDetails = () => {
     <div className="min-h-screen bg-gray-900">
       <CarHeroSection carName={carData.name} heroImage={carData.images[selectedImageIndex]} />
       <CarImageGallery images={carData.images} selectedImage={selectedImageIndex} onImageSelect={setSelectedImageIndex} />
-      <CarPriceActions price={carData.price} carData={carData} isUser={true} />
+      <CarPriceActions price={carData.price} carData={carData} isAdminWaitlist={true} />
       
       <div className="container mx-auto px-4 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

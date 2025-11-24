@@ -397,13 +397,14 @@ const CarDetails = () => {
     }
   ];
 
-  const carData = allCarsData[parseInt(id) - 1] || allCarsData[0];
+  const carIndex = parseInt(id) - 1;
+  const carData = allCarsData[carIndex] || allCarsData[0];
 
   return (
     <div className="min-h-screen bg-gray-900">
       <CarHeroSection carName={carData.name} heroImage={carData.images[selectedImageIndex]} />
       <CarImageGallery images={carData.images} selectedImage={selectedImageIndex} onImageSelect={setSelectedImageIndex} />
-      <CarPriceActions price={carData.price} carData={carData} isAdminStatus={true} />
+      <CarPriceActions price={carData.price} carData={carData} carId={carIndex + 1} isAdminStatus={true} />
       
       <div className="container mx-auto px-4 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

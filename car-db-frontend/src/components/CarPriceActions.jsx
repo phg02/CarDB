@@ -1,9 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const CarPriceActions = ({ price, carData, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
+const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
+  const [deliveryStatus, setDeliveryStatus] = useState(() => {
+    try {
+      const store = JSON.parse(localStorage.getItem('boughtCarsStatus') || '{}');
+      return store?.[carId] || 'Not Delivered';
+    } catch (e) {
+      return 'Not Delivered';
+    }
+  });
 
   const handleBuy = () => {
     // navigate to the OrderForm page
@@ -90,7 +98,22 @@ const CarPriceActions = ({ price, carData, isUser, isAdminApproved, isAdminWaitl
 
         {isAdminStatus && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
-            <select className="p-2 rounded border bg-white text-black">
+            <select
+              className="p-2 rounded border bg-white text-black"
+              value={deliveryStatus}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDeliveryStatus(val);
+                try {
+                  const store = JSON.parse(localStorage.getItem('boughtCarsStatus') || '{}');
+                  store[carId] = val;
+                  localStorage.setItem('boughtCarsStatus', JSON.stringify(store));
+                } catch (err) {
+                  localStorage.setItem('boughtCarsStatus', JSON.stringify({ [carId]: val }));
+                }
+                if (typeof onStatusChange === 'function') onStatusChange(carId, val);
+              }}
+            >
               <option>Not Delivered</option>
               <option>Delivered</option>
             </select>

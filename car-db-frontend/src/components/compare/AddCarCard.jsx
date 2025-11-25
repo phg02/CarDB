@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const AddCarCard = ({ onAddCar }) => {
   return (
-    <Card className="overflow-hidden border-gray-700 border-dashed bg-gray-800/50 flex items-center justify-center min-h-[400px]">
+    <Card className="overflow-hidden border-gray-700 border-dashed bg-gray-800/50 flex items-center justify-center h-full">
       <div className="text-center p-8">
         <div className="w-16 h-16 rounded-full bg-gray-900/80 flex items-center justify-center mx-auto mb-4">
           <Plus className="w-8 h-8 text-gray-400" />
@@ -14,7 +14,7 @@ const AddCarCard = ({ onAddCar }) => {
         <p className="text-sm text-gray-400 mb-4">
           Select a vehicle from the car listing to compare
         </p>
-        <Link to="/carlisting">
+        <Link to="/carlisting?mode=compare">
           <Button 
             variant="outline" 
             className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"

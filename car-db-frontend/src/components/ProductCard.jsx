@@ -1,7 +1,86 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 function ProductCard({ children, to, ...props }) {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const isCompareMode = searchParams.get('mode') === 'compare';
     const linkTo = to || `/car/${props.id || 1}`;
+
+    const handleCardClick = (e) => {
+        if (isCompareMode) {
+            e.preventDefault();
+            
+            // Get existing compare list
+            const existingCompare = JSON.parse(localStorage.getItem('compareList') || '[]');
+            
+            // Check if already added
+            const isAlreadyAdded = existingCompare.some(car => car.id === props.id);
+            if (isAlreadyAdded) {
+                alert('This car is already in your comparison list');
+                navigate('/compare');
+                return;
+            }
+            
+            // Check if list is full
+            if (existingCompare.length >= 3) {
+                alert('You can only compare up to 3 cars');
+                navigate('/compare');
+                return;
+            }
+            
+            // Add car to compare list
+            const carData = {
+                id: props.id,
+                name: props.name,
+                heroImage: props.img,
+                price: props.price,
+                dealer: { location: props.location },
+                specifications: {
+                    leftColumn: [
+                        {
+                            items: [
+                                { label: 'Year', value: props.year },
+                                { label: 'Body Type', value: 'Sedan' },
+                                { label: 'Color', value: 'Black' },
+                                { label: 'Doors', value: '4' },
+                                { label: 'Fuel Type', value: props.fuel }
+                            ]
+                        },
+                        {
+                            items: [
+                                { label: 'Roof Type', value: 'Hardtop' },
+                                { label: 'Drivetrain', value: props.wheel },
+                                { label: 'Seats', value: props.seats },
+                                { label: 'Transmission', value: 'Automatic' }
+                            ]
+                        },
+                        {
+                            items: [
+                                { label: 'Engine Type', value: props.fuel === 'Electric' ? 'Electric Motor' : 'Internal Combustion' },
+                                { label: 'Horsepower', value: 'N/A' },
+                                { label: 'Torque', value: 'N/A' }
+                            ]
+                        },
+                        {
+                            items: [
+                                { label: 'Length', value: 'N/A' },
+                                { label: 'Width', value: 'N/A' },
+                                { label: 'Height', value: 'N/A' }
+                            ]
+                        }
+                    ]
+                },
+                images: [props.img]
+            };
+            
+            existingCompare.push(carData);
+            localStorage.setItem('compareList', JSON.stringify(existingCompare));
+            
+            // Navigate back to compare page
+            navigate('/compare');
+        }
+    };
+
     return (
         <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col">
             <div className="h-[12rem] w-full flex-shrink-0">
@@ -31,7 +110,7 @@ function ProductCard({ children, to, ...props }) {
                 </div>
             </div>
 
-            <Link to={linkTo} className="text-lg sm:text-xl font-semibold leading-tight hover:underline text-white line-clamp-2">{props.name}</Link>
+            <Link to={linkTo} onClick={handleCardClick} className="text-lg sm:text-xl font-semibold leading-tight hover:underline text-white line-clamp-2">{props.name}</Link>
 
             <div className="mt-3 flex flex-col gap-2">
                 <p className="text-lg sm:text-xl font-medium text-blue-500">{props.price}</p>

@@ -79,34 +79,32 @@ const CompareCar = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Car Header Cards */}
-        <div className={`grid grid-cols-1 ${gridCols} gap-6 mb-6`}>
-          {comparisonList.map((car, index) => {
-            const formatted = formatCarForComparison(car);
-            return (
-              <CarComparisonColumn 
-                key={index}
-                name={formatted.name}
-                image={formatted.image}
-                price={formatted.price}
-                location={formatted.location}
-                quickSpecs={formatted.quickSpecs}
-                sections={[]} // No sections in column view
-                mediaItems={[]}
-                vehicleHistoryId=""
-                onRemove={() => removeCar(index)}
-                isActive={activeCardIndex === index}
-                onToggleActive={() => setActiveCardIndex(activeCardIndex === index ? null : index)}
-              />
-            );
+        {/* Car Header Cards - Always 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {[0, 1, 2].map((slotIndex) => {
+            const car = comparisonList[slotIndex];
+            if (car) {
+              const formatted = formatCarForComparison(car);
+              return (
+                <CarComparisonColumn 
+                  key={slotIndex}
+                  name={formatted.name}
+                  image={formatted.image}
+                  price={formatted.price}
+                  location={formatted.location}
+                  quickSpecs={formatted.quickSpecs}
+                  sections={[]}
+                  mediaItems={[]}
+                  vehicleHistoryId=""
+                  onRemove={() => removeCar(slotIndex)}
+                  isActive={activeCardIndex === slotIndex}
+                  onToggleActive={() => setActiveCardIndex(activeCardIndex === slotIndex ? null : slotIndex)}
+                />
+              );
+            } else {
+              return <AddCarCard key={`empty-${slotIndex}`} />;
+            }
           })}
-          {comparisonList.length < 3 && (
-            <div className={comparisonList.length === 2 ? "md:col-start-1" : ""}>
-              {Array.from({ length: 3 - comparisonList.length }).map((_, index) => (
-                <AddCarCard key={`empty-${index}`} />
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Merged Specification Rows */}
@@ -114,25 +112,25 @@ const CompareCar = () => {
           <div className="space-y-4">
             <ComparisonRow 
               title="Basic Car Details"
-              cars={formattedCars.map(car => ({ specs: car.sections[0].specs }))}
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[0].specs } : { specs: [] })}
             />
             <ComparisonRow 
               title="Body & Exterior"
-              cars={formattedCars.map(car => ({ specs: car.sections[1].specs }))}
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[1].specs } : { specs: [] })}
             />
             <ComparisonRow 
               title="Engine & Powertrain"
-              cars={formattedCars.map(car => ({ specs: car.sections[2].specs }))}
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[2].specs } : { specs: [] })}
             />
             <ComparisonRow 
               title="Dimensions"
-              cars={formattedCars.map(car => ({ specs: car.sections[3].specs }))}
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[3].specs } : { specs: [] })}
             />
             <MediaComparisonRow 
-              cars={formattedCars.map(car => ({ mediaItems: car.mediaItems }))}
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { mediaItems: formatCarForComparison(comparisonList[i]).mediaItems } : { mediaItems: [] })}
             />
             <VehicleHistoryRow 
-              cars={formattedCars.map(car => ({ vehicleHistoryId: car.vehicleHistoryId }))}
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { vehicleHistoryId: formatCarForComparison(comparisonList[i]).vehicleHistoryId } : { vehicleHistoryId: '' })}
             />
           </div>
         )}

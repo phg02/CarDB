@@ -6,6 +6,84 @@ function ProductCard({ children, to, ...props }) {
     const isCompareMode = searchParams.get('mode') === 'compare';
     const linkTo = to || `/car/${props.id || 1}`;
 
+    const handleAddToCompare = (e) => {
+        e.preventDefault();
+        
+        // Get existing compare list
+        const existingCompare = JSON.parse(localStorage.getItem('compareList') || '[]');
+        
+        // Check if already added
+        const isAlreadyAdded = existingCompare.some(car => car.id === props.id);
+        if (isAlreadyAdded) {
+            alert('This car is already in your comparison list');
+            navigate('/compare');
+            return;
+        }
+        
+        // Check if list is full
+        if (existingCompare.length >= 3) {
+            alert('You can only compare up to 3 cars');
+            navigate('/compare');
+            return;
+        }
+        
+        // Add car to compare list
+        const carData = {
+            id: props.id,
+            name: props.name,
+            heroImage: props.img,
+            price: props.price,
+            dealer: { location: props.location },
+            specifications: {
+                leftColumn: [
+                    {
+                        items: [
+                            { label: 'Year', value: props.year },
+                            { label: 'Body Type', value: 'Sedan' },
+                            { label: 'Color', value: 'Black' },
+                            { label: 'Doors', value: '4' },
+                            { label: 'Fuel Type', value: props.fuel }
+                        ]
+                    },
+                    {
+                        items: [
+                            { label: 'Roof Type', value: 'Hardtop' },
+                            { label: 'Drivetrain', value: props.wheel },
+                            { label: 'Seats', value: props.seats },
+                            { label: 'Transmission', value: 'Automatic' }
+                        ]
+                    },
+                    {
+                        items: [
+                            { label: 'Engine Type', value: props.fuel === 'Electric' ? 'Electric Motor' : 'Internal Combustion' },
+                            { label: 'Horsepower', value: 'N/A' },
+                            { label: 'Torque', value: 'N/A' }
+                        ]
+                    },
+                    {
+                        items: [
+                            { label: 'Length', value: 'N/A' },
+                            { label: 'Width', value: 'N/A' },
+                            { label: 'Height', value: 'N/A' }
+                        ]
+                    }
+                ]
+            },
+            images: [props.img]
+        };
+        
+        existingCompare.push(carData);
+        localStorage.setItem('compareList', JSON.stringify(existingCompare));
+        
+        // Navigate to compare page
+        navigate('/compare');
+    };
+
+    const handleAddToWishlist = (e) => {
+        e.preventDefault();
+        alert('Added to wishlist!');
+    };
+
     const handleCardClick = (e) => {
         if (isCompareMode) {
             e.preventDefault();
@@ -93,21 +171,6 @@ function ProductCard({ children, to, ...props }) {
                 <div className="border border-blue-500 text-blue-500 px-3 py-0.5 rounded-[3px] bg-transparent text-sm">
                     {props.status}
                 </div>
-
-                <div className="flex items-center justify-end gap-1">
-                    <div className="relative flex items-center justify-end gap-1 group">
-                        <button type="button" className="rounded-lg p-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors">
-                            <span className="sr-only">Add to Favorites</span>
-                            <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z" />
-                            </svg>
-                        </button>
-
-                        <div className="absolute bottom-full mb-2 hidden w-max rounded-lg px-3 py-2 text-sm font-medium text-white group-hover:block bg-gray-700">
-                            Add to favorites
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <Link to={linkTo} onClick={handleCardClick} className="text-lg sm:text-xl font-semibold leading-tight hover:underline text-white line-clamp-2">{props.name}</Link>
@@ -149,6 +212,28 @@ function ProductCard({ children, to, ...props }) {
                 <p className="text-sm sm:text-md text-white">{props.seats}</p>
                 </li>
             </ul>
+
+            {/* Action Buttons */}
+            <div className="mt-4 flex gap-2">
+                <button
+                    onClick={handleAddToWishlist}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-[3px] transition-colors text-sm font-medium"
+                >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z" />
+                    </svg>
+                    <span>Add to Wishlist</span>
+                </button>
+                <button
+                    onClick={handleAddToCompare}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[3px] transition-colors text-sm font-medium"
+                >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span>Add to Compare</span>
+                </button>
+            </div>
 
             {/* CHILDREN EXTRA UI (admin delete button, etc.) */}
             {children && (

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* Dark theme colors using oklch color space for Tailwind v4 */
   --color-background: oklch(0.18 0.02 250);
   --color-foreground: oklch(0.98 0.01 250);
   
@@ -17,21 +16,12 @@
   --color-muted: oklch(0.25 0.02 250);
   --color-muted-foreground: oklch(0.65 0.02 250);
   
-  --color-accent: oklch(0.6 0.25 250);
-  --color-accent-foreground: oklch(1 0 0);
-  
   --color-border: oklch(0.3 0.02 250);
   --color-input: oklch(0.3 0.02 250);
-  --color-ring: oklch(0.6 0.25 250);
   
-  /* Custom automotive theme colors */
   --color-spec-label: oklch(0.6 0.02 250);
   --color-spec-value: oklch(0.98 0.01 250);
   --color-price-highlight: oklch(0.6 0.25 250);
-  
-  --radius-lg: 0.5rem;
-  --radius-md: calc(0.5rem - 2px);
-  --radius-sm: calc(0.5rem - 4px);
 }
 
 @layer base {

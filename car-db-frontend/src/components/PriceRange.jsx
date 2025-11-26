@@ -26,7 +26,7 @@ function PriceRange() {
   };
 
   return (
-    <div className="w-full">
+    <div className="col-span-3">
       <label className="block mb-2 text-sm font-medium text-white">
         Price Range
       </label>
@@ -35,7 +35,7 @@ function PriceRange() {
       <div className="flex justify-between text-sm text-white mb-2">
         <span>{formatVND(min)}</span>
         <span>{formatVND(max)}</span>
-      </div>
+      </div> 
 
       <div className="relative w-full h-2">
         {/* Background track */}

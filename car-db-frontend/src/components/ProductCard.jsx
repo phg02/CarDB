@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 function ProductCard({ children, to, ...props }) {
     const navigate = useNavigate();
@@ -159,6 +159,9 @@ function ProductCard({ children, to, ...props }) {
         }
     };
 
+    const location = useLocation();
+    const showActions = location.pathname === '/carlisting' || location.pathname.startsWith('/carlisting');
+
     return (
         <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col">
             <div className="h-[12rem] w-full flex-shrink-0">
@@ -213,8 +216,9 @@ function ProductCard({ children, to, ...props }) {
                 </li>
             </ul>
 
-            {/* Action Buttons */}
-            <div className="mt-4 flex gap-2">
+            {/* Action Buttons (only on public Car Listing) */}
+            {showActions && (
+              <div className="mt-4 flex gap-2">
                 <button
                     onClick={handleAddToWishlist}
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-[3px] transition-colors text-sm font-medium"
@@ -234,6 +238,7 @@ function ProductCard({ children, to, ...props }) {
                     <span>Add to Compare</span>
                 </button>
             </div>
+            )}
 
             {/* CHILDREN EXTRA UI (admin delete button, etc.) */}
             {children && (

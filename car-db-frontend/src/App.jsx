@@ -1,12 +1,14 @@
-import './index.css';
-import CarListing from './pages/CarListing';
-import OrderSummary from './pages/OrderSummary';
-import OrderForm from './pages/OrderForm';
-import CarDetails from './pages/CarDetails';
-import CompareCar from './pages/CompareCar';
-import Settings from './pages/Settings';
-import Navbar from './components/Navbar';
-import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import "./index.css";
+import CarListing from "./pages/CarListing";
+import OrderSummary from "./pages/OrderSummary";
+import OrderForm from "./pages/OrderForm";
+import CarDetails from "./pages/CarDetails";
+import CompareCar from "./pages/CompareCar";
+import Settings from "./pages/Settings";
+import Navbar from "./components/Navbar";
+import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
           <Route path="/order" element={<OrderForm />} />
           <Route path="/ordersummary" element={<OrderSummary />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
         </Routes>
       </Navbar>
     </BrowserRouter>

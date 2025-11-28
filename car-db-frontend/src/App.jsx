@@ -8,6 +8,7 @@ import Settings from "./pages/Settings";
 import Navbar from "./components/Navbar";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
+import FAQ from "./pages/FAQ";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/faq" element={<FAQ />} />
         </Routes>
       </Navbar>
     </BrowserRouter>

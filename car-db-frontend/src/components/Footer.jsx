@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Footer() {
   return (
     <footer className="bg-gray-800 text-white rounded-base shadow-xs">
@@ -12,7 +14,8 @@ function Footer() {
                         <a href="#" className="hover:underline me-4 md:me-6">ABOUT US</a>
                     </li>
                     <li>
-                        <a href="#" className="hover:underline me-4 md:me-6">FAQ</a>
+                        <Link to="/faq" className="hover:underline me-4 md:me-6">FAQ</Link>
+                    
                     </li>
                     <li>
                         <a href="#" className="hover:underline">Contact</a>

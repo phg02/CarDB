@@ -20,38 +20,37 @@ import ApprovedCarDetail from './admin-pages/ApprovedCarDetail';
 import WaitlistCarDetail from './admin-pages/WaitlistCarDetail';
 import BoughtCarDetail from './admin-pages/BoughtCarDetail';
 import PostNews from './admin-pages/PostNews';
-
+import {Signin} from "./pages/Signin";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar>
-        <Routes>
-          <Route path="/carlisting" element={<CarListing />} />
-          <Route path="/car/:id" element={<CarDetails />} />
-          <Route path="/compare" element={<CompareCar />} />
-          <Route path="/order" element={<OrderForm />} />
-          <Route path="/ordersummary" element={<OrderSummary />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/news/:id" element={<NewsDetail />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/" element={<Homepage />} />
-        </Routes>
-      </Navbar>
-
-      <AdminNavbar>
-        <Routes>
-            <Route path="/approved-cars" element={<ApprovedCar />} />
-            <Route path="/waitlist-cars" element={<WaitlistCar />} />
-            <Route path="/bought-cars" element={<BoughtCars />} />
-            <Route path="/approved-car/:id" element={<ApprovedCarDetail />} />
-            <Route path="/waitlist-car/:id" element={<WaitlistCarDetail />} />
-            <Route path="/bought-car/:id" element={<BoughtCarDetail />} />
-            <Route path="/post-news" element={<PostNews />} />
-        </Routes>
-      </AdminNavbar>
+      <Routes>
+        {/* Public routes without navbar */}
+        <Route path="/signin" element={<Navbar><Signin /></Navbar>} />
+        
+        {/* User routes with navbar */}
+        <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />
+        <Route path="/car/:id" element={<Navbar><CarDetails /></Navbar>} />
+        <Route path="/compare" element={<Navbar><CompareCar /></Navbar>} />
+        <Route path="/order" element={<Navbar><OrderForm /></Navbar>} />
+        <Route path="/ordersummary" element={<Navbar><OrderSummary /></Navbar>} />
+        <Route path="/settings" element={<Navbar><Settings /></Navbar>} />
+        <Route path="/news" element={<Navbar><News /></Navbar>} />
+        <Route path="/news/:id" element={<Navbar><NewsDetail /></Navbar>} />
+        <Route path="/faq" element={<Navbar><FAQ /></Navbar>} />
+        <Route path="/" element={<Navbar><Homepage /></Navbar>} />
+        
+        {/* Admin routes with admin navbar */}
+        <Route path="/approved-cars" element={<AdminNavbar><ApprovedCar /></AdminNavbar>} />
+        <Route path="/waitlist-cars" element={<AdminNavbar><WaitlistCar /></AdminNavbar>} />
+        <Route path="/bought-cars" element={<AdminNavbar><BoughtCars /></AdminNavbar>} />
+        <Route path="/approved-car/:id" element={<AdminNavbar><ApprovedCarDetail /></AdminNavbar>} />
+        <Route path="/waitlist-car/:id" element={<AdminNavbar><WaitlistCarDetail /></AdminNavbar>} />
+        <Route path="/bought-car/:id" element={<AdminNavbar><BoughtCarDetail /></AdminNavbar>} />
+        <Route path="/post-news" element={<AdminNavbar><PostNews /></AdminNavbar>} />
+      </Routes>
     </BrowserRouter>
   );
 }

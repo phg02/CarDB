@@ -20,7 +20,8 @@ import ApprovedCarDetail from './admin-pages/ApprovedCarDetail';
 import WaitlistCarDetail from './admin-pages/WaitlistCarDetail';
 import BoughtCarDetail from './admin-pages/BoughtCarDetail';
 import PostNews from './admin-pages/PostNews';
-import {Signin} from "./pages/Signin";
+import {Register} from "./pages/Register";
+import {Login} from "./pages/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -28,7 +29,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public routes without navbar */}
-        <Route path="/signin" element={<Navbar><Signin /></Navbar>} />
+        <Route path="/register" element={<Navbar><Register /></Navbar>} />
+        <Route path="/login" element={<Navbar><Login /></Navbar>} />
         
         {/* User routes with navbar */}
         <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />

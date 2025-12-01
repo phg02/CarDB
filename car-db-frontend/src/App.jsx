@@ -6,13 +6,13 @@ import OrderForm from "./pages/OrderForm";
 import CarDetails from "./pages/CarDetails";
 import CompareCar from "./pages/CompareCar";
 import Settings from "./pages/Settings";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/common/Navbar";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import FAQ from "./pages/FAQ";
 import Homepage from "./pages/Homepage";
 
-import AdminNavbar from './components/AdminNavbar';
+import AdminNavbar from './components/admin/AdminNavbar';
 import ApprovedCar from './admin-pages/ApprovedCars';
 import WaitlistCar from './admin-pages/WaitlistCars';
 import BoughtCars from './admin-pages/BoughtCars';

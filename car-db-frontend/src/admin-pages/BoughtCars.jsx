@@ -1,8 +1,8 @@
 import '../index.css';
 import { useEffect, useState } from 'react';
-import ProductCard from '../components/ProductCard';
-import Result from '../components/Result';
-import DeliveredFilter from '../components/DeliveredFilter';
+import ProductCard from '../components/carlisting/ProductCard';
+import Result from '../components/carlisting/Result';
+import DeliveredFilter from '../components/admin/DeliveredFilter';
 
 const initialCars = [
   {

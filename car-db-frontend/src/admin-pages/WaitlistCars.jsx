@@ -1,7 +1,7 @@
 import '../index.css';
-import ProductCard from '../components/ProductCard';
-import Filter from '../components/Filter';
-import Result from '../components/Result';
+import ProductCard from '../components/carlisting/ProductCard';
+import Filter from '../components/carlisting/Filter';
+import Result from '../components/carlisting/Result';
 
 function WaitlistCar() {
   return (

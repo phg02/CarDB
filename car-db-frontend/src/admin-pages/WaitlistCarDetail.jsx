@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import CarHeroSection from '../components/CarHeroSection';
-import CarImageGallery from '../components/CarImageGallery';
-import CarPriceActions from '../components/CarPriceActions';
-import CarSpecifications from '../components/CarSpecifications';
-import DealerInfo from '../components/DealerInfo';
+import CarHeroSection from '../components/cardetails/CarHeroSection';
+import CarImageGallery from '../components/cardetails/CarImageGallery';
+import CarPriceActions from '../components/cardetails/CarPriceActions';
+import CarSpecifications from '../components/cardetails/CarSpecifications';
+import DealerInfo from '../components/cardetails/DealerInfo';
 
 const CarDetails = () => {
   const { id } = useParams();

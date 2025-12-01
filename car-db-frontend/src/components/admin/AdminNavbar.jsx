@@ -1,8 +1,8 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import{ NavLink } from 'react-router-dom';
-import Footer from './Footer';
-import Chatbot from './Chatbot';
+import Footer from '../common/Footer';
+import Chatbot from '../common/Chatbot';
 
 const navigation = [
   { name: 'Approved Cars', href: '/approved-cars' },

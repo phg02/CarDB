@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PriceRange from "./PriceRange";
+import PriceRange from "../carlisting/PriceRange";
 
 function DeliveredFilter() {
     const [status, setOpenStatus] = useState(false);

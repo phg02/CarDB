@@ -9,6 +9,7 @@ const navigation = [
   { name: 'Compare', href: '/compare' },
   { name: 'Sell', href: '/sellcar' },
   { name: 'News', href: '/news' },
+  { name: 'VIN Decoder', href: '/vin-decoder' }
 ]
 
 function classNames(...classes) {

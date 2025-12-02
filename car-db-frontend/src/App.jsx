@@ -12,6 +12,7 @@ import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import FAQ from "./pages/FAQ";
 import Homepage from "./pages/Homepage";
+import VinDecoder from "./pages/VinDecoder";
 
 import AdminNavbar from './components/admin/AdminNavbar';
 import ApprovedCar from './admin-pages/ApprovedCars';
@@ -44,6 +45,7 @@ function App() {
         <Route path="/news" element={<Navbar><News /></Navbar>} />
         <Route path="/news/:id" element={<Navbar><NewsDetail /></Navbar>} />
         <Route path="/faq" element={<Navbar><FAQ /></Navbar>} />
+        <Route path="/vin-decoder" element={<Navbar><VinDecoder /></Navbar>} />
         <Route path="/" element={<Navbar><Homepage /></Navbar>} />
         
         {/* Admin routes with admin navbar */}

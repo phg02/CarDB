@@ -5,6 +5,7 @@ import OrderSummary from "./pages/OrderSummary";
 import OrderForm from "./pages/OrderForm";
 import CarDetails from "./pages/CarDetails";
 import CompareCar from "./pages/CompareCar";
+import SellCar from "./pages/SellCar";
 import Settings from "./pages/Settings";
 import Navbar from "./components/common/Navbar";
 import News from "./pages/News";
@@ -36,6 +37,7 @@ function App() {
         <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />
         <Route path="/car/:id" element={<Navbar><CarDetails /></Navbar>} />
         <Route path="/compare" element={<Navbar><CompareCar /></Navbar>} />
+        <Route path="/sellcar" element={<Navbar><SellCar /></Navbar>} />
         <Route path="/order" element={<Navbar><OrderForm /></Navbar>} />
         <Route path="/ordersummary" element={<Navbar><OrderSummary /></Navbar>} />
         <Route path="/settings" element={<Navbar><Settings /></Navbar>} />

@@ -7,7 +7,7 @@ import Chatbot from './Chatbot';
 const navigation = [
   { name: 'Car Listing', href: '/carlisting' },
   { name: 'Compare', href: '/compare' },
-  { name: 'Sell', href: '/sell' },
+  { name: 'Sell', href: '/sellcar' },
   { name: 'News', href: '/news' },
 ]
 

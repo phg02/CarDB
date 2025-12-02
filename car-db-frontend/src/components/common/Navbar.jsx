@@ -3,7 +3,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import{ NavLink } from 'react-router-dom';
 import Footer from './Footer';
 import Chatbot from './Chatbot';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/logo.svg';
 
 const navigation = [
   { name: 'Car Listing', href: '/carlisting' },

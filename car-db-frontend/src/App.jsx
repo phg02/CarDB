@@ -1,5 +1,7 @@
 import "./index.css";
 
+import NotFound from "./pages/NotFound";
+
 import CarListing from "./pages/CarListing";
 import OrderSummary from "./pages/OrderSummary";
 import OrderForm from "./pages/OrderForm";
@@ -31,6 +33,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="*" element={<Navbar><NotFound /></Navbar>} />
+
         {/* Public routes without navbar */}
         <Route path="/register" element={<Navbar><Register /></Navbar>} />
         <Route path="/login" element={<Navbar><Login /></Navbar>} />

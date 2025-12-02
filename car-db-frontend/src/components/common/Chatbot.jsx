@@ -93,9 +93,7 @@ function Chatbot() {
             <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : (
-          <svg className="w-5 h-5 text-gray-100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 8">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7 7.674 1.3a.91.91 0 0 0-1.348 0L1 7" />
-          </svg>
+          <img src="/chatbot.png" alt="chatbot" className="w-8 h-8" aria-hidden="true" />
         )}
       </button>
 

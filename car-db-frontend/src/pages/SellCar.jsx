@@ -26,15 +26,14 @@ export default function SellCar() {
 
     return (
     <div className="min-h-screen bg-background">
-            {/* Hero Section */}
-      <nav className="flex items-center gap-2 text-sm text-gray-400 w-full max-w-[1200px] mb-6 pr-4">
-        <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
-        <span>/</span>
-        <span className="text-white">Car Listing</span>
-      </nav>
-
       {/* Main Form */}
       <main className="container mx-auto max-w-4xl px-6 py-8 pb-24">
+        {/* Bread crumb */}
+        <nav className="flex items-center gap-2 text-sm text-gray-400 mb-6">
+          <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
+          <span>/</span>
+          <span className="text-white">Car Listing</span>
+        </nav>
         <form className="space-y-8">
           {/* Images Section */}
           <section className="space-y-4">

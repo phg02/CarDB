@@ -101,37 +101,37 @@ function Chatbot() {
         <div
           role="dialog"
           aria-label="Chat window"
-          className="fixed w-90 max-w-sm flex flex-col border border-gray-700 rounded-[3px]"
+          className="fixed w-[calc(100vw-2rem)] sm:w-96 max-w-sm flex flex-col border border-gray-700 rounded-[3px]"
           style={{ right: `${pos.right}px`, bottom: `${pos.bottom + 65}px`, zIndex: 99998 }}
         >
           <div className="flex items-center justify-between px-3 py-2 bg-blue-400 rounded-[2px]">
             <div>
-              <p className="text-gray-200">Chat with</p>
+              <p className="text-sm text-gray-200">Chat with</p>
               <p className="font-semibold">Carlo</p>
             </div>
-            <button aria-label="Close chat" onClick={() => setOpen(false)} className="text-white font-bold">✕</button>
+            <button aria-label="Close chat" onClick={() => setOpen(false)} className="text-white font-bold text-xl">✕</button>
           </div>
 
-          <div ref={messagesRef} className="px-3 py-2 overflow-y-auto space-y-2 bg-gray-800" style={{ maxHeight: '400px' }}>
+          <div ref={messagesRef} className="px-3 py-2 overflow-y-auto space-y-2 bg-gray-800 h-64 sm:h-80" style={{ maxHeight: '400px' }}>
             {messages.map((m) => (
               <div key={m.id} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`${m.from === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 rounded-lg max-w-[80%] break-words`}>
+                <div className={`${m.from === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 rounded-lg max-w-[80%] break-words text-sm`}>
                   {m.text}
                 </div>
               </div>
             ))}
           </div>
 
-          <form onSubmit={sendMessage} className="px-3 py-2 flex items-center gap-2 bg-gray-700 rounded-[2px]">
+          <form onSubmit={sendMessage} className="px-2 sm:px-3 py-2 flex items-center gap-2 bg-gray-700 rounded-[2px]">
             <input
               aria-label="Type a message"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 rounded-md px-2 py-1.5 text-sm bg-gray-600"
+              className="flex-1 rounded-md px-2 py-1.5 text-sm bg-gray-600 text-white"
               placeholder="Type a message..."
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(e); } }}
             />
-            <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded-md">Send</button>
+            <button type="submit" className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-md text-sm whitespace-nowrap">Send</button>
           </form>
         </div>
       )}

@@ -8,7 +8,7 @@ const navigation = [
   { name: 'Approved Cars', href: '/approved-cars' },
   { name: 'Waitlist Cars', href: '/waitlist-cars' },
   { name: 'Bought Cars', href: '/bought-cars' },
-  { name: 'News', href: '/news' },
+  { name: 'News', href: '/admin-news' },
 ]
 
 function classNames(...classes) {

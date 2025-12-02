@@ -20,6 +20,7 @@ import BoughtCars from './admin-pages/BoughtCars';
 import ApprovedCarDetail from './admin-pages/ApprovedCarDetail';
 import WaitlistCarDetail from './admin-pages/WaitlistCarDetail';
 import BoughtCarDetail from './admin-pages/BoughtCarDetail';
+import AdminNews from './admin-pages/AdminNews';
 import PostNews from './admin-pages/PostNews';
 import {Register} from "./pages/Register";
 import {Login} from "./pages/Login";
@@ -53,6 +54,7 @@ function App() {
         <Route path="/approved-car/:id" element={<AdminNavbar><ApprovedCarDetail /></AdminNavbar>} />
         <Route path="/waitlist-car/:id" element={<AdminNavbar><WaitlistCarDetail /></AdminNavbar>} />
         <Route path="/bought-car/:id" element={<AdminNavbar><BoughtCarDetail /></AdminNavbar>} />
+        <Route path="/admin-news" element={<AdminNavbar><AdminNews /></AdminNavbar>} />
         <Route path="/post-news" element={<AdminNavbar><PostNews /></AdminNavbar>} />
       </Routes>
     </BrowserRouter>

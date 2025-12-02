@@ -22,24 +22,47 @@ function VinDecoder() {
 
     // Simulate API call - Replace with actual VIN decoding API
     setTimeout(() => {
-      // Mock data - replace with actual API response
+      // Mock data - replace with actual API response matching the schema
       setResult({
         vin: vin.toUpperCase(),
+        year: 2020,
         make: 'Tesla',
         model: 'Model 3',
-        year: '2020',
-        bodyStyle: 'Sedan',
-        engine: 'Electric Motor',
-        drivetrain: 'Rear-Wheel Drive',
+        trim: 'Standard Range Plus',
+        trim_confidence: 'HIGH',
+        vehicle_type: 'Passenger Car',
+        body_type: 'Sedan',
+        body_subtype: '4 Door Sedan',
         transmission: 'Automatic',
-        fuelType: 'Electric',
-        manufacturerLocation: 'Fremont, California, USA',
-        plantCountry: 'United States',
-        vehicleType: 'Passenger Car',
-        trimLevel: 'Standard Range Plus',
-        doors: '4',
-        seats: '5',
-        grossVehicleWeight: '2,100 kg',
+        transmission_description: 'Single-Speed Fixed Gear',
+        drivetrain: 'Rear-Wheel Drive',
+        powertrain_type: 'Electric',
+        engine: 'Electric Motor',
+        fuel_type: 'Electric',
+        doors: 4,
+        seating_capacity: 5,
+        exterior_color: {
+          code: 'RMC',
+          name: 'Red Multi-Coat',
+          base: 'Red',
+          confidence: 'HIGH'
+        },
+        interior_color: {
+          code: 'BLK',
+          name: 'Black',
+          base: 'Black',
+          confidence: 'HIGH'
+        },
+        weight: 1847,
+        width: 1849,
+        height: 1443,
+        length: 4694,
+        city_mpg: 142,
+        highway_mpg: 132,
+        msrp: 39990,
+        country: 'United States',
+        manufacturer_code: '5YJ3E1EA',
+        listing_confidence: 'HIGH'
       });
       setLoading(false);
     }, 1500);
@@ -109,7 +132,11 @@ function VinDecoder() {
             
             {/* Key Information */}
             <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-6 mb-6 border border-blue-800/30">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-gray-400 text-sm">Year</p>
+                  <p className="text-white text-xl font-semibold">{result.year}</p>
+                </div>
                 <div>
                   <p className="text-gray-400 text-sm">Make</p>
                   <p className="text-white text-xl font-semibold">{result.make}</p>
@@ -119,27 +146,83 @@ function VinDecoder() {
                   <p className="text-white text-xl font-semibold">{result.model}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Year</p>
-                  <p className="text-white text-xl font-semibold">{result.year}</p>
+                  <p className="text-gray-400 text-sm">Trim</p>
+                  <p className="text-white text-xl font-semibold">{result.trim}</p>
                 </div>
               </div>
             </div>
 
-            {/* Detailed Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InfoItem label="VIN" value={result.vin} />
-              <InfoItem label="Body Style" value={result.bodyStyle} />
-              <InfoItem label="Trim Level" value={result.trimLevel} />
-              <InfoItem label="Engine" value={result.engine} />
-              <InfoItem label="Drivetrain" value={result.drivetrain} />
-              <InfoItem label="Transmission" value={result.transmission} />
-              <InfoItem label="Fuel Type" value={result.fuelType} />
-              <InfoItem label="Vehicle Type" value={result.vehicleType} />
-              <InfoItem label="Doors" value={result.doors} />
-              <InfoItem label="Seats" value={result.seats} />
-              <InfoItem label="Gross Vehicle Weight" value={result.grossVehicleWeight} />
-              <InfoItem label="Manufacturer Location" value={result.manufacturerLocation} />
-              <InfoItem label="Plant Country" value={result.plantCountry} />
+            {/* Detailed Information Sections */}
+            <div className="space-y-6">
+              {/* Basic Details */}
+              <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Basic Vehicle Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InfoItem label="VIN" value={result.vin} />
+                  <InfoItem label="Vehicle Type" value={result.vehicle_type} />
+                  <InfoItem label="Body Type" value={result.body_type} />
+                  <InfoItem label="Body Subtype" value={result.body_subtype} />
+                  <InfoItem label="Doors" value={result.doors} />
+                  <InfoItem label="Seating Capacity" value={result.seating_capacity} />
+                  <InfoItem label="Country" value={result.country} />
+                  <InfoItem label="Manufacturer Code" value={result.manufacturer_code} />
+                </div>
+              </div>
+
+              {/* Engine & Powertrain */}
+              <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Engine & Powertrain</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InfoItem label="Engine" value={result.engine} />
+                  <InfoItem label="Powertrain Type" value={result.powertrain_type} />
+                  <InfoItem label="Fuel Type" value={result.fuel_type} />
+                  <InfoItem label="Transmission" value={result.transmission} />
+                  <InfoItem label="Transmission Description" value={result.transmission_description} />
+                  <InfoItem label="Drivetrain" value={result.drivetrain} />
+                </div>
+              </div>
+
+              {/* Dimensions & Capacity */}
+              <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Dimensions & Capacity</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InfoItem label="Length" value={`${result.length} mm`} />
+                  <InfoItem label="Width" value={`${result.width} mm`} />
+                  <InfoItem label="Height" value={`${result.height} mm`} />
+                  <InfoItem label="Weight" value={`${result.weight} kg`} />
+                </div>
+              </div>
+
+              {/* Fuel Efficiency */}
+              <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Fuel Efficiency</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InfoItem label="City MPG" value={result.city_mpg} />
+                  <InfoItem label="Highway MPG" value={result.highway_mpg} />
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Exterior & Interior Color</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InfoItem label="Exterior Color" value={result.exterior_color.name} badge={result.exterior_color.confidence} />
+                  <InfoItem label="Exterior Color Code" value={result.exterior_color.code} />
+                  <InfoItem label="Base Exterior Color" value={result.exterior_color.base} />
+                  <InfoItem label="Interior Color" value={result.interior_color.name} badge={result.interior_color.confidence} />
+                  <InfoItem label="Interior Color Code" value={result.interior_color.code} />
+                  <InfoItem label="Base Interior Color" value={result.interior_color.base} />
+                </div>
+              </div>
+
+              {/* Pricing Information */}
+              <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Pricing Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InfoItem label="MSRP" value={`$${result.msrp.toLocaleString()}`} />
+                  <InfoItem label="Listing Confidence" value={result.listing_confidence} badge={result.listing_confidence} />
+                </div>
+              </div>
             </div>
 
             {/* Actions */}
@@ -191,10 +274,21 @@ function VinDecoder() {
 }
 
 // Helper component for displaying info items
-function InfoItem({ label, value }) {
+function InfoItem({ label, value, badge }) {
   return (
     <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-      <p className="text-gray-400 text-sm mb-1">{label}</p>
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-gray-400 text-sm">{label}</p>
+        {badge && (
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            badge === 'HIGH' ? 'bg-green-900/30 text-green-400 border border-green-700' :
+            badge === 'MEDIUM' ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-700' :
+            'bg-gray-700/30 text-gray-400 border border-gray-600'
+          }`}>
+            {badge}
+          </span>
+        )}
+      </div>
       <p className="text-white font-medium">{value}</p>
     </div>
   );

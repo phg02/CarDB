@@ -1,4 +1,5 @@
 import "./index.css";
+import "react-toastify/dist/ReactToastify.css";
 
 import NotFound from "./pages/NotFound";
 
@@ -28,10 +29,25 @@ import PostNews from './admin-pages/PostNews';
 import {Register} from "./pages/Register";
 import {Login} from "./pages/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
     <BrowserRouter>
+    <AuthProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Routes>
         <Route path="*" element={<Navbar><NotFound /></Navbar>} />
 
@@ -63,6 +79,7 @@ function App() {
         <Route path="/admin-news" element={<AdminNavbar><AdminNews /></AdminNavbar>} />
         <Route path="/post-news" element={<AdminNavbar><PostNews /></AdminNavbar>} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

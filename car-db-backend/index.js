@@ -3,10 +3,18 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import authRouter from './api_routes/authRouter.js';
 
 const app = express();
 dotenv.config();
+
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite default port
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

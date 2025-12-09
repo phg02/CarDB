@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ChevronUp } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = 4;
 
@@ -85,6 +87,7 @@ const Hero = () => {
           <button
             className="bg-primary hover:bg-sky-400 text-white px-8 py-3.5 rounded font-semibold transition-all shadow-lg shadow-primary/25 transform hover:-translate-y-1 animate-fade-in-up"
             style={{ animationDelay: "0.2s" }}
+            onClick={() => navigate("/carlisting")}
           >
             Explore Now !!!
           </button>
@@ -105,15 +108,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-
-      {/* Floating Action Button */}
-      <button
-        onClick={scrollToTop}
-        className="absolute bottom-10 right-10 z-20 bg-primary hover:bg-sky-400 p-3 rounded-full shadow-lg transition-transform hover:scale-110"
-        aria-label="Scroll to top"
-      >
-        <ChevronUp size={24} className="text-white" />
-      </button>
     </div>
   );
 };

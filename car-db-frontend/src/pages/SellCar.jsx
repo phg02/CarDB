@@ -32,7 +32,7 @@ export default function SellCar() {
         <nav className="flex items-center gap-2 text-sm text-gray-400 mb-6">
           <Link to="/" className="hover:text-white transition-colors">Homepage</Link>
           <span>/</span>
-          <span className="text-white">Car Listing</span>
+          <span className="text-white">Sell Car</span>
         </nav>
         <form className="space-y-8">
           {/* Images Section */}

@@ -80,7 +80,10 @@ const carPostSchema = new mongoose.Schema(
     powertrain_type: String,
 
     // Status fields
-    verified: { type: Boolean, default: false },
+    verified: { type: Boolean, default: false }, // Admin approval status
+    rejectionReason: { type: String, default: null }, // Reason if rejected
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // Admin who approved
+    approvedAt: { type: Date, default: null },
     sold: { type: Boolean, default: false },
 
     status: {

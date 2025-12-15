@@ -147,7 +147,8 @@ export const createCarPost = async (req, res) => {
 
 // ==================== READ ====================
 /**
- * Get all car posts with filtering and pagination
+ * Get all verified car posts (for regular users)
+ * Only shows posts that are verified by admin and have been paid
  * @route GET /api/cars
  */
 export const getAllCarPosts = async (req, res) => {
@@ -155,7 +156,8 @@ export const getAllCarPosts = async (req, res) => {
     const { page = 1, limit = 12, status, minPrice, maxPrice, make, year, inventory_type } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const filter = { isDeleted: false };
+    // Only show verified posts (admin approved)
+    const filter = { isDeleted: false, verified: true };
 
     // Apply filters
     if (status) filter.status = status;
@@ -195,6 +197,104 @@ export const getAllCarPosts = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch car posts',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get all car posts for admin (including unverified)
+ * @route GET /api/cars/admin/all
+ */
+export const getAllCarPostsAdmin = async (req, res) => {
+  try {
+    const { page = 1, limit = 12, status, minPrice, maxPrice, make, year, inventory_type, verified } = req.query;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const filter = { isDeleted: false };
+
+    // Apply filters
+    if (status) filter.status = status;
+    if (inventory_type) filter.inventory_type = inventory_type;
+    if (make) filter.make = { $regex: make, $options: 'i' };
+    if (year) filter.year = parseInt(year);
+    if (verified !== undefined) filter.verified = verified === 'true';
+    
+    // Price range filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = parseInt(minPrice);
+      if (maxPrice) filter.price.$lte = parseInt(maxPrice);
+    }
+
+    const carPosts = await CarPost.find(filter)
+      .populate('seller', 'name email phone')
+      .populate('approvedBy', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await CarPost.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      message: 'All car posts retrieved successfully',
+      data: carPosts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
+        itemsPerPage: parseInt(limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching all car posts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch car posts',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get all unverified car posts (for admin review)
+ * @route GET /api/cars/admin/unverified
+ */
+export const getUnverifiedCarPosts = async (req, res) => {
+  try {
+    const { page = 1, limit = 12, make, year } = req.query;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const filter = { isDeleted: false, verified: false };
+
+    if (make) filter.make = { $regex: make, $options: 'i' };
+    if (year) filter.year = parseInt(year);
+
+    const carPosts = await CarPost.find(filter)
+      .populate('seller', 'name email phone')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await CarPost.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      message: 'Unverified car posts retrieved successfully',
+      data: carPosts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
+        itemsPerPage: parseInt(limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching unverified posts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch unverified posts',
       error: error.message,
     });
   }
@@ -541,6 +641,119 @@ export const markCarAsAvailable = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to mark car as available',
+      error: error.message,
+    });
+  }
+};
+
+// ==================== ADMIN APPROVAL ====================
+/**
+ * Approve car post (admin only)
+ * @route PATCH /api/cars/admin/:id/approve
+ */
+export const approveCarPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user?.id || req.user?.userId; // From auth middleware
+
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized. Admin authentication required.',
+      });
+    }
+
+    const carPost = await CarPost.findById(id);
+
+    if (!carPost) {
+      return res.status(404).json({
+        success: false,
+        message: 'Car post not found',
+      });
+    }
+
+    // Check if posting fee was paid (verify it exists and is linked)
+    const PostingFee = require('../model/PostingFee.js').default;
+    const postingFee = await PostingFee.findOne({ carPost: id, paymentStatus: 'paid' });
+
+    if (!postingFee) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot approve this post. The posting fee has not been paid.',
+      });
+    }
+
+    // Approve the post
+    carPost.verified = true;
+    carPost.approvedBy = adminId;
+    carPost.approvedAt = new Date();
+    carPost.rejectionReason = null;
+    await carPost.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Car post approved successfully',
+      data: {
+        carPost,
+        approvedAt: carPost.approvedAt,
+        approvedBy: carPost.approvedBy,
+      },
+    });
+  } catch (error) {
+    console.error('Error approving car post:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to approve car post',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Reject car post (admin only)
+ * @route PATCH /api/cars/admin/:id/reject
+ */
+export const rejectCarPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a rejection reason',
+      });
+    }
+
+    const carPost = await CarPost.findById(id);
+
+    if (!carPost) {
+      return res.status(404).json({
+        success: false,
+        message: 'Car post not found',
+      });
+    }
+
+    // Reject the post
+    carPost.verified = false;
+    carPost.rejectionReason = reason;
+    carPost.approvedBy = null;
+    carPost.approvedAt = null;
+    await carPost.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Car post rejected successfully',
+      data: {
+        carPost,
+        rejectionReason: carPost.rejectionReason,
+      },
+    });
+  } catch (error) {
+    console.error('Error rejecting car post:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject car post',
       error: error.message,
     });
   }

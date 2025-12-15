@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import * as carPostController from '../controller/CarPostController.js';
+import { verifyToken, isAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -51,10 +52,22 @@ router.post('/create', carPostController.createCarPost);
 
 // ==================== READ ====================
 /**
- * Get all car posts with filtering and pagination
+ * Get all verified car posts (for regular users)
  * GET /api/cars?page=1&limit=12&status=Available&minPrice=1000&maxPrice=50000&make=Toyota&year=2020&inventory_type=used
  */
 router.get('/', carPostController.getAllCarPosts);
+
+/**
+ * Get all car posts for admin (including unverified)
+ * GET /api/cars/admin/all?page=1&limit=12&verified=false
+ */
+router.get('/admin/all', verifyToken, isAdmin, carPostController.getAllCarPostsAdmin);
+
+/**
+ * Get all unverified car posts (for admin review)
+ * GET /api/cars/admin/unverified?page=1&limit=12
+ */
+router.get('/admin/unverified', verifyToken, isAdmin, carPostController.getUnverifiedCarPosts);
 
 /**
  * Get car posts by seller with pagination
@@ -120,6 +133,19 @@ router.post('/:carId/watchlist/:userId', carPostController.addToWatchlist);
  * DELETE /api/cars/:carId/watchlist/:userId
  */
 router.delete('/:carId/watchlist/:userId', carPostController.removeFromWatchlist);
+
+// ==================== ADMIN APPROVAL ====================
+/**
+ * Approve car post (admin only)
+ * PATCH /api/cars/admin/:id/approve
+ */
+router.patch('/admin/:id/approve', verifyToken, isAdmin, carPostController.approveCarPost);
+
+/**
+ * Reject car post (admin only)
+ * PATCH /api/cars/admin/:id/reject
+ */
+router.patch('/admin/:id/reject', verifyToken, isAdmin, carPostController.rejectCarPost);
 
 // Error handling middleware for multer
 router.use((error, req, res, next) => {

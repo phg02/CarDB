@@ -5,6 +5,10 @@ import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './api_routes/authRouter.js';
+import carPostRouter from './api_routes/CarPostRouter.js';
+import orderRouter from './api_routes/OrderRouter.js';
+import vnpayRouter from './api_routes/VNPayRouter.js';
+import postingFeeRouter from './api_routes/PostingFeeRouter.js';
 
 const app = express();
 dotenv.config();
@@ -30,8 +34,12 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
     console.error('Error connecting to MongoDB', err);
 });
 
-
+// Routes
 app.use('/api/auth', authRouter);
+app.use('/api/cars', carPostRouter);
+app.use('/api/orders', orderRouter);
+app.use('/api/payments', vnpayRouter);
+app.use('/api/posting-fee', postingFeeRouter);
 
 app.listen(3000, () => {
       console.log('Server is running on port 3000');

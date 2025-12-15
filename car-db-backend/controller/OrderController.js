@@ -1,0 +1,448 @@
+import Order from "../model/Order.js";
+import User from "../model/User.js";
+import CarPost from "../model/CarPost.js";
+
+// ==================== CREATE ORDER ====================
+/**
+ * Create a new order (customer initiates order)
+ * @route POST /api/orders/create
+ */
+export const createOrder = async (req, res) => {
+  const { customer, firstName, lastName, email, phone, address, city, state, country, zipCode, items, notes } = req.body;
+
+  if (!customer || !firstName || !lastName || !email || !address || !city || !country || !items || items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide all required fields",
+    });
+  }
+
+  try {
+    // Validate customer exists
+    const customerUser = await User.findById(customer);
+    if (!customerUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found",
+      });
+    }
+
+    // Validate items and calculate total
+    let total = 0;
+    const validatedItems = [];
+
+    for (const item of items) {
+      const carPost = await CarPost.findById(item.carPost);
+      if (!carPost) {
+        return res.status(404).json({
+          success: false,
+          message: `Car post with ID ${item.carPost} not found`,
+        });
+      }
+
+      const seller = await User.findById(item.seller);
+      if (!seller) {
+        return res.status(404).json({
+          success: false,
+          message: `Seller with ID ${item.seller} not found`,
+        });
+      }
+
+      const itemTotal = carPost.price * (item.quantity || 1);
+      total += itemTotal;
+
+      validatedItems.push({
+        carPost: item.carPost,
+        seller: item.seller,
+        title: carPost.title || carPost.make,
+        price: carPost.price,
+        quantity: item.quantity || 1,
+      });
+    }
+
+    // Create new order
+    const newOrder = new Order({
+      customer,
+      firstName,
+      lastName,
+      email,
+      phone: phone || "",
+      address,
+      city,
+      state: state || "",
+      country,
+      zipCode: zipCode || "",
+      items: validatedItems,
+      total,
+      notes: notes || "",
+      orderStatus: "pending",
+      paymentStatus: false,
+    });
+
+    await newOrder.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      data: {
+        order: newOrder,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create order",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== GET ORDER BY ID ====================
+/**
+ * Get order details by ID
+ * @route GET /api/orders/:id
+ */
+export const getOrderById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Order.findById(id)
+      .populate("customer", "name email phone")
+      .populate("items.carPost", "title make model year price images")
+      .populate("items.seller", "name email phone");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.isDeleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Order has been deleted",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order retrieved successfully",
+      data: {
+        order,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve order",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== GET CUSTOMER ORDERS ====================
+/**
+ * Get all orders for a customer
+ * @route GET /api/orders/customer/:customerId
+ */
+export const getCustomerOrders = async (req, res) => {
+  const { customerId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+
+  try {
+    const skip = (page - 1) * limit;
+
+    const orders = await Order.find({ customer: customerId, isDeleted: false })
+      .populate("items.carPost", "title make model year price")
+      .populate("items.seller", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Order.countDocuments({ customer: customerId, isDeleted: false });
+
+    res.status(200).json({
+      success: true,
+      message: "Customer orders retrieved successfully",
+      data: {
+        orders,
+      },
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error getting customer orders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve orders",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== UPDATE PAYMENT DETAILS (VNPay Return) ====================
+/**
+ * Update order with VNPay payment details
+ * @route PATCH /api/orders/:id/payment-vnpay
+ */
+export const updatePaymentDetailsVNPay = async (req, res) => {
+  const { id } = req.params;
+  const { responseCode, transactionId, bankCode, bankTmnCode, paymentTime, paymentId } = req.body;
+
+  if (!id || !responseCode) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Update payment details
+    order.paymentDetails = {
+      responseCode,
+      transactionId,
+      bankCode,
+      bankTmnCode,
+      paymentTime: paymentTime ? new Date(paymentTime) : new Date(),
+    };
+
+    // Set payment status based on response code
+    if (responseCode === "00") {
+      order.paymentStatus = true;
+      order.orderStatus = "confirmed";
+      order.paymentId = paymentId;
+    } else {
+      order.paymentStatus = false;
+      order.orderStatus = "cancelled";
+    }
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Payment details updated successfully",
+      data: {
+        order,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating payment details:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update payment details",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== UPDATE ORDER STATUS ====================
+/**
+ * Update order status (admin/seller)
+ * @route PATCH /api/orders/:id/status
+ */
+export const updateOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { orderStatus } = req.body;
+
+  if (!orderStatus || !["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"].includes(orderStatus)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid order status",
+    });
+  }
+
+  try {
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { orderStatus },
+      { new: true, runValidators: true }
+    ).populate("items.carPost items.seller");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      data: {
+        order,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== CANCEL ORDER ====================
+/**
+ * Cancel an order
+ * @route PATCH /api/orders/:id/cancel
+ */
+export const cancelOrder = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Can only cancel pending or confirmed orders
+    if (!["pending", "confirmed"].includes(order.orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot cancel order with status: ${order.orderStatus}`,
+      });
+    }
+
+    order.orderStatus = "cancelled";
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      data: {
+        order,
+      },
+    });
+  } catch (error) {
+    console.error("Error cancelling order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to cancel order",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== SOFT DELETE ORDER ====================
+/**
+ * Soft delete an order (mark as deleted)
+ * @route DELETE /api/orders/:id
+ */
+export const deleteOrder = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
+      data: {
+        order,
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete order",
+      error: error.message,
+    });
+  }
+};
+
+// ==================== GET ORDER STATISTICS ====================
+/**
+ * Get order statistics for a seller
+ * @route GET /api/orders/seller/:sellerId/stats
+ */
+export const getOrderStats = async (req, res) => {
+  const { sellerId } = req.params;
+
+  try {
+    const totalOrders = await Order.countDocuments({
+      "items.seller": sellerId,
+      isDeleted: false,
+    });
+
+    const completedOrders = await Order.countDocuments({
+      "items.seller": sellerId,
+      orderStatus: "delivered",
+      isDeleted: false,
+    });
+
+    const pendingOrders = await Order.countDocuments({
+      "items.seller": sellerId,
+      orderStatus: "pending",
+      isDeleted: false,
+    });
+
+    const totalRevenue = await Order.aggregate([
+      {
+        $match: {
+          "items.seller": require("mongoose").Types.ObjectId(sellerId),
+          orderStatus: "delivered",
+          isDeleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          revenue: { $sum: "$total" },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Order statistics retrieved successfully",
+      data: {
+        stats: {
+          totalOrders,
+          completedOrders,
+          pendingOrders,
+          totalRevenue: totalRevenue[0]?.revenue || 0,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error getting order stats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve order statistics",
+      error: error.message,
+    });
+  }
+};

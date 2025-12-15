@@ -27,12 +27,29 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
-  otp: String,
-  otpExpire: Date,
+  // Email verification
   verified: {
     type: Boolean,
     default: false,
   },
+  otp: {
+    type: String,
+    default: null,
+  },
+  otpExpire: {
+    type: Date,
+    default: null,
+  },
+  // Password reset
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpire: {
+    type: Date,
+    default: null,
+  },
+  // User relationships
   watchlist: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -2,6 +2,7 @@ import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 
 import NotFound from "./pages/NotFound";
+import VerificationCode from "./pages/VerificationCode";
 
 import CarListing from "./pages/CarListing";
 import OrderSummary from "./pages/OrderSummary";
@@ -54,6 +55,7 @@ function App() {
         {/* Public routes without navbar */}
         <Route path="/register" element={<Navbar><Register /></Navbar>} />
         <Route path="/login" element={<Navbar><Login /></Navbar>} />
+        <Route path="/verification-code" element={<Navbar><VerificationCode /></Navbar>} />
         
         {/* User routes with navbar */}
         <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />

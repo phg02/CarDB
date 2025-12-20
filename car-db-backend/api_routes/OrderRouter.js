@@ -30,10 +30,11 @@ router.get('/:id', getOrderById);
 
 /**
  * Get all orders for a customer
- * GET /api/orders/customer/:customerId
+ * GET /api/orders/customer
  * Query: page, limit
+ * SECURITY: Requires authenticated user - retrieves their own orders
  */
-router.get('/customer/:customerId', getCustomerOrders);
+router.get('/customer', verifyToken, getCustomerOrders);
 
 // ==================== UPDATE ORDER ====================
 /**
@@ -68,8 +69,9 @@ router.delete('/:id', verifyToken, deleteOrder);
 // ==================== STATISTICS ====================
 /**
  * Get order statistics for a seller
- * GET /api/orders/seller/:sellerId/stats
+ * GET /api/orders/seller/stats
+ * SECURITY: Requires authenticated user - retrieves their own statistics
  */
-router.get('/seller/:sellerId/stats', getOrderStats);
+router.get('/seller/stats', verifyToken, getOrderStats);
 
 export default router;

@@ -146,10 +146,11 @@ export const getOrderById = async (req, res) => {
 // ==================== GET CUSTOMER ORDERS ====================
 /**
  * Get all orders for a customer
- * @route GET /api/orders/customer/:customerId
+ * @route GET /api/orders/customer
+ * SECURITY: Uses authenticated user ID from JWT token instead of route parameter
  */
 export const getCustomerOrders = async (req, res) => {
-  const { customerId } = req.params;
+  const customerId = req.user.userId; // Get from authenticated token
   const { page = 1, limit = 10 } = req.query;
 
   try {
@@ -386,10 +387,11 @@ export const deleteOrder = async (req, res) => {
 // ==================== GET ORDER STATISTICS ====================
 /**
  * Get order statistics for a seller
- * @route GET /api/orders/seller/:sellerId/stats
+ * @route GET /api/orders/seller/stats
+ * SECURITY: Uses authenticated user ID from JWT token instead of route parameter
  */
 export const getOrderStats = async (req, res) => {
-  const { sellerId } = req.params;
+  const sellerId = req.user.userId; // Get from authenticated token
 
   try {
     const totalOrders = await Order.countDocuments({

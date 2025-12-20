@@ -1,16 +1,22 @@
 import { useState } from "react";
 import { Upload, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function SellCar() {
     const [condition, setCondition] = useState("new");
     const [imagePreviews, setImagePreviews] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
+    const { token } = useAuth();
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         const previews = files.map(file => ({
             url: URL.createObjectURL(file),
-            name: file.name
+            name: file.name,
+            file: file
         }));
         setImagePreviews(prev => [...prev, ...previews]);
     };
@@ -24,6 +30,107 @@ export default function SellCar() {
         });
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+
+        try {
+            if (!token) {
+                setError("Please login to sell a car");
+                navigate("/login");
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            
+            // Add file uploads
+            imagePreviews.forEach(preview => {
+                formData.append("photos", preview.file);
+            });
+
+            // Extract car data from form
+            const carData = {
+                heading: formData.get("title"),
+                price: parseInt(formData.get("price")),
+                miles: parseInt(formData.get("miles")) || 0,
+                condition: condition,
+                vehicleType: formData.get("vehicleType"),
+                year: parseInt(formData.get("year")),
+                make: formData.get("make"),
+                model: formData.get("model"),
+                trim: formData.get("trim"),
+                madeIn: formData.get("madeIn"),
+                bodyType: formData.get("bodyType"),
+                bodySubtype: formData.get("bodySubtype"),
+                doors: formData.get("doors"),
+                engine: formData.get("engine"),
+                engineSize: formData.get("engineSize"),
+                engineBlock: formData.get("engineBlock"),
+                cylinders: formData.get("cylinders"),
+                fuelType: formData.get("fuelType"),
+                powertrain: formData.get("powertrain"),
+                transmission: formData.get("transmission"),
+                drivetrain: formData.get("drivetrain"),
+                highwayMpg: parseInt(formData.get("highwayMpg")) || 0,
+                cityMpg: parseInt(formData.get("cityMpg")) || 0,
+                height: formData.get("height"),
+                length: formData.get("length"),
+                width: formData.get("width"),
+                seating: parseInt(formData.get("seating")) || 0,
+                exteriorColor: formData.get("exteriorColor"),
+                interiorColor: formData.get("interiorColor"),
+                baseExteriorColor: formData.get("baseExteriorColor"),
+                baseInteriorColor: formData.get("baseInteriorColor"),
+                owners: parseInt(formData.get("owners")) || 0,
+                cleanTitle: formData.get("cleanTitle"),
+                phone: formData.get("phone"),
+                address: formData.get("address"),
+            };
+
+            // Create FormData for multipart request
+            const submitData = new FormData();
+            Object.entries(carData).forEach(([key, value]) => {
+                if (value !== null && value !== undefined && value !== "") {
+                    submitData.append(key, value);
+                }
+            });
+            
+            // Add files
+            imagePreviews.forEach(preview => {
+                submitData.append("photos", preview.file);
+            });
+
+            // SECURITY: User ID is extracted from JWT token on the backend
+            // No need to send sellerId in the request
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/cars/initiate`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`, // Send JWT token
+                    },
+                    body: submitData,
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to initiate car posting");
+            }
+
+            const result = await response.json();
+            
+            // Redirect to payment page with posting fee ID
+            navigate(`/order-summary?postingFeeId=${result.data.postingFeeId}`);
+        } catch (err) {
+            console.error("Error submitting form:", err);
+            setError(err.message || "An error occurred while submitting the form");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
     <div className="min-h-screen bg-background">
       {/* Main Form */}
@@ -34,7 +141,15 @@ export default function SellCar() {
           <span>/</span>
           <span className="text-white">Sell Car</span>
         </nav>
-        <form className="space-y-8">
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Images Section */}
           <section className="space-y-4">
             <h2 className="text-xl font-semibold">Images</h2>
@@ -461,8 +576,12 @@ export default function SellCar() {
 
           {/* Submit Button */}
           <div className="pt-6">
-            <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg rounded">
-              Sell My Car
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-6 text-lg rounded transition-all"
+            >
+              {loading ? "Processing..." : "Sell My Car"}
             </button>
           </div>
         </form>

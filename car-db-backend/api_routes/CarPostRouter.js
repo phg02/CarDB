@@ -5,7 +5,7 @@ import { verifyToken, isAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Configure multer for file uploads
+// Configure multer for file uploads with any field names
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/cars/');
@@ -25,6 +25,16 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Create separate uploads configurations
+const uploadAny = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max file size
+  },
+}).any(); // .any() accepts any field names
+
+// For routes that only handle photo uploads
 const upload = multer({
   storage,
   fileFilter,
@@ -36,11 +46,12 @@ const upload = multer({
 // ==================== CREATE ====================
 /**
  * Initiate car post (step 1: upload details and pay posting fee)
- * POST /api/cars/initiate/:sellerId
+ * POST /api/cars/initiate
  * Body: Car details + images as multipart/form-data
  * Returns: postingFeeId to use for VNPay payment
+ * SECURITY: Requires authenticated user - user ID taken from JWT token
  */
-router.post('/initiate/:sellerId', upload.array('photos', 10), carPostController.initiateCarPost);
+router.post('/initiate', verifyToken, uploadAny, carPostController.initiateCarPost);
 
 /**
  * Create car post after payment (step 2: called after successful VNPay payment)
@@ -70,10 +81,12 @@ router.get('/admin/all', verifyToken, isAdmin, carPostController.getAllCarPostsA
 router.get('/admin/unverified', verifyToken, isAdmin, carPostController.getUnverifiedCarPosts);
 
 /**
- * Get car posts by seller with pagination
- * GET /api/cars/seller/:sellerId?page=1&limit=10
+ * Get car posts by seller (authenticated user)
+ * GET /api/cars/seller?page=1&limit=10
+ * Returns: All car posts posted by the authenticated seller
+ * SECURITY: Requires authenticated user - retrieves their own posts only
  */
-router.get('/seller/:sellerId', carPostController.getCarPostsBySeller);
+router.get('/seller', verifyToken, carPostController.getCarPostsBySeller);
 
 /**
  * Get a single car post by ID

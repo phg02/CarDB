@@ -8,7 +8,7 @@ import {
   refreshToken,
   logout,
 } from '../controller/authController.js';
-import { verifyToken } from '../middleware/authMiddleware.js';
+import { verifyToken, verifyTokenOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -24,6 +24,13 @@ router.post('/register', sendOTP);
  * POST /api/auth/verify-otp
  */
 router.post('/verify-otp', verifyOTP);
+
+/**
+ * Resend OTP for authenticated user
+ * POST /api/auth/send-otp
+ * Requires: valid JWT token (allows unverified users)
+ */
+router.post('/send-otp', verifyTokenOnly, sendOTP);
 
 // ==================== LOGIN ====================
 /**
@@ -52,6 +59,13 @@ router.post('/reset-password', resetPassword);
  * Requires: refresh token in cookies
  */
 router.post('/refresh-token', refreshToken);
+
+/**
+ * Get user info (via refresh token)
+ * GET /api/auth/refresh
+ * Requires: refresh token in cookies
+ */
+router.get('/refresh', refreshToken);
 
 /**
  * Logout user

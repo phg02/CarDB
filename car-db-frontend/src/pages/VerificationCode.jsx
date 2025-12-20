@@ -1,8 +1,19 @@
 import { useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function VerificationCode(props) {
   const [otp, setOtp] = useState(Array(6).fill("")); // Array with 6 empty strings
   const inputRefs = useRef([]); // Array of refs for each input field
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
+  // Use email from auth context or props
+  const email = auth?.email || props?.email;
 
   const handleKeyDown = (e) => {
     if (
@@ -74,11 +85,67 @@ export default function VerificationCode(props) {
     });
   };
 
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    const otpCode = otp.join("");
+    
+    if (otpCode.length !== 6) {
+      toast.error("Please enter all 6 digits");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const res = await axios.post(
+        "/api/auth/verify-otp",
+        {
+          email,
+          otp: otpCode,
+        },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        toast.success("Email verified successfully!");
+        // Redirect to home or dashboard
+        navigate("/");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Verification failed";
+      toast.error(errorMessage);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!email) {
+      toast.error("Email not found");
+      return;
+    }
+
+    setIsResending(true);
+    try {
+      await axios.post(
+        "/api/auth/send-otp",
+        { email },
+        { withCredentials: true }
+      );
+      toast.success("OTP resent to your email");
+      setOtp(Array(6).fill("")); // Clear the OTP inputs
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to resend OTP";
+      toast.error(errorMessage);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   return (
     <section className="py-10 flex items-center justify-center">
       <div className="w-full max-w-md mx-auto p-6 text-center flex flex-col items-center justify-center space-y-4">
         <p className="text-xl font-semibold mb-1">Verification Code</p>
-        <p className="text-gray-500 mb-6">A code has been sent to {props.email}</p>
+        <p className="text-gray-500 mb-6">A code has been sent to {email}</p>
 
         <form id="otp-form" className="flex gap-3 justify-center mb-4">
           {otp.map((digit, index) => (
@@ -101,14 +168,23 @@ export default function VerificationCode(props) {
 
         <button
           type="button"
-          className="mt-2 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium"
+          onClick={handleVerify}
+          disabled={isVerifying}
+          className="mt-2 w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md font-medium"
         >
-          Verify
+          {isVerifying ? "Verifying..." : "Verify"}
         </button>
 
         <p className="mt-3 text-sm text-gray-500">
           Don't see code?{' '}
-          <button type="button" className="text-blue-600 underline">Resend code</button>
+          <button 
+            type="button" 
+            onClick={handleResendCode}
+            disabled={isResending}
+            className="text-blue-600 underline disabled:opacity-50"
+          >
+            {isResending ? "Sending..." : "Resend code"}
+          </button>
         </p>
       </div>
     </section>

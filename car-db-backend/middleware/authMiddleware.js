@@ -126,7 +126,7 @@ export const isVerified = (req, res, next) => {
  * Middleware to check if token is valid (without user verification requirement)
  * Use this for endpoints that don't require email verification
  */
-export const verifyTokenOnly = (req, res, next) => {
+export const verifyTokenOnly = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -157,8 +157,23 @@ export const verifyTokenOnly = (req, res, next) => {
       throw error;
     }
 
-    // Attach user ID to request
-    req.userId = decoded.userId;
+    // Find user and attach to request
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    req.user = {
+      userId: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      verified: user.verified,
+    };
+
     next();
   } catch (error) {
     console.error("Token verification error:", error);

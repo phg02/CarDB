@@ -7,10 +7,15 @@ import { sendOTPEmail, sendPasswordResetEmail } from "../services/emailTemplates
 // ==================== REGISTER WITH OTP ====================
 /**
  * Send OTP for email verification during registration
- * @route POST /api/auth/register
+ * Can be used for both registration (POST /api/auth/register) 
+ * and resending OTP for unverified users (POST /api/auth/send-otp)
+ * @route POST /api/auth/register or POST /api/auth/send-otp
  */
 export const sendOTP = async (req, res) => {
-  const { email } = req.body;
+  // Email can come from request body or from decoded JWT token (if authenticated)
+  const emailFromBody = req.body.email;
+  const emailFromToken = req.user?.email;
+  const email = emailFromBody || emailFromToken;
   
   if (!email) {
     return res.status(400).json({

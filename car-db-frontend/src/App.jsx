@@ -33,6 +33,8 @@ import {Login} from "./pages/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./components/authComponent/PrivateRoute";
+import { PublicRoute } from "./components/authComponent/PublicRoute";
 
 function App() {
   return (
@@ -53,35 +55,149 @@ function App() {
       <Routes>
         <Route path="*" element={<Navbar><NotFound /></Navbar>} />
 
-        {/* Public routes without navbar */}
-        <Route path="/register" element={<Navbar><Register /></Navbar>} />
-        <Route path="/login" element={<Navbar><Login /></Navbar>} />
-        <Route path="/forgot-password" element={<Navbar><ForgotPassword /></Navbar>} />
-        <Route path="/verification-code" element={<Navbar><VerificationCode /></Navbar>} />
+        {/* Public routes - Only accessible to unauthenticated users */}
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <Navbar><Register /></Navbar>
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Navbar><Login /></Navbar>
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/forgot-password" 
+          element={
+            <PublicRoute>
+              <Navbar><ForgotPassword /></Navbar>
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/verification-code" 
+          element={
+            <PublicRoute>
+              <Navbar><VerificationCode /></Navbar>
+            </PublicRoute>
+          } 
+        />
         
-        {/* User routes with navbar */}
+        {/* Common routes - Accessible to all users */}
         <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />
         <Route path="/car/:id" element={<Navbar><CarDetails /></Navbar>} />
         <Route path="/compare" element={<Navbar><CompareCar /></Navbar>} />
-        <Route path="/sellcar" element={<Navbar><SellCar /></Navbar>} />
-        <Route path="/order" element={<Navbar><OrderForm /></Navbar>} />
-        <Route path="/ordersummary" element={<Navbar><OrderSummary /></Navbar>} />
-        <Route path="/settings" element={<Navbar><Settings /></Navbar>} />
         <Route path="/news" element={<Navbar><News /></Navbar>} />
         <Route path="/news/:id" element={<Navbar><NewsDetail /></Navbar>} />
         <Route path="/faq" element={<Navbar><FAQ /></Navbar>} />
         <Route path="/vin-decoder" element={<Navbar><VinDecoder /></Navbar>} />
         <Route path="/" element={<Navbar><Homepage /></Navbar>} />
         
-        {/* Admin routes with admin navbar */}
-        <Route path="/approved-cars" element={<AdminNavbar><ApprovedCar /></AdminNavbar>} />
-        <Route path="/waitlist-cars" element={<AdminNavbar><WaitlistCar /></AdminNavbar>} />
-        <Route path="/bought-cars" element={<AdminNavbar><BoughtCars /></AdminNavbar>} />
-        <Route path="/approved-car/:id" element={<AdminNavbar><ApprovedCarDetail /></AdminNavbar>} />
-        <Route path="/waitlist-car/:id" element={<AdminNavbar><WaitlistCarDetail /></AdminNavbar>} />
-        <Route path="/bought-car/:id" element={<AdminNavbar><BoughtCarDetail /></AdminNavbar>} />
-        <Route path="/admin-news" element={<AdminNavbar><AdminNews /></AdminNavbar>} />
-        <Route path="/post-news" element={<AdminNavbar><PostNews /></AdminNavbar>} />
+        {/* Private routes - Only accessible to authenticated users */}
+        <Route 
+          path="/sellcar" 
+          element={
+            <PrivateRoute>
+              <Navbar><SellCar /></Navbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/order" 
+          element={
+            <PrivateRoute>
+              <Navbar><OrderForm /></Navbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/ordersummary" 
+          element={
+            <PrivateRoute>
+              <Navbar><OrderSummary /></Navbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <PrivateRoute>
+              <Navbar><Settings /></Navbar>
+            </PrivateRoute>
+          } 
+        />
+        
+        {/* Admin routes - Only accessible to authenticated admin users */}
+        <Route 
+          path="/approved-cars" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><ApprovedCar /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/waitlist-cars" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><WaitlistCar /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bought-cars" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><BoughtCars /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/approved-car/:id" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><ApprovedCarDetail /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/waitlist-car/:id" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><WaitlistCarDetail /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/bought-car/:id" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><BoughtCarDetail /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/admin-news" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><AdminNews /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/post-news" 
+          element={
+            <PrivateRoute>
+              <AdminNavbar><PostNews /></AdminNavbar>
+            </PrivateRoute>
+          } 
+        />
       </Routes>
       </AuthProvider>
     </BrowserRouter>

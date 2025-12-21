@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext"
@@ -9,9 +9,19 @@ import { api } from "../../lib/utils";
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const {setAuth} = useAuth();
   const navigate = useNavigate();
+
+  // Load saved email from localStorage on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("savedEmail");
+    if (savedEmail) {
+      setForm(prev => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -38,6 +48,13 @@ export const LoginForm = () => {
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
+    }
+
+    // Save or remove email from localStorage based on "remember me" checkbox
+    if (rememberMe) {
+      localStorage.setItem("savedEmail", form.email);
+    } else {
+      localStorage.removeItem("savedEmail");
     }
 
     try {
@@ -110,7 +127,12 @@ export const LoginForm = () => {
       </div>      
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-          <input type="checkbox" className="w-4 h-4 rounded border-border" />
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 rounded border-border" 
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />
           Remember me
         </label>
         <a href="#" className="text-sm text-primary hover:underline">

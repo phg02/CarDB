@@ -18,6 +18,7 @@ import NewsDetail from "./pages/NewsDetail";
 import FAQ from "./pages/FAQ";
 import Homepage from "./pages/Homepage";
 import VinDecoder from "./pages/VinDecoder";
+import PostingFeeReturn from "./pages/PostingFeeReturn";
 
 import AdminNavbar from './components/admin/AdminNavbar';
 import ApprovedCar from './admin-pages/ApprovedCars';
@@ -105,6 +106,14 @@ function App() {
           element={
             <PrivateRoute>
               <Navbar><SellCar /></Navbar>
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/posting-fee-return" 
+          element={
+            <PrivateRoute>
+              <Navbar><PostingFeeReturn /></Navbar>
             </PrivateRoute>
           } 
         />

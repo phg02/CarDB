@@ -2,6 +2,7 @@ import express from 'express';
 import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
 import Order from '../model/Order.js';
 import PostingFee from '../model/PostingFee.js';
+import CarPost from '../model/CarPost.js';
 import { updatePaymentDetailsVNPay } from '../controller/OrderController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
 import dotenv from 'dotenv';
@@ -111,6 +112,7 @@ router.post('/vnpay/create-checkout', verifyToken, async (req, res) => {
  */
 router.get('/vnpay/return', async (req, res) => {
   try {
+    console.log('VNPay return received:', req.query);
     const {
       vnp_ResponseCode,
       vnp_TxnRef,
@@ -121,8 +123,17 @@ router.get('/vnpay/return', async (req, res) => {
       vnp_PayDate,
     } = req.query;
 
-    // Extract ID from txnRef (format: id-timestamp)
-    const recordId = vnp_TxnRef.split('-')[0];
+    // Extract ID from txnRef (format: POSTFEE_id_timestamp or id-timestamp)
+    let recordId;
+    if (vnp_TxnRef.startsWith('POSTFEE_')) {
+      // Format: POSTFEE_id_timestamp
+      recordId = vnp_TxnRef.split('_')[1];
+    } else {
+      // Format: id-timestamp (for orders)
+      recordId = vnp_TxnRef.split('-')[0];
+    }
+
+    console.log('Extracted recordId:', recordId, 'from txnRef:', vnp_TxnRef);
 
     if (!recordId) {
       return res.status(400).json({
@@ -150,6 +161,7 @@ router.get('/vnpay/return', async (req, res) => {
 
     // Handle payment response
     if (vnp_ResponseCode === '00') {
+      console.log('Payment successful for record:', recordId, 'type:', recordType);
       // Payment successful
       record.paymentStatus = recordType === 'posting_fee' ? 'paid' : true;
       if (recordType === 'order') {
@@ -166,16 +178,29 @@ router.get('/vnpay/return', async (req, res) => {
 
       await record.save();
 
-      res.status(200).json({
-        success: true,
-        message: 'Payment successful',
-        data: {
-          recordId,
-          recordType,
-          paymentStatus: 'success',
-        },
-      });
+      // For posting fees, update the associated car post
+      if (recordType === 'posting_fee') {
+        try {
+          // Update the car post to mark it as verified/paid
+          await CarPost.findByIdAndUpdate(
+            record.carPost,
+            { verified: true },
+            { new: true }
+          );
+          console.log('Car post updated with payment confirmation');
+        } catch (error) {
+          console.error('Error updating car post after payment:', error);
+        }
+      }
+
+      // Redirect to frontend with success status
+      const redirectUrl = recordType === 'posting_fee' 
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/sellcar?payment_status=success`
+        : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`;
+
+      res.redirect(redirectUrl);
     } else {
+      console.log('Payment failed for record:', recordId, 'type:', recordType, 'response code:', vnp_ResponseCode);
       // Payment failed
       record.paymentStatus = recordType === 'posting_fee' ? 'failed' : false;
       if (recordType === 'order') {
@@ -190,16 +215,12 @@ router.get('/vnpay/return', async (req, res) => {
 
       await record.save();
 
-      res.status(200).json({
-        success: false,
-        message: 'Payment failed',
-        data: {
-          recordId,
-          recordType,
-          paymentStatus: 'failed',
-          responseCode: vnp_ResponseCode,
-        },
-      });
+      // Redirect to frontend with failed status
+      const redirectUrl = recordType === 'posting_fee'
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/sellcar?payment_status=failed`
+        : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failed`;
+
+      res.redirect(redirectUrl);
     }
   } catch (error) {
     console.error('Error processing VNPay return:', error);

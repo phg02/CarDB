@@ -93,9 +93,20 @@ export const initiateCarPost = async (req, res) => {
       photoLinks = uploadResult.uploadedUrls;
     }
 
-    // Create posting fee payment record
+    // Create the car post immediately (unpaid status)
+    const newCarPost = new CarPost({
+      seller: sellerId,
+      ...carData,
+      photo_links: photoLinks,
+      verified: false, // Not paid yet
+    });
+
+    await newCarPost.save();
+
+    // Create posting fee payment record for tracking payment
     const postingFee = new PostingFee({
       seller: sellerId,
+      carPost: newCarPost._id, // Link to the car post
       carData: carData,
       photoLinks: photoLinks,
       amount: POSTING_FEE,
@@ -106,8 +117,9 @@ export const initiateCarPost = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Posting initiated. Please proceed to payment.',
+      message: 'Car post created successfully. Please complete payment to publish your listing.',
       data: {
+        carPostId: newCarPost._id,
         postingFeeId: postingFee._id,
         amount: POSTING_FEE,
         message: 'You need to pay 15,000 VND posting fee to publish your car listing',
@@ -123,11 +135,6 @@ export const initiateCarPost = async (req, res) => {
   }
 };
 
-/**
- * Create a new car post (called after successful payment)
- * @route POST /api/cars
- * This is an INTERNAL endpoint - called by payment callback
- */
 export const createCarPost = async (req, res) => {
   try {
     const { postingFeeId } = req.body;
@@ -141,51 +148,48 @@ export const createCarPost = async (req, res) => {
     if (postingFee.paymentStatus !== 'paid') {
       return res.status(400).json({
         success: false,
-        message: 'Payment not completed. Cannot create post.',
+        message: 'Payment not completed. Cannot publish post.',
       });
     }
 
-    if (postingFee.carPost) {
+    if (!postingFee.carPost) {
+      // Create the actual car post from the posting fee data
+      const newCarPost = new CarPost({
+        seller: postingFee.seller,
+        ...postingFee.carData,
+        photo_links: postingFee.photoLinks,
+        verified: true, // Mark as paid and published
+      });
+
+      await newCarPost.save();
+
+      // Update posting fee to link to the created car post
+      postingFee.carPost = newCarPost._id;
+      await postingFee.save();
+
+      // Add to seller's selling list
+      await User.findByIdAndUpdate(
+        postingFee.seller,
+        { $push: { sellingList: newCarPost._id } },
+        { new: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Car post published successfully after payment',
+        data: newCarPost,
+      });
+    } else {
       return res.status(400).json({
         success: false,
-        message: 'Post already created for this payment',
-        data: { carPost: postingFee.carPost },
+        message: 'This posting fee has already been used to create a car post',
       });
     }
-
-    // Create car post from stored data
-    const newCarPost = new CarPost({
-      seller: postingFee.seller,
-      ...postingFee.carData,
-      photo_links: postingFee.photoLinks,
-    });
-
-    await newCarPost.save();
-
-    // Add to seller's selling list
-    await User.findByIdAndUpdate(
-      postingFee.seller,
-      { $push: { sellingList: newCarPost._id } },
-      { new: true }
-    );
-
-    // Update posting fee with created post reference
-    await PostingFee.findByIdAndUpdate(
-      postingFeeId,
-      { carPost: newCarPost._id },
-      { new: true }
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'Car post created successfully after payment',
-      data: newCarPost,
-    });
   } catch (error) {
-    console.error('Error creating car post:', error);
+    console.error('Error publishing car post:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create car post',
+      message: 'Failed to publish car post',
       error: error.message,
     });
   }
@@ -401,25 +405,50 @@ export const getCarPostsBySeller = async (req, res) => {
       });
     }
 
+    // Get all car posts by seller
     const carPosts = await CarPost.find({ seller: sellerId, isDeleted: false })
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit))
+      .populate('approvedBy', 'name')
       .lean();
 
-    const total = await CarPost.countDocuments({
+    // Get posting fees for these car posts to determine payment status
+    const carPostIds = carPosts.map(post => post._id);
+    const postingFees = await PostingFee.find({
       seller: sellerId,
-      isDeleted: false,
+      carPost: { $in: carPostIds }
+    }).lean();
+
+    // Create a map of carPost ID to posting fee
+    const postingFeeMap = {};
+    postingFees.forEach(fee => {
+      postingFeeMap[fee.carPost.toString()] = fee;
     });
+
+    // Add payment information to car posts
+    const postsWithPaymentInfo = carPosts.map(post => {
+      const postingFee = postingFeeMap[post._id.toString()];
+      return {
+        ...post,
+        paymentStatus: postingFee ? postingFee.paymentStatus : 'unknown',
+        postingFee: postingFee ? {
+          _id: postingFee._id,
+          amount: postingFee.amount
+        } : null
+      };
+    });
+
+    // Apply pagination
+    const totalItems = postsWithPaymentInfo.length;
+    const paginatedItems = postsWithPaymentInfo.slice(skip, skip + parseInt(limit));
 
     res.status(200).json({
       success: true,
       message: 'Seller car posts retrieved successfully',
-      data: carPosts,
+      data: paginatedItems,
       pagination: {
         currentPage: parseInt(page),
-        totalPages: Math.ceil(total / parseInt(limit)),
-        totalItems: total,
+        totalPages: Math.ceil(totalItems / parseInt(limit)),
+        totalItems: totalItems,
       },
     });
   } catch (error) {

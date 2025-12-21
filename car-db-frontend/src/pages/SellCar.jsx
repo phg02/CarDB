@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 export default function SellCar() {
     const [condition, setCondition] = useState("new");
@@ -9,7 +10,23 @@ export default function SellCar() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const { token } = useAuth();
+    const [searchParams] = useSearchParams();
+    const { auth } = useAuth();
+    const token = auth?.accessToken;
+
+    // Check for payment status on component mount
+    useEffect(() => {
+        const paymentStatus = searchParams.get('payment_status');
+        if (paymentStatus === 'failed') {
+            toast.error('Transaction cancelled or failed. Please try again.');
+        } else if (paymentStatus === 'success') {
+            toast.success('Payment successful! Your car listing has been published.');
+            // Optionally redirect to car listings after success
+            setTimeout(() => {
+                navigate('/carlisting');
+            }, 2000);
+        }
+    }, [searchParams, navigate]);
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -121,8 +138,30 @@ export default function SellCar() {
 
             const result = await response.json();
             
-            // Redirect to payment page with posting fee ID
-            navigate(`/order-summary?postingFeeId=${result.data.postingFeeId}`);
+            // Car post created successfully, now initiate VNPay payment
+            const paymentResponse = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/posting-fee/pay/checkout`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        postingFeeId: result.data.postingFeeId,
+                    }),
+                }
+            );
+
+            if (!paymentResponse.ok) {
+                const paymentError = await paymentResponse.json();
+                throw new Error(paymentError.message || "Failed to initiate payment");
+            }
+
+            const paymentResult = await paymentResponse.json();
+            
+            // Redirect to VNPay payment page
+            window.location.href = paymentResult.data.url;
         } catch (err) {
             console.error("Error submitting form:", err);
             setError(err.message || "An error occurred while submitting the form");

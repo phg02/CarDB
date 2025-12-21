@@ -2,21 +2,12 @@ import express from 'express';
 import PostingFee from '../model/PostingFee.js';
 import { createCarPost } from '../controller/CarPostController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
-import { VNPay } from 'vnpay';
+import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const postingFeeRouter = express.Router();
-
-// Initialize VNPay
-const vnpayInstance = new VNPay({
-  tmnCode: process.env.VNPAY_TMN_CODE,
-  hashSecret: process.env.VNPAY_HASH_SECRET,
-  vnpayHost: process.env.VNPAY_HOST || 'https://sandbox.vnpayment.vn',
-  testMode: true,
-  hashAlgorithm: 'SHA512',
-});
 
 // GET posting fee info
 postingFeeRouter.get('/:postingFeeId', verifyToken, async (req, res) => {
@@ -84,13 +75,29 @@ postingFeeRouter.post('/pay/checkout', verifyToken, async (req, res) => {
     // Generate unique transaction reference
     const txnRef = `POSTFEE_${postingFee._id}_${Date.now()}`;
 
+    // Create VNPay instance for this request
+    const vnpay = new VNPay({
+      tmnCode: process.env.VNPAY_TMN_CODE,
+      secureSecret: process.env.VNPAY_HASH_SECRET,
+      vnpayHost: process.env.VNPAY_HOST || 'https://sandbox.vnpayment.vn',
+      testMode: process.env.NODE_ENV !== 'production',
+      hashAlgorithm: 'SHA512',
+      loggerFn: ignoreLogger,
+    });
+
+    const createDate = new Date();
+
     // Build payment URL
-    const paymentUrl = vnpayInstance.buildPaymentUrl({
+    const paymentUrl = await vnpay.buildPaymentUrl({
+      vnp_Amount: postingFee.amount,
+      vnp_IpAddr: req.ip || '127.0.0.1',
       vnp_TxnRef: txnRef,
       vnp_OrderInfo: `Posting Fee - Car Listing`,
-      vnp_Amount: postingFee.amount,
-      vnp_ReturnUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/posting-fee-return`,
-      vnp_IpAddr: req.ip,
+      vnp_OrderType: ProductCode.Other,
+      vnp_Locale: VnpLocale.VN,
+      vnp_ReturnUrl: `http://localhost:3000/api/payments/vnpay/return`,
+      vnp_CreateDate: dateFormat(createDate),
+      vnp_ExpireDate: dateFormat(new Date(createDate.getTime() + 15 * 60 * 1000)), // 15 minutes
     });
 
     // Store transaction ref in posting fee
@@ -114,102 +121,6 @@ postingFeeRouter.post('/pay/checkout', verifyToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to create payment URL',
-      error: error.message,
-    });
-  }
-});
-
-// Handle VNPay return for posting fee
-postingFeeRouter.get('/pay/return', async (req, res) => {
-  try {
-    const vnp_ResponseCode = req.query.vnp_ResponseCode;
-    const vnp_TxnRef = req.query.vnp_TxnRef;
-    const vnp_Amount = req.query.vnp_Amount;
-    const vnp_TransactionNo = req.query.vnp_TransactionNo;
-    const vnp_BankCode = req.query.vnp_BankCode;
-    const vnp_PayDate = req.query.vnp_PayDate;
-
-    // Extract posting fee ID from transaction ref
-    // Format: POSTFEE_{postingFeeId}_{timestamp}
-    const postingFeeId = vnp_TxnRef.split('_')[1];
-
-    const postingFee = await PostingFee.findById(postingFeeId);
-
-    if (!postingFee) {
-      return res.status(404).json({
-        success: false,
-        message: 'Posting fee not found',
-      });
-    }
-
-    if (vnp_ResponseCode === '00') {
-      // Payment successful
-      await PostingFee.findByIdAndUpdate(
-        postingFeeId,
-        {
-          paymentStatus: 'paid',
-          'paymentDetails.responseCode': vnp_ResponseCode,
-          'paymentDetails.transactionId': vnp_TransactionNo,
-          'paymentDetails.bankCode': vnp_BankCode,
-          'paymentDetails.paymentTime': new Date(),
-        },
-        { new: true }
-      );
-
-      // Auto-create the car post after payment
-      try {
-        await createCarPost(
-          {
-            body: { postingFeeId },
-          },
-          {
-            status: () => ({
-              json: (response) => {
-                console.log('Car post created:', response);
-              },
-            }),
-          }
-        );
-      } catch (error) {
-        console.error('Error creating car post after payment:', error);
-        // Continue anyway - user can retry
-      }
-
-      res.status(200).json({
-        success: true,
-        message: 'Payment successful',
-        data: {
-          postingFeeId,
-          paymentStatus: 'paid',
-          responseCode: vnp_ResponseCode,
-        },
-      });
-    } else {
-      // Payment failed
-      await PostingFee.findByIdAndUpdate(
-        postingFeeId,
-        {
-          paymentStatus: 'failed',
-          'paymentDetails.responseCode': vnp_ResponseCode,
-        },
-        { new: true }
-      );
-
-      res.status(400).json({
-        success: false,
-        message: `Payment failed. Code: ${vnp_ResponseCode}`,
-        data: {
-          postingFeeId,
-          paymentStatus: 'failed',
-          responseCode: vnp_ResponseCode,
-        },
-      });
-    }
-  } catch (error) {
-    console.error('Error handling posting fee return:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error processing payment return',
       error: error.message,
     });
   }

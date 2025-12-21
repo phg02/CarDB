@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
   const navigate = useNavigate();
+  const { auth } = useAuth();
   const [showNotification, setShowNotification] = useState(false);
+  const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [deliveryStatus, setDeliveryStatus] = useState(() => {
     try {
       const store = JSON.parse(localStorage.getItem('boughtCarsStatus') || '{}');
@@ -14,6 +17,12 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
   });
 
   const handleBuy = () => {
+    // If not authenticated, show a login notification
+    if (!auth?.accessToken) {
+      setShowLoginNotification(true);
+      setTimeout(() => setShowLoginNotification(false), 3000);
+      return;
+    }
     // navigate to the OrderForm page
     navigate('/order');
   };
@@ -46,6 +55,12 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
       {showNotification && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-yellow-500 text-gray-900 px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
           You've chosen this car for comparison already
+        </div>
+      )}
+      {showLoginNotification && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
+          You need to login before buying.
+          <button onClick={() => navigate('/login')} className="underline ml-2">Login</button>
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

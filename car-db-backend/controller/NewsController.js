@@ -53,8 +53,16 @@ export const createNews = async (req, res) => {
       });
     }
 
-    // Upload thumbnail if provided
+    // Process images array - first image is the thumbnail
+    let imagesArray = Array.isArray(images) ? images : [];
     let thumbnailUrl = null;
+
+    // Use first image from images array as thumbnail
+    if (imagesArray.length > 0) {
+      thumbnailUrl = imagesArray[0];
+    }
+
+    // If thumbnail file is uploaded via multipart, it overrides the images array thumbnail
     if (req.file) {
       const validation = validateImageFile(req.file);
       if (!validation.success) {
@@ -80,7 +88,7 @@ export const createNews = async (req, res) => {
       title: title.trim(),
       content: content.trim(),
       thumbnail: thumbnailUrl,
-      images: Array.isArray(images) ? images : [],
+      images: imagesArray,
       author: adminId,
     });
 
@@ -320,10 +328,14 @@ export const updateNews = async (req, res) => {
     if (images !== undefined) {
       if (Array.isArray(images)) {
         news.images = images;
+        // Update thumbnail from first image in array
+        if (images.length > 0) {
+          news.thumbnail = images[0];
+        }
       }
     }
 
-    // Upload new thumbnail if provided
+    // Upload new thumbnail file if provided (overrides images array thumbnail)
     if (req.file) {
       const validation = validateImageFile(req.file);
       if (!validation.success) {

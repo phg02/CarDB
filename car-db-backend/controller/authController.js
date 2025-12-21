@@ -87,10 +87,20 @@ export const sendOTP = async (req, res) => {
 export const verifyOTP = async (req, res) => {
   const { email, otp, name, phone, password } = req.body;
 
-  if (!email || !otp || !name || !phone || !password) {
+  if (!email || !otp) {
+    console.log('Missing required fields: email or otp');
     return res.status(400).json({
       success: false,
-      message: "Please provide all required fields",
+      message: "Email and OTP are required",
+    });
+  }
+
+  // For registration verification, require additional fields
+  const isRegistration = name && phone && password;
+  if (isRegistration && (!name || !phone || !password)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide all required fields for registration",
     });
   }
 
@@ -100,7 +110,7 @@ export const verifyOTP = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found. Please send OTP first",
+        message: `No account found for ${email}. Please register first.`,
       });
     }
 
@@ -113,39 +123,61 @@ export const verifyOTP = async (req, res) => {
     }
 
     // Verify OTP
-    if (user.otp !== otp) {
+    if (user.otp !== otp && user.otp !== String(otp)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP",
+        message: "Invalid OTP. Please check the code and try again",
       });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Handle registration completion if additional data is provided
+    if (isRegistration) {
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update user with registration details
-    user.name = name;
-    user.phone = phone;
-    user.password = hashedPassword;
-    user.verified = true;
-    user.otp = undefined; // Clear OTP
-    user.otpExpire = undefined; // Clear OTP expiry
+      // Update user with registration details
+      user.name = name;
+      user.phone = phone;
+      user.password = hashedPassword;
+      user.verified = true;
+      user.otp = undefined; // Clear OTP
+      user.otpExpire = undefined; // Clear OTP expiry
 
-    await user.save();
+      await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Email verified successfully. Registration complete",
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          verified: user.verified,
+      res.status(200).json({
+        success: true,
+        message: "Email verified successfully. Registration complete",
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            verified: user.verified,
+          },
         },
-      },
-    });
+      });
+    } else {
+      // Just verify email without completing registration
+      user.verified = true;
+      user.otp = undefined; // Clear OTP
+      user.otpExpire = undefined; // Clear OTP expiry
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Email verified successfully",
+        data: {
+          user: {
+            id: user._id,
+            email: user.email,
+            verified: user.verified,
+          },
+        },
+      });
+    }
   } catch (error) {
     console.error("Error verifying OTP:", error);
     res.status(500).json({

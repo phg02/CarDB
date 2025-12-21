@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { api } from "../../lib/utils";
 
 export default function PrivateRoute({ children, allowedRole}) {
     const { auth, loading } = useAuth();
@@ -18,14 +19,13 @@ export default function PrivateRoute({ children, allowedRole}) {
         if (sendingOtp) return; // Prevent duplicate requests
         setSendingOtp(true);
         try {
-            const response = await axios.post(
-                "/api/auth/send-otp",
+            const response = await api.post(
+                "/auth/send-otp",
                 { email: auth.email },
                 { 
                     headers: {
                         Authorization: `Bearer ${auth.accessToken}`
-                    },
-                    withCredentials: true 
+                    }
                 }
             );
             console.log("OTP sent:", response.data);

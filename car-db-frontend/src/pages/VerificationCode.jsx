@@ -1,19 +1,23 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import { api } from "../lib/utils";
 
 export default function VerificationCode(props) {
   const [otp, setOtp] = useState(Array(6).fill("")); // Array with 6 empty strings
   const inputRefs = useRef([]); // Array of refs for each input field
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const { auth } = useAuth();
+  const { auth, setAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Use email from auth context or props
-  const email = auth?.email || props?.email;
+  // Get data from props or location state
+  const registrationData = location.state;
+  const email = (auth?.email || props?.email || registrationData?.email)?.trim();
+  const isRegistration = registrationData?.isRegistration;
 
   const handleKeyDown = (e) => {
     if (
@@ -96,19 +100,34 @@ export default function VerificationCode(props) {
 
     setIsVerifying(true);
     try {
-      const res = await axios.post(
-        "/api/auth/verify-otp",
-        {
-          email,
-          otp: otpCode,
-        },
-        { withCredentials: true }
+      let requestData = { email, otp: otpCode };
+      
+      // If this is registration verification, include registration data
+      if (isRegistration && registrationData) {
+        requestData = {
+          ...requestData,
+          name: registrationData.name,
+          phone: registrationData.phone,
+          password: registrationData.password
+        };
+      }
+
+      const res = await api.post(
+        "/auth/verify-otp",
+        requestData
       );
 
       if (res.data.success) {
-        toast.success("Email verified successfully!");
-        // Redirect to home or dashboard
-        navigate("/");
+        toast.success(isRegistration ? "Registration completed successfully!" : "Email verified successfully!");
+        
+        if (isRegistration) {
+          // For registration, set auth context and navigate to home
+          // Note: The backend doesn't return tokens on verify-otp, so user needs to login
+          navigate("/login");
+        } else {
+          // For other verifications, redirect to home or dashboard
+          navigate("/");
+        }
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Verification failed";
@@ -126,11 +145,11 @@ export default function VerificationCode(props) {
 
     setIsResending(true);
     try {
-      await axios.post(
-        "/api/auth/send-otp",
-        { email },
-        { withCredentials: true }
-      );
+      // For registration, use /register endpoint; for authenticated users, use /send-otp
+      const endpoint = isRegistration ? "/auth/register" : "/auth/send-otp";
+      const requestData = isRegistration ? { email } : { email }; // both endpoints expect email in body
+      
+      await api.post(endpoint, requestData);
       toast.success("OTP resent to your email");
       setOtp(Array(6).fill("")); // Clear the OTP inputs
     } catch (error) {

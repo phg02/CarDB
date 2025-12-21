@@ -3,6 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { api } from "../../lib/utils";
 
 export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -62,20 +63,25 @@ export const RegisterForm = () => {
     }
 
     try{
-      await axios.post(
-        "/api/auth/register",
+      const response = await api.post(
+        "/auth/register",
         {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          password: form.password
-        },
-        { withCredentials: true }
+          email: form.email.trim()
+        }
       );
-      toast.success("Registration successful! Please login.");
-      navigate("/login");
+      toast.success("OTP sent to your email. Please verify.");
+      // Navigate to verification page with registration data
+      navigate("/verification-code", { 
+        state: { 
+          email: form.email.trim(),
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          password: form.password,
+          isRegistration: true
+        } 
+      });
     }catch(err){
-      const errorMessage = err.response?.data?.message || "Registration failed";
+      const errorMessage = err.response?.data?.message || "Failed to send OTP";
       toast.error(errorMessage);
     }
   }

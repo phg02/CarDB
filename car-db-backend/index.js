@@ -15,7 +15,7 @@ dotenv.config();
 
 // CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 
@@ -41,6 +41,11 @@ app.use('/api/cars', carPostRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/payments', vnpayRouter);
 app.use('/api/posting-fee', postingFeeRouter);
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend is working!', timestamp: new Date().toISOString() });
+});
 
 app.listen(3000, () => {
       console.log('Server is running on port 3000');

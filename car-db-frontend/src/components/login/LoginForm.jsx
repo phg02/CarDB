@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { api } from "../../lib/utils";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,21 +41,25 @@ export const LoginForm = () => {
     }
 
     try {
-      const response = await axios.post(
-        "/api/auth/login",
+      const response = await api.post(
+        "/auth/login",
         {
           email: form.email,
           password: form.password,
-        },
-        { withCredentials: true }
+        }
       );
+      console.log('Login response:', response.data);
       setAuth({
         accessToken: response.data.accessToken,
-        role: response.data.user.role,
+        role: response.data.data.user.role,
+        verified: response.data.data.user.verified,
+        email: response.data.data.user.email
       });
+      console.log('Auth state set:', { accessToken: !!response.data.accessToken, role: response.data.data.user.role });
       toast.success("Login successful!");
       navigate("/");
     } catch (err) {
+      console.error('Login error:', err.response?.data);
       const errorMessage = err.response?.data?.message || "Login failed";
       toast.error(errorMessage);
     }

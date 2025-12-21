@@ -1,23 +1,32 @@
 import { createContext, useContext, useState, useEffect  } from "react";
 import axios from "axios";
+import { api } from "../lib/utils";
 const AuthContext = createContext();
 
 export const AuthProvider = ({children}) =>{
-    const [auth, setAuth] = useState({});
-    const [loading, setLoading] = useState(true);
+    const [auth, setAuth] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const updateAuth = (newAuth) => {
+        console.log('AuthContext - updating auth:', newAuth ? { hasToken: !!newAuth.accessToken, role: newAuth.role } : 'null');
+        setAuth(newAuth);
+    };
 
     useEffect(()=>{
         const checkAuth = async () =>{
             try{
-                const res = await axios.get("/api/auth/refresh", {withCredentials: true});
-                setAuth({
+                const res = await api.get("/auth/refresh");
+                const newAuth = {
                     accessToken: res.data.accessToken, 
-                    role: res.data.user.role,
-                    verified: res.data.user.verified,
-                    email: res.data.user.email
-                });
+                    role: res.data.data.user.role,
+                    verified: res.data.data.user.verified,
+                    email: res.data.data.user.email
+                };
+                console.log('AuthContext - refresh successful:', { hasToken: !!newAuth.accessToken, role: newAuth.role });
+                setAuth(newAuth);
             }
-            catch{
+            catch(error){
+                console.log('Auth check failed:', error.response?.data?.message || error.message);
                 setAuth(null);
             }
             finally{
@@ -27,7 +36,7 @@ export const AuthProvider = ({children}) =>{
         checkAuth();
     },[]);
     return (
-        <AuthContext.Provider value={{auth, setAuth, loading}}>
+        <AuthContext.Provider value={{auth, setAuth: updateAuth, loading}}>
             {children}
         </AuthContext.Provider>
     );

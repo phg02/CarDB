@@ -4,6 +4,10 @@ import{ NavLink } from 'react-router-dom';
 import Footer from './Footer';
 import Chatbot from './Chatbot';
 import logo from '../../assets/logo.svg';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../../lib/utils';
 
 const navigation = [
   { name: 'Car Listing', href: '/carlisting' },
@@ -18,14 +22,48 @@ function classNames(...classes) {
 }
 
 export default function Navbar(props) {
+  const { auth, setAuth, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout', {});
+      setAuth(null);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails, clear local auth state
+      setAuth(null);
+      navigate('/login');
+    }
+  };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <>
+        <Chatbot />
+        <div className="min-h-screen flex flex-col">
+          <div className="bg-gray-800 h-16 flex items-center justify-center">
+            <div className="text-white">Loading...</div>
+          </div>
+          <main className="flex-grow">
+            {props.children}
+          </main>
+          <Footer />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-    <Chatbot />
-    <div className="min-h-screen flex flex-col">
-    <Disclosure
-      as="nav"
-      className="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
-    >
+      <Chatbot />
+      <div className="min-h-screen flex flex-col">
+        <Disclosure
+          as="nav"
+          className="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
+        >
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -61,35 +99,51 @@ export default function Navbar(props) {
             </div>
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-           {/* Profile */}
-            <Menu as="div" className="relative ml-3">
-              <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">                
-                <img
-                  alt=""
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10"
-                />
-              </MenuButton>
-              <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                <MenuItem>
-                  <NavLink
-                    to="/settings"
-                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    Settings
-                  </NavLink>
-                </MenuItem>
-                <MenuItem>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                    onClick={() => console.log('Sign out')}
-                  >
-                    Sign out
-                  </button>
-                </MenuItem>
-              </MenuItems>
-            </Menu>
-
+            {/* Authentication buttons or Profile */}
+            {auth?.accessToken ? (
+              <Menu as="div" className="relative ml-3">
+                <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">                
+                  <img
+                    alt="Profile"
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10"
+                  />
+                </MenuButton>
+                <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                  <MenuItem>
+                    <NavLink
+                      to="/settings"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                    >
+                      Settings
+                    </NavLink>
+                  </MenuItem>
+                  <MenuItem>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                      onClick={handleLogout}
+                    >
+                      Sign out
+                    </button>
+                  </MenuItem>
+                </MenuItems>
+              </Menu>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <NavLink
+                  to="/login"
+                  className="text-gray-300 hover:bg-white/5 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                >
+                  Login
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-3 py-2 text-sm font-medium"
+                >
+                  Register
+                </NavLink>
+              </div>
+            )}
           </div>
         </div>
       </div>

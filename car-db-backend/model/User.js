@@ -74,6 +74,11 @@ const userSchema = new mongoose.Schema({
       ref: 'Payment',
     },
   ],
+  // Profile image
+  profileImage: {
+    type: String,
+    default: null,
+  },
   isDeleted: {
     type: Boolean,
     default: false,

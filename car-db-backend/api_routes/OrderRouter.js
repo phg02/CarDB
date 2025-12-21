@@ -23,18 +23,18 @@ router.post('/create', verifyToken, createOrder);
 
 // ==================== GET ORDERS ====================
 /**
- * Get order by ID
- * GET /api/orders/:id
- */
-router.get('/:id', getOrderById);
-
-/**
  * Get all orders for a customer
  * GET /api/orders/customer
  * Query: page, limit
  * SECURITY: Requires authenticated user - retrieves their own orders
  */
 router.get('/customer', verifyToken, getCustomerOrders);
+
+/**
+ * Get order by ID
+ * GET /api/orders/:id
+ */
+router.get('/:id', getOrderById);
 
 // ==================== UPDATE ORDER ====================
 /**

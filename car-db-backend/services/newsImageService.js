@@ -1,7 +1,82 @@
 import cloudinary from './cloudinaryConfig.js';
+import fs from 'fs';
+import path from 'path';
+
+// Constants for image validation
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MIN_FILE_SIZE = 1024; // 1KB
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 
 /**
- * Upload news thumbnail/cover image
+ * Validate image file before uploading
+ * @param {Object} file - File object from multer
+ * @returns {Object} - Validation result with success flag and message
+ */
+export const validateImageFile = (file) => {
+  try {
+    // Check if file exists
+    if (!file) {
+      return {
+        success: false,
+        message: 'No file provided',
+      };
+    }
+
+    // Check file size
+    if (file.size < MIN_FILE_SIZE) {
+      return {
+        success: false,
+        message: `File size too small (minimum: 1KB, got: ${(file.size / 1024).toFixed(2)}KB)`,
+      };
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        success: false,
+        message: `File size too large (maximum: 10MB, got: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`,
+      };
+    }
+
+    // Check MIME type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      return {
+        success: false,
+        message: `Invalid file type. Allowed types: ${ALLOWED_IMAGE_TYPES.join(', ')}`,
+      };
+    }
+
+    // Check file extension
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
+      return {
+        success: false,
+        message: `Invalid file extension. Allowed extensions: ${ALLOWED_EXTENSIONS.join(', ')}`,
+      };
+    }
+
+    // Check if file path exists (for buffer-based uploads)
+    if (file.path && !fs.existsSync(file.path)) {
+      return {
+        success: false,
+        message: 'File not found at specified path',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'File validation passed',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Validation error: ${error.message}`,
+    };
+  }
+};
+
+/**
+ * Upload news thumbnail/cover image to Cloudinary (without storing in repo)
  * @param {string} filePath - Local file path or URL
  * @param {string} newsId - News article ID for folder organization
  * @returns {Promise} - Upload response with secure_url and public_id
@@ -29,7 +104,19 @@ export const uploadNewsThumbnail = async (filePath, newsId) => {
       tags: ['news-thumbnail'],
     });
 
-    console.log('News thumbnail uploaded successfully:', result.secure_url);
+    // Delete local file after successful upload to Cloudinary
+    if (filePath.startsWith('/') || filePath.includes('uploads')) {
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log('Local file deleted after Cloudinary upload:', filePath);
+        }
+      } catch (deleteError) {
+        console.warn('Warning: Could not delete local file:', filePath, deleteError.message);
+      }
+    }
+
+    console.log('News thumbnail uploaded successfully to Cloudinary:', result.secure_url);
     return {
       success: true,
       url: result.secure_url,
@@ -38,6 +125,18 @@ export const uploadNewsThumbnail = async (filePath, newsId) => {
     };
   } catch (error) {
     console.error('Error uploading news thumbnail:', error);
+    
+    // Try to clean up local file on error
+    if (filePath && (filePath.startsWith('/') || filePath.includes('uploads'))) {
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (deleteError) {
+        console.warn('Could not delete file on error:', filePath);
+      }
+    }
+
     return {
       success: false,
       message: 'Failed to upload news thumbnail',
@@ -47,7 +146,7 @@ export const uploadNewsThumbnail = async (filePath, newsId) => {
 };
 
 /**
- * Upload inline news images (images within article content)
+ * Upload inline news images (images within article content) to Cloudinary
  * @param {string} filePath - Local file path or URL
  * @param {string} newsId - News article ID for folder organization
  * @returns {Promise} - Upload response with secure_url and public_id
@@ -75,7 +174,19 @@ export const uploadNewsImage = async (filePath, newsId) => {
       tags: ['news-image'],
     });
 
-    console.log('News image uploaded successfully:', result.secure_url);
+    // Delete local file after successful upload to Cloudinary
+    if (filePath.startsWith('/') || filePath.includes('uploads')) {
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log('Local file deleted after Cloudinary upload:', filePath);
+        }
+      } catch (deleteError) {
+        console.warn('Warning: Could not delete local file:', filePath, deleteError.message);
+      }
+    }
+
+    console.log('News image uploaded successfully to Cloudinary:', result.secure_url);
     return {
       success: true,
       url: result.secure_url,
@@ -84,6 +195,18 @@ export const uploadNewsImage = async (filePath, newsId) => {
     };
   } catch (error) {
     console.error('Error uploading news image:', error);
+    
+    // Try to clean up local file on error
+    if (filePath && (filePath.startsWith('/') || filePath.includes('uploads'))) {
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (deleteError) {
+        console.warn('Could not delete file on error:', filePath);
+      }
+    }
+
     return {
       success: false,
       message: 'Failed to upload news image',
@@ -93,23 +216,49 @@ export const uploadNewsImage = async (filePath, newsId) => {
 };
 
 /**
- * Upload multiple news images
- * @param {Array} filePaths - Array of local file paths or URLs
+ * Upload multiple news images with validation
+ * @param {Array} files - Array of file objects from multer
  * @param {string} newsId - News article ID for folder organization
  * @returns {Promise} - Array of upload responses
  */
-export const uploadMultipleNewsImages = async (filePaths, newsId) => {
+export const uploadMultipleNewsImages = async (files, newsId) => {
   try {
-    if (!filePaths || !Array.isArray(filePaths) || filePaths.length === 0) {
-      throw new Error('Missing required parameters: filePaths must be a non-empty array');
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      throw new Error('Missing required parameters: files must be a non-empty array');
     }
 
     if (!newsId) {
       throw new Error('Missing required parameter: newsId');
     }
 
-    const uploadPromises = filePaths.map((filePath) =>
-      uploadNewsImage(filePath, newsId)
+    // Validate all files before uploading
+    const validatedFiles = [];
+    const validationErrors = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const validation = validateImageFile(file);
+
+      if (validation.success) {
+        validatedFiles.push(file);
+      } else {
+        validationErrors.push({
+          filename: file.originalname,
+          error: validation.message,
+        });
+      }
+    }
+
+    // If no valid files, return error
+    if (validatedFiles.length === 0) {
+      throw new Error(
+        `All files failed validation: ${validationErrors.map((e) => e.error).join('; ')}`
+      );
+    }
+
+    // Upload all validated files
+    const uploadPromises = validatedFiles.map((file) =>
+      uploadNewsImage(file.path, newsId)
     );
 
     const results = await Promise.all(uploadPromises);
@@ -118,16 +267,18 @@ export const uploadMultipleNewsImages = async (filePaths, newsId) => {
     const failedUploads = results.filter((r) => !r.success);
 
     console.log(
-      `Uploaded ${successfulUploads.length} out of ${results.length} news images`
+      `Uploaded ${successfulUploads.length} out of ${validatedFiles.length} news images`
     );
 
     return {
-      success: failedUploads.length === 0,
+      success: failedUploads.length === 0 && successfulUploads.length > 0,
       totalUploaded: successfulUploads.length,
       totalFailed: failedUploads.length,
+      totalValidationErrors: validationErrors.length,
       uploadedUrls: successfulUploads.map((r) => r.url),
       results: successfulUploads,
       failedResults: failedUploads,
+      validationErrors: validationErrors,
     };
   } catch (error) {
     console.error('Error uploading multiple news images:', error);
@@ -172,4 +323,5 @@ export default {
   uploadNewsImage,
   uploadMultipleNewsImages,
   deleteNewsImage,
+  validateImageFile,
 };

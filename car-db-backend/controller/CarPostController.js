@@ -80,14 +80,14 @@ export const initiateCarPost = async (req, res) => {
     // Handle image uploads
     let photoLinks = [];
     if (photoFiles && photoFiles.length > 0) {
-      const filePaths = photoFiles.map((file) => file.path);
-      const uploadResult = await uploadMultipleCarPhotos(filePaths, sellerId);
+      const uploadResult = await uploadMultipleCarPhotos(photoFiles, sellerId);
 
       if (!uploadResult.success && uploadResult.uploadedUrls.length === 0) {
         return res.status(500).json({
           success: false,
           message: 'Failed to upload car photos',
           error: uploadResult.error,
+          validationErrors: uploadResult.validationErrors,
         });
       }
       photoLinks = uploadResult.uploadedUrls;

@@ -9,6 +9,8 @@ import carPostRouter from './api_routes/CarPostRouter.js';
 import orderRouter from './api_routes/OrderRouter.js';
 import vnpayRouter from './api_routes/VNPayRouter.js';
 import postingFeeRouter from './api_routes/PostingFeeRouter.js';
+import userRouter from './api_routes/UserRouter.js';
+import newsRouter from './api_routes/NewsRouter.js';
 
 const app = express();
 dotenv.config();
@@ -41,6 +43,8 @@ app.use('/api/cars', carPostRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/payments', vnpayRouter);
 app.use('/api/posting-fee', postingFeeRouter);
+app.use('/api/users', userRouter);
+app.use('/api/news', newsRouter);
 
 // Test endpoint
 app.get('/api/test', (req, res) => {

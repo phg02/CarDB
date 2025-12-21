@@ -2,11 +2,11 @@ import { useState } from "react";
 
 function PriceRange() {
   const MIN = 0;
-  const MAX = 1_000_000_000;
+  const MAX = 20_000_000_000;
   const STEP = 10000;
 
   const [min, setMin] = useState(0);
-  const [max, setMax] = useState(500_000_000);
+  const [max, setMax] = useState(20_000_000_000);
 
   // Format VND currency
   const formatVND = (v) =>

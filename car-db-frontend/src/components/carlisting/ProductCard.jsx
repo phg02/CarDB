@@ -1,10 +1,26 @@
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 function ProductCard({ children, to, ...props }) {
     const navigate = useNavigate();
+    const { auth } = useAuth();
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [showLoginNotification, setShowLoginNotification] = useState(false);
+    const [showWishlistNotification, setShowWishlistNotification] = useState(false);
+    const [wishlistMessage, setWishlistMessage] = useState('');
     const [searchParams] = useSearchParams();
     const isCompareMode = searchParams.get('mode') === 'compare';
     const linkTo = to || `/car/${props.id || 1}`;
+
+    useEffect(() => {
+        try {
+            const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            setIsWishlisted(existingWishlist.includes(props.id));
+        } catch (err) {
+            setIsWishlisted(false);
+        }
+    }, [props.id]);
 
     const handleAddToCompare = (e) => {
         e.preventDefault();
@@ -81,7 +97,32 @@ function ProductCard({ children, to, ...props }) {
 
     const handleAddToWishlist = (e) => {
         e.preventDefault();
-        alert('Added to wishlist!');
+        // Require login to add/remove wishlist
+        if (!auth?.accessToken) {
+            setShowLoginNotification(true);
+            setTimeout(() => setShowLoginNotification(false), 3000);
+            return;
+        }
+
+        try {
+            const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            const isAlready = existingWishlist.includes(props.id);
+            let newList;
+            if (isAlready) {
+                newList = existingWishlist.filter(id => id !== props.id);
+                setIsWishlisted(false);
+                setWishlistMessage('Removed from wishlist');
+            } else {
+                newList = [...existingWishlist, props.id];
+                setIsWishlisted(true);
+                setWishlistMessage('Added to wishlist');
+            }
+            localStorage.setItem('wishlist', JSON.stringify(newList));
+            setShowWishlistNotification(true);
+            setTimeout(() => setShowWishlistNotification(false), 2000);
+        } catch (err) {
+            console.error('Wishlist error', err);
+        }
     };
 
     const handleCardClick = (e) => {
@@ -164,6 +205,17 @@ function ProductCard({ children, to, ...props }) {
 
     return (
         <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col">
+            {showLoginNotification && (
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
+                    You need to login before adding to wishlist.
+                    <button onClick={() => navigate('/login')} className="underline ml-2">Login</button>
+                </div>
+            )}
+            {showWishlistNotification && (
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
+                    {wishlistMessage}
+                </div>
+            )}
             <div className="h-[12rem] w-full flex-shrink-0">
             <Link to={linkTo}>
                 <img className="mx-auto h-full w-full block rounded-[3px] object-cover" src={props.img} alt="" />
@@ -223,10 +275,16 @@ function ProductCard({ children, to, ...props }) {
                     onClick={handleAddToWishlist}
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-[3px] transition-colors text-sm font-medium"
                 >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                        className={`h-4 w-4 ${isWishlisted ? 'text-pink-600' : ''}`}
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        fill={isWishlisted ? 'currentColor' : 'none'}
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z" />
                     </svg>
-                    <span>Add to Wishlist</span>
+                    <span>{isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
                 </button>
                 <button
                     onClick={handleAddToCompare}

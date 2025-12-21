@@ -21,7 +21,7 @@ function OrderForm() {
     }
 
     return (
-        <div className="min-h-full mt-10 mx-4 lg:mt-20 lg:mx-32">
+        <div className="min-h-full mt-10 mx-4 lg:mt-20 lg:mx-50">
             <div className="pb-6">
                 <nav className="flex items-center text-sm text-gray-400 gap-2">
                     <Link to="/" className="hover:text-white transition-colors">

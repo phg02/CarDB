@@ -21,9 +21,9 @@ export default function SellCar() {
             toast.error('Transaction cancelled or failed. Please try again.');
         } else if (paymentStatus === 'success') {
             toast.success('Payment successful! Your car listing has been published.');
-            // Optionally redirect to car listings after success
+            // Redirect to settings page to view the listing
             setTimeout(() => {
-                navigate('/carlisting');
+                navigate('/settings?tab=my-listed-car');
             }, 2000);
         }
     }, [searchParams, navigate]);

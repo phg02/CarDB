@@ -14,7 +14,10 @@ export const AuthProvider = ({children}) =>{
 
     useEffect(()=>{
         const checkAuth = async () =>{
+            console.log('AuthContext - Starting auth check');
+            setLoading(true);
             try{
+                console.log('AuthContext - Making refresh request');
                 const res = await api.get("/auth/refresh");
                 const newAuth = {
                     accessToken: res.data.accessToken, 
@@ -26,10 +29,11 @@ export const AuthProvider = ({children}) =>{
                 setAuth(newAuth);
             }
             catch(error){
-                console.log('Auth check failed:', error.response?.data?.message || error.message);
+                console.log('AuthContext - Auth check failed:', error.response?.data?.message || error.message);
                 setAuth(null);
             }
             finally{
+                console.log('AuthContext - Auth check complete, setting loading to false');
                 setLoading(false);
             }
         }

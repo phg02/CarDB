@@ -80,7 +80,7 @@ router.post('/vnpay/create-checkout', verifyToken, async (req, res) => {
       vnp_OrderInfo: `CarDB Order #${orderId}`,
       vnp_OrderType: ProductCode.Other,
       vnp_Locale: VnpLocale.VN,
-      vnp_ReturnUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/vnpay-return`,
+      vnp_ReturnUrl: `http://localhost:3000/api/payments/vnpay/return`,
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(new Date(createDate.getTime() + 15 * 60 * 1000)), // 15 minutes
     });
@@ -194,8 +194,8 @@ router.get('/vnpay/return', async (req, res) => {
       }
 
       // Redirect to frontend with success status
-      const redirectUrl = recordType === 'posting_fee' 
-        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/sellcar?payment_status=success`
+      const redirectUrl = recordType === 'posting_fee'
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment_status=success`
         : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`;
 
       res.redirect(redirectUrl);
@@ -217,7 +217,7 @@ router.get('/vnpay/return', async (req, res) => {
 
       // Redirect to frontend with failed status
       const redirectUrl = recordType === 'posting_fee'
-        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/sellcar?payment_status=failed`
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment_status=failed`
         : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failed`;
 
       res.redirect(redirectUrl);

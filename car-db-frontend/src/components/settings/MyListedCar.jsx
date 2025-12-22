@@ -7,20 +7,32 @@ const MyListedCar = () => {
   const [listedCars, setListedCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { auth } = useAuth();
+  const { auth, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    fetchListedCars();
-  }, [auth]);
+    console.log('MyListedCar - useEffect triggered, authLoading:', authLoading, 'auth:', auth ? 'present' : 'null');
+    if (!authLoading) {
+      fetchListedCars();
+    }
+  }, [auth, authLoading]);
 
   const fetchListedCars = async () => {
+    console.log('MyListedCar - fetchListedCars called, authLoading:', authLoading, 'auth token:', auth?.accessToken ? 'present' : 'missing');
     try {
+      if (authLoading) {
+        console.log('MyListedCar - Still loading auth, skipping fetch');
+        // Still loading auth, don't fetch yet
+        return;
+      }
+
       if (!auth?.accessToken) {
+        console.log('MyListedCar - No auth token, setting error');
         setError('Please login to view your listed cars');
         setLoading(false);
         return;
       }
 
+      console.log('MyListedCar - Making API call to fetch cars');
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cars/seller`, {
         headers: {
           'Authorization': `Bearer ${auth.accessToken}`,
@@ -32,8 +44,10 @@ const MyListedCar = () => {
       }
 
       const result = await response.json();
+      console.log('MyListedCar - API call successful, cars:', result.data?.length || 0);
       setListedCars(result.data || []);
     } catch (err) {
+      console.log('MyListedCar - Error fetching cars:', err.message);
       setError(err.message);
       console.error('Error fetching listed cars:', err);
     } finally {
@@ -43,6 +57,7 @@ const MyListedCar = () => {
 
   const handlePayNow = async (carPost) => {
     try {
+      console.log('Pay Now clicked for car post:', carPost);
       if (!auth?.accessToken) {
         toast.error('Please login to proceed with payment');
         return;
@@ -52,6 +67,8 @@ const MyListedCar = () => {
         toast.error('Payment information not found for this post');
         return;
       }
+
+      console.log('Calling payment API with postingFeeId:', carPost.postingFee._id);
 
       // Initiate VNPay payment for the existing posting fee
       const paymentResponse = await fetch(
@@ -70,13 +87,20 @@ const MyListedCar = () => {
 
       if (!paymentResponse.ok) {
         const errorData = await paymentResponse.json();
+        console.error('Payment API error:', errorData);
         throw new Error(errorData.message || "Failed to initiate payment");
       }
 
       const paymentResult = await paymentResponse.json();
+      console.log('Payment API success:', paymentResult);
+      console.log('Payment result:', paymentResult);
+
+      if (!paymentResult.data || !paymentResult.data.url) {
+        throw new Error('Invalid payment response - no payment URL received');
+      }
 
       // Redirect to VNPay payment URL
-      window.location.href = paymentResult.data.paymentUrl;
+      window.location.href = paymentResult.data.url;
 
     } catch (err) {
       console.error('Error initiating payment:', err);
@@ -111,7 +135,7 @@ const MyListedCar = () => {
     };
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div>
         <h2 className="text-white text-2xl font-semibold mb-6">My Listed Cars</h2>

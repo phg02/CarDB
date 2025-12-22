@@ -48,6 +48,7 @@ postingFeeRouter.get('/:postingFeeId', verifyToken, async (req, res) => {
 postingFeeRouter.post('/pay/checkout', verifyToken, async (req, res) => {
   try {
     const { postingFeeId } = req.body;
+    console.log('PostingFee checkout called with:', req.body);
 
     if (!postingFeeId) {
       return res.status(400).json({
@@ -57,6 +58,7 @@ postingFeeRouter.post('/pay/checkout', verifyToken, async (req, res) => {
     }
 
     const postingFee = await PostingFee.findById(postingFeeId);
+    console.log('Found posting fee:', postingFee);
 
     if (!postingFee) {
       return res.status(404).json({
@@ -99,6 +101,8 @@ postingFeeRouter.post('/pay/checkout', verifyToken, async (req, res) => {
       vnp_CreateDate: dateFormat(createDate),
       vnp_ExpireDate: dateFormat(new Date(createDate.getTime() + 15 * 60 * 1000)), // 15 minutes
     });
+
+    console.log('Generated payment URL:', paymentUrl);
 
     // Store transaction ref in posting fee
     await PostingFee.findByIdAndUpdate(

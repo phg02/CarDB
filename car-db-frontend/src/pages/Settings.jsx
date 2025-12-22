@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, ShoppingBag, Heart, Car, LogOut, Trash2, Menu, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import EditProfile from '../components/settings/EditProfile';
 import PurchaseHistory from '../components/settings/PurchaseHistory';
 import FavoriteList from '../components/settings/FavoriteList';
@@ -8,6 +10,29 @@ import MyListedCar from '../components/settings/MyListedCar';
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('edit-profile');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Check for payment status and tab on component mount
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment_status');
+    const tab = searchParams.get('tab');
+
+    if (paymentStatus === 'success') {
+      toast.success('Payment successful! Your car listing has been published.');
+      setActiveTab('my-listed-car');
+      // Clear the query parameters
+      setSearchParams({});
+    } else if (paymentStatus === 'failed') {
+      toast.error('Payment failed. Please try again.');
+      setActiveTab('my-listed-car');
+      // Clear the query parameters
+      setSearchParams({});
+    } else if (tab === 'my-listed-car') {
+      setActiveTab('my-listed-car');
+      // Clear the query parameter
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   const menuItems = [
     { id: 'edit-profile', label: 'Edit profile', icon: User },

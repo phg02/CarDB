@@ -98,6 +98,7 @@ function App() {
         <Route path="/news/:id" element={<Navbar><NewsDetail /></Navbar>} />
         <Route path="/faq" element={<Navbar><FAQ /></Navbar>} />
         <Route path="/vin-decoder" element={<Navbar><VinDecoder /></Navbar>} />
+        <Route path="/settings" element={<Navbar><Settings /></Navbar>} />
         <Route path="/" element={<Navbar><Homepage /></Navbar>} />
         
         {/* Private routes - Only accessible to authenticated users */}
@@ -130,14 +131,6 @@ function App() {
           element={
             <PrivateRoute>
               <Navbar><OrderSummary /></Navbar>
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/settings" 
-          element={
-            <PrivateRoute>
-              <Navbar><Settings /></Navbar>
             </PrivateRoute>
           } 
         />

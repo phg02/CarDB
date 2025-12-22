@@ -105,6 +105,24 @@ export default function SellCar() {
                 address: formData.get("address"),
             };
 
+            // Basic validation
+            if (!carData.heading || carData.heading.trim() === "") {
+                setError("Please enter a title for your car listing");
+                return;
+            }
+            if (!carData.price || carData.price <= 0) {
+                setError("Please enter a valid price");
+                return;
+            }
+            if (carData.miles < 0) {
+                setError("Please enter valid mileage");
+                return;
+            }
+            if (imagePreviews.length === 0) {
+                setError("Please upload at least one image of your car");
+                return;
+            }
+
             // Create FormData for multipart request
             const submitData = new FormData();
             Object.entries(carData).forEach(([key, value]) => {
@@ -137,8 +155,10 @@ export default function SellCar() {
             }
 
             const result = await response.json();
+            console.log('Car post initiated successfully:', result);
             
             // Car post created successfully, now initiate VNPay payment
+            console.log('Initiating payment for postingFeeId:', result.data.postingFeeId);
             const paymentResponse = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/posting-fee/pay/checkout`,
                 {
@@ -155,12 +175,15 @@ export default function SellCar() {
 
             if (!paymentResponse.ok) {
                 const paymentError = await paymentResponse.json();
+                console.error('Payment initiation failed:', paymentError);
                 throw new Error(paymentError.message || "Failed to initiate payment");
             }
 
             const paymentResult = await paymentResponse.json();
+            console.log('Payment URL received:', paymentResult);
             
             // Redirect to VNPay payment page
+            console.log('Redirecting to:', paymentResult.data.url);
             window.location.href = paymentResult.data.url;
         } catch (err) {
             console.error("Error submitting form:", err);
@@ -293,16 +316,11 @@ export default function SellCar() {
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Make</label>
-                <select name="make" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="bmw">BMW</option>
-                  <option value="chevrolet">Chevrolet</option>
-                  <option value="ford">Ford</option>
-                  <option value="fiat">Fiat</option>
-                  <option value="honda">Honda</option>
-                  <option value="toyota">Toyota</option>
-                </select>
+                <label className="text-sm text-muted-foreground mb-2 block">Mileage</label>
+                <div className="relative">
+                  <input id="miles" name="miles" type="number" className="bg-input border-border pr-16 rounded w-full py-2 px-3" placeholder="0" />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">miles</span>
+                </div>
               </div>
             </div>
 

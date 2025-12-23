@@ -3,7 +3,6 @@ import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { api } from "../../lib/utils";
 
 export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -63,10 +62,13 @@ export const RegisterForm = () => {
     }
 
     try{
-      const response = await api.post(
-        "/auth/register",
+      const response = await axios.post(
+        "/api/auth/register",
         {
           email: form.email.trim()
+        },
+        {
+          withCredentials: true
         }
       );
       toast.success("OTP sent to your email. Please verify.");

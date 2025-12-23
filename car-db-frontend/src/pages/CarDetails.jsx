@@ -5,7 +5,7 @@ import CarImageGallery from '../components/cardetails/CarImageGallery';
 import CarPriceActions from '../components/cardetails/CarPriceActions';
 import CarSpecifications from '../components/cardetails/CarSpecifications';
 import DealerInfo from '../components/cardetails/DealerInfo';
-import { api } from '../lib/utils';
+import axios from 'axios';
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -24,7 +24,9 @@ const CarDetails = () => {
         setLoading(true);
         setError(null);
         
-        const response = await api.get(`/cars/${id}`);
+        const response = await axios.get(`/api/cars/${id}`, {
+          withCredentials: true
+        });
         
         if (response.data.success) {
           const car = response.data.data;

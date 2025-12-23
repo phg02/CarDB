@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { api } from "../lib/utils";
 
 export default function VerificationCode(props) {
   const [otp, setOtp] = useState(Array(6).fill("")); // Array with 6 empty strings
@@ -112,9 +111,12 @@ export default function VerificationCode(props) {
         };
       }
 
-      const res = await api.post(
-        "/auth/verify-otp",
-        requestData
+      const res = await axios.post(
+        "/api/auth/verify-otp",
+        requestData,
+        {
+          withCredentials: true
+        }
       );
 
       if (res.data.success) {
@@ -149,7 +151,9 @@ export default function VerificationCode(props) {
       const endpoint = isRegistration ? "/auth/register" : "/auth/send-otp";
       const requestData = isRegistration ? { email } : { email }; // both endpoints expect email in body
       
-      await api.post(endpoint, requestData);
+      await axios.post(endpoint, requestData, {
+        withCredentials: true
+      });
       toast.success("OTP resent to your email");
       setOtp(Array(6).fill("")); // Clear the OTP inputs
     } catch (error) {

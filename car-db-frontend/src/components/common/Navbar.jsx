@@ -7,7 +7,6 @@ import logo from '../../assets/logo.svg';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../lib/utils';
 
 const navigation = [
   { name: 'Car Listing', href: '/carlisting' },
@@ -27,7 +26,9 @@ export default function Navbar(props) {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/logout', {});
+      await axios.post('/api/auth/logout', {}, {
+        withCredentials: true
+      });
       setAuth(null);
       navigate('/login');
     } catch (error) {

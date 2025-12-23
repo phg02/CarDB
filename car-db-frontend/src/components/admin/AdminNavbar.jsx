@@ -5,7 +5,7 @@ import Footer from '../common/Footer';
 import Chatbot from '../common/Chatbot';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../lib/utils';
+import axios from 'axios';
 
 const navigation = [
   { name: 'Approved Cars', href: '/approved-cars' },
@@ -24,7 +24,9 @@ export default function AdminNavbar(props) {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/logout', {});
+      await axios.post('/api/auth/logout', {}, {
+        withCredentials: true
+      });
       setAuth(null);
       navigate('/login');
     } catch (error) {

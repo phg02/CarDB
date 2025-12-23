@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../lib/utils";
+import axios from "axios";
 import { toast } from "react-toastify";
 
 function OrderSummary() {
@@ -68,7 +68,8 @@ function OrderSummary() {
         });
 
         // Initiate car post
-        const response = await api.post('/cars/initiate', submitData, {
+        const response = await axios.post('/api/cars/initiate', submitData, {
+          withCredentials: true,
           headers: {
             "Authorization": `Bearer ${token}`,
           },
@@ -80,9 +81,10 @@ function OrderSummary() {
 
       // Initiate VNPay payment
       console.log('Initiating payment for postingFeeId:', postingFeeIdToUse);
-      const paymentResponse = await api.post('/posting-fee/pay/checkout', {
+      const paymentResponse = await axios.post('/api/posting-fee/pay/checkout', {
         postingFeeId: postingFeeIdToUse,
       }, {
+        withCredentials: true,
         headers: {
           "Authorization": `Bearer ${token}`,
         },

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect  } from "react";
 import axios from "axios";
-import { api } from "../lib/utils";
 const AuthContext = createContext();
 
 export const AuthProvider = ({children}) =>{
@@ -18,7 +17,9 @@ export const AuthProvider = ({children}) =>{
             setLoading(true);
             try{
                 console.log('AuthContext - Making refresh request');
-                const res = await api.get("/auth/refresh");
+                const res = await axios.get("/api/auth/refresh", {
+                    withCredentials: true
+                });
                 const newAuth = {
                     accessToken: res.data.accessToken, 
                     role: res.data.data.user.role,

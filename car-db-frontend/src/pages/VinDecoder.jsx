@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../lib/utils';
+import axios from 'axios';
 import '../index.css';
 
 function VinDecoder() {
@@ -22,7 +22,9 @@ function VinDecoder() {
     setLoading(true);
 
     try {
-      const response = await api.get(`/vin/decode/${vin.toUpperCase()}`);
+      const response = await axios.get(`/api/vin/decode/${vin.toUpperCase()}`, {
+        withCredentials: true
+      });
 
       if (response.data.success) {
         setResult(response.data.data);

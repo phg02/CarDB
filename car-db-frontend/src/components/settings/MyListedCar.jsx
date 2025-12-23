@@ -39,7 +39,7 @@ const MyListedCar = () => {
       }
 
       console.log('MyListedCar - Making API call to fetch cars');
-      const response = await api.get(`/cars/seller?page=${page}&limit=10`, {
+      const response = await api.get(`/cars/seller?page=${page}&limit=12`, {
         headers: {
           'Authorization': `Bearer ${auth.accessToken}`,
         },

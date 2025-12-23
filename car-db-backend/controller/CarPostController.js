@@ -499,7 +499,7 @@ export const getCarPostsBySeller = async (req, res) => {
   try {
     // Get user ID from authenticated token (secure method)
     const sellerId = req.user.userId;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 12 } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 

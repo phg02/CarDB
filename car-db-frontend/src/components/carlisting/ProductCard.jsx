@@ -204,7 +204,7 @@ function ProductCard({ children, to, ...props }) {
     const showActions = location.pathname === '/carlisting' || location.pathname.startsWith('/carlisting');
 
     return (
-        <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col">
+        <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col h-full">
             {showLoginNotification && (
                 <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
                     You need to login before adding to wishlist.
@@ -299,11 +299,9 @@ function ProductCard({ children, to, ...props }) {
             )}
 
             {/* CHILDREN EXTRA UI (admin delete button, etc.) */}
-            {children && (
-                <div className="mt-4">
-                    {children}
-                </div>
-            )}
+            <div className="mt-4 min-h-[3rem] flex items-end">
+                {children}
+            </div>
             
             </div>
         </div>

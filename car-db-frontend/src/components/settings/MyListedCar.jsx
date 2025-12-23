@@ -167,22 +167,21 @@ const MyListedCar = () => {
           <p className="text-gray-400 text-lg">You haven't listed any cars for sale yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {listedCars.map(car => {
             const formattedCar = formatCarData(car);
             return (
               <div key={car._id} className="relative">
-                <ProductCard {...formattedCar} />
-                {formattedCar.status === 'Pending Payment' && (
-                  <div className="mt-2 text-center">
+                <ProductCard {...formattedCar}>
+                  {formattedCar.status === 'Pending Payment' && (
                     <button
                       onClick={() => handlePayNow(car)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                       Pay Now ({car.postingFee ? car.postingFee.amount.toLocaleString() : '15,000'} đ)
                     </button>
-                  </div>
-                )}
+                  )}
+                </ProductCard>
               </div>
             );
           })}

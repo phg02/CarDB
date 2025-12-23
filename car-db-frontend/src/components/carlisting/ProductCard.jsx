@@ -299,7 +299,7 @@ function ProductCard({ children, to, ...props }) {
             )}
 
             {/* CHILDREN EXTRA UI (admin delete button, etc.) */}
-            <div className="mt-4 min-h-[3rem] flex items-end">
+            <div className={`mt-4 ${children ? 'min-h-[3rem]' : ''} flex items-end`}>
                 {children}
             </div>
             

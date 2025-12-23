@@ -399,15 +399,17 @@ export const getAllCarPostsAdmin = async (req, res) => {
 };
 
 /**
- * Get all unverified car posts (for admin review)
+ * Get all paid and unverified car posts (for admin review)
  * @route GET /api/cars/admin/unverified
+ * Shows posts that have been paid but not yet verified by admin
  */
 export const getUnverifiedCarPosts = async (req, res) => {
   try {
     const { page = 1, limit = 12, make, year } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const filter = { isDeleted: false, verified: false };
+    // Filter for paid (paymentStatus = 'paid') AND unverified (verified = false)
+    const filter = { isDeleted: false, paymentStatus: 'paid', verified: false };
 
     if (make) filter.make = { $regex: make, $options: 'i' };
     if (year) filter.year = parseInt(year);
@@ -422,7 +424,7 @@ export const getUnverifiedCarPosts = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Unverified car posts retrieved successfully',
+      message: 'Paid and unverified car posts retrieved successfully',
       data: carPosts,
       pagination: {
         currentPage: parseInt(page),

@@ -11,6 +11,8 @@ import {
   getCities,
   getSeats,
   getAllFilters,
+  getVietnamBrands,
+  getVietnamModels,
 } from '../controller/FilterController.js';
 
 const router = express.Router();
@@ -80,5 +82,17 @@ router.get('/cities', getCities);
  * GET /api/filters/seats
  */
 router.get('/seats', getSeats);
+
+/**
+ * Get all car brands available in Vietnam (for post creation)
+ * GET /api/filters/vietnam-brands
+ */
+router.get('/vietnam-brands', getVietnamBrands);
+
+/**
+ * Get all models for a specific brand in Vietnam (for post creation)
+ * GET /api/filters/vietnam-models/:brand
+ */
+router.get('/vietnam-models/:brand', getVietnamModels);
 
 export default router;

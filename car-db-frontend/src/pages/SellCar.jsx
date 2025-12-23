@@ -3,6 +3,7 @@ import { Upload, X } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { api } from "../lib/utils";
 
 export default function SellCar() {
     const [condition, setCondition] = useState("new");
@@ -138,53 +139,29 @@ export default function SellCar() {
 
             // SECURITY: User ID is extracted from JWT token on the backend
             // No need to send sellerId in the request
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/cars/initiate`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`, // Send JWT token
-                    },
-                    body: submitData,
-                }
-            );
+            const response = await api.post('/cars/initiate', submitData, {
+                headers: {
+                    "Authorization": `Bearer ${token}`, // Send JWT token
+                },
+            });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to initiate car posting");
-            }
-
-            const result = await response.json();
-            console.log('Car post initiated successfully:', result);
+            console.log('Car post initiated successfully:', response.data);
             
             // Car post created successfully, now initiate VNPay payment
-            console.log('Initiating payment for postingFeeId:', result.data.postingFeeId);
-            const paymentResponse = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/posting-fee/pay/checkout`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        postingFeeId: result.data.postingFeeId,
-                    }),
-                }
-            );
+            console.log('Initiating payment for postingFeeId:', response.data.data.postingFeeId);
+            const paymentResponse = await api.post('/posting-fee/pay/checkout', {
+                postingFeeId: response.data.data.postingFeeId,
+            }, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
 
-            if (!paymentResponse.ok) {
-                const paymentError = await paymentResponse.json();
-                console.error('Payment initiation failed:', paymentError);
-                throw new Error(paymentError.message || "Failed to initiate payment");
-            }
-
-            const paymentResult = await paymentResponse.json();
-            console.log('Payment URL received:', paymentResult);
+            console.log('Payment URL received:', paymentResponse.data);
             
             // Redirect to VNPay payment page
-            console.log('Redirecting to:', paymentResult.data.url);
-            window.location.href = paymentResult.data.url;
+            console.log('Redirecting to:', paymentResponse.data.data.url);
+            window.location.href = paymentResponse.data.data.url;
         } catch (err) {
             console.error("Error submitting form:", err);
             setError(err.message || "An error occurred while submitting the form");

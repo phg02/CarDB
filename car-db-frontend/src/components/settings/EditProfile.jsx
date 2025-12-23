@@ -1,20 +1,61 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../lib/utils';
+import { toast } from 'react-toastify';
 
 const EditProfile = () => {
+  const { auth } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [username, setUsername] = useState('JohnDoe123');
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    profileImage: null
+  });
   const [profileImage, setProfileImage] = useState(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    username: 'JohnDoe123',
+    username: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!auth?.accessToken) return;
+
+      try {
+        const response = await api.get('/users/profile', {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+          }
+        });
+        const user = response.data.data.user;
+        setUserData({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          profileImage: user.profileImage || null
+        });
+        setFormData(prev => ({
+          ...prev,
+          username: user.name || ''
+        }));
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        toast.error('Failed to load user profile');
+      }
+    };
+
+    fetchUserProfile();
+  }, [auth]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -27,19 +68,113 @@ const EditProfile = () => {
     }
   };
 
-  const handleEditProfile = () => {
-    setUsername(formData.username);
-    setShowEditModal(false);
+  const handleProfileImageUpload = async (file) => {
+    const formDataObj = new FormData();
+    formDataObj.append('profileImage', file);
+
+    const response = await api.post('/users/profile-image', formDataObj, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${auth.accessToken}`
+      },
+    });
+
+    // Update userData with new profile image URL
+    setUserData(prev => ({
+      ...prev,
+      profileImage: response.data.data.profileImage
+    }));
+    setProfileImage(null); // Clear the preview
+    return response;
   };
 
-  const handleChangePassword = () => {
-    if (formData.newPassword !== formData.confirmPassword) {
-      alert('Passwords do not match');
+  const handleEditProfile = async () => {
+    if (!formData.username.trim()) {
+      toast.error('Username cannot be empty');
       return;
     }
-    console.log('Password changed successfully');
-    setShowPasswordModal(false);
-    setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
+
+    setLoading(true);
+    try {
+      // Update profile name
+      await api.patch('/users/profile', {
+        name: formData.username.trim()
+      }, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`
+        }
+      });
+
+      // Update local state
+      setUserData(prev => ({
+        ...prev,
+        name: formData.username.trim()
+      }));
+
+      // If there's a new profile image to upload
+      if (profileImage && profileImage.startsWith('data:')) {
+        // Convert data URL to file
+        const response = await fetch(profileImage);
+        const blob = await response.blob();
+        const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
+        
+        await handleProfileImageUpload(file);
+      }
+
+      toast.success('Profile updated successfully');
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to update profile';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    if (formData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.post('/users/change-password', {
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword
+      }, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`
+        }
+      });
+
+      toast.success('Password changed successfully');
+      setShowPasswordModal(false);
+      setFormData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+    } catch (error) {
+      console.error('Error changing password:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to change password';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,17 +186,21 @@ const EditProfile = () => {
         <div className="flex items-center gap-4 sm:gap-6">
           {/* Avatar */}
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-xl sm:text-2xl font-semibold flex-shrink-0 overflow-hidden">
-            {profileImage ? (
-              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+            {userData.profileImage || profileImage ? (
+              <img 
+                src={profileImage || userData.profileImage} 
+                alt="Profile" 
+                className="w-full h-full object-cover" 
+              />
             ) : (
-              username.charAt(0).toUpperCase()
+              userData.name ? userData.name.charAt(0).toUpperCase() : 'U'
             )}
           </div>
           
           {/* Username Block */}
           <div>
             <p className="text-gray-400 text-xs sm:text-sm mb-1">Username</p>
-            <p className="text-white text-base sm:text-lg font-medium">{username}</p>
+            <p className="text-white text-base sm:text-lg font-medium">{userData.name || 'Loading...'}</p>
           </div>
         </div>
 
@@ -110,10 +249,10 @@ const EditProfile = () => {
                   className="hidden"
                 />
                 <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-3xl font-semibold overflow-hidden">
-                  {profileImage ? (
-                    <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  {profileImage || userData.profileImage ? (
+                    <img src={profileImage || userData.profileImage} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    formData.username.charAt(0).toUpperCase()
+                    formData.username ? formData.username.charAt(0).toUpperCase() : 'U'
                   )}
                 </div>
                 {/* Upload Icon Overlay */}
@@ -137,9 +276,10 @@ const EditProfile = () => {
             {/* Edit Button */}
             <button
               onClick={handleEditProfile}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-[3px] transition-colors font-medium"
+              disabled={loading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-[3px] transition-colors font-medium"
             >
-              Edit
+              {loading ? 'Updating...' : 'Edit'}
             </button>
           </div>
         </div>
@@ -223,9 +363,10 @@ const EditProfile = () => {
             {/* Save Button */}
             <button
               onClick={handleChangePassword}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-[3px] transition-colors font-medium"
+              disabled={loading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-[3px] transition-colors font-medium"
             >
-              Save
+              {loading ? 'Changing...' : 'Save'}
             </button>
           </div>
         </div>

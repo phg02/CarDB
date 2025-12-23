@@ -13,6 +13,7 @@ import userRouter from './api_routes/UserRouter.js';
 import newsRouter from './api_routes/NewsRouter.js';
 import commentRouter from './api_routes/CommentRouter.js';
 import filterRouter from './api_routes/FilterRouter.js';
+import chatbotRouter from './api_routes/ChatbotRouter.js';
 
 const app = express();
 dotenv.config();
@@ -49,6 +50,7 @@ app.use('/api/users', userRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/filters', filterRouter);
+app.use('/api/chatbot', chatbotRouter);
 
 // Test endpoint
 app.get('/api/test', (req, res) => {

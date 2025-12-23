@@ -137,7 +137,7 @@ function App() {
           } 
         />
         <Route 
-          path="/ordersummary" 
+          path="/order-summary" 
           element={
             <PrivateRoute>
               <NavbarWrapper><OrderSummary /></NavbarWrapper>

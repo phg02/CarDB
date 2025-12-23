@@ -10,6 +10,13 @@ export default function SellCar() {
     const [imagePreviews, setImagePreviews] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [makes, setMakes] = useState([]);
+    const [models, setModels] = useState([]);
+    const [engines, setEngines] = useState([]);
+    const [countries, setCountries] = useState([]);
+    const [bodyTypes, setBodyTypes] = useState([]);
+    const [fuelTypes, setFuelTypes] = useState([]);
+    const [selectedMake, setSelectedMake] = useState("");
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { auth } = useAuth();
@@ -28,6 +35,79 @@ export default function SellCar() {
             }, 2000);
         }
     }, [searchParams, navigate]);
+
+    // Fetch makes, engines, and countries on component mount
+    useEffect(() => {
+        const fetchMakes = async () => {
+            try {
+                const response = await api.get('/cars/makes');
+                setMakes(response.data.data);
+            } catch (error) {
+                console.error('Error fetching makes:', error);
+            }
+        };
+
+        const fetchEngines = async () => {
+            try {
+                const response = await api.get('/cars/engines');
+                setEngines(response.data.data);
+            } catch (error) {
+                console.error('Error fetching engines:', error);
+            }
+        };
+
+        const fetchCountries = async () => {
+            try {
+                const response = await api.get('/cars/countries');
+                setCountries(response.data.data);
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+            }
+        };
+
+        const fetchBodyTypes = async () => {
+            try {
+                const response = await api.get('/cars/body-types');
+                setBodyTypes(response.data.data);
+            } catch (error) {
+                console.error('Error fetching body types:', error);
+            }
+        };
+
+        const fetchFuelTypes = async () => {
+            try {
+                const response = await api.get('/cars/fuel-types');
+                setFuelTypes(response.data.data);
+            } catch (error) {
+                console.error('Error fetching fuel types:', error);
+            }
+        };
+
+        fetchMakes();
+        fetchEngines();
+        fetchCountries();
+        fetchBodyTypes();
+        fetchFuelTypes();
+    }, []);
+
+    // Fetch models when make changes
+    useEffect(() => {
+        const fetchModels = async () => {
+            if (!selectedMake) {
+                setModels([]);
+                return;
+            }
+            try {
+                const response = await api.get(`/cars/models/${selectedMake}`);
+                setModels(response.data.data);
+            } catch (error) {
+                console.error('Error fetching models:', error);
+                setModels([]);
+            }
+        };
+
+        fetchModels();
+    }, [selectedMake]);
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -83,18 +163,17 @@ export default function SellCar() {
                 body_subtype: formData.get("body_subtype"),
                 doors: formData.get("doors"),
                 engine: formData.get("engine"),
-                engine_size: formData.get("engine_size"),
+                engine_size: parseFloat(formData.get("engine_size")) || 0,
                 engine_block: formData.get("engine_block"),
-                cylinders: formData.get("cylinders"),
+                cylinders: parseInt(formData.get("cylinders")) || 0,
                 fuel_type: formData.get("fuel_type"),
-                powertrain: formData.get("powertrain"),
                 transmission: formData.get("transmission"),
                 drivetrain: formData.get("drivetrain"),
                 highway_mpg: parseInt(formData.get("highway_mpg")) || 0,
                 city_mpg: parseInt(formData.get("city_mpg")) || 0,
-                overall_height: formData.get("overall_height"),
-                overall_length: formData.get("overall_length"),
-                overall_width: formData.get("overall_width"),
+                overall_height: parseFloat(formData.get("overall_height")) || 0,
+                overall_length: parseFloat(formData.get("overall_length")) || 0,
+                overall_width: parseFloat(formData.get("overall_width")) || 0,
                 std_seating: parseInt(formData.get("std_seating")) || 0,
                 exterior_color: formData.get("exterior_color"),
                 interior_color: formData.get("interior_color"),
@@ -131,51 +210,13 @@ export default function SellCar() {
                 return;
             }
 
-            // Create FormData for multipart request
-            const submitData = new FormData();
-            Object.entries(carData).forEach(([key, value]) => {
-                if (key === 'dealer' && typeof value === 'object') {
-                    // Handle nested dealer object
-                    Object.entries(value).forEach(([dealerKey, dealerValue]) => {
-                        if (dealerValue !== null && dealerValue !== undefined && dealerValue !== "") {
-                            submitData.append(`dealer[${dealerKey}]`, dealerValue);
-                        }
-                    });
-                } else if (value !== null && value !== undefined && value !== "") {
-                    submitData.append(key, value);
+            // Navigate to Order Summary page with car data and images
+            navigate('/order-summary', {
+                state: {
+                    carData,
+                    imagePreviews
                 }
             });
-            
-            // Add files
-            imagePreviews.forEach(preview => {
-                submitData.append("photos", preview.file);
-            });
-
-            // SECURITY: User ID is extracted from JWT token on the backend
-            // No need to send sellerId in the request
-            const response = await api.post('/cars/initiate', submitData, {
-                headers: {
-                    "Authorization": `Bearer ${token}`, // Send JWT token
-                },
-            });
-
-            console.log('Car post initiated successfully:', response.data);
-            
-            // Car post created successfully, now initiate VNPay payment
-            console.log('Initiating payment for postingFeeId:', response.data.data.postingFeeId);
-            const paymentResponse = await api.post('/posting-fee/pay/checkout', {
-                postingFeeId: response.data.data.postingFeeId,
-            }, {
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
-            });
-
-            console.log('Payment URL received:', paymentResponse.data);
-            
-            // Redirect to VNPay payment page
-            console.log('Redirecting to:', paymentResponse.data.data.url);
-            window.location.href = paymentResponse.data.data.url;
         } catch (err) {
             console.error("Error submitting form:", err);
             setError(err.message || "An error occurred while submitting the form");
@@ -318,55 +359,41 @@ export default function SellCar() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Make</label>
-                <select name="make" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select Option</option>
-                  <option value="toyota">Toyota</option>
-                  <option value="honda">Honda</option>
-                  <option value="ford">Ford</option>
-                  <option value="chevrolet">Chevrolet</option>
-                  <option value="bmw">BMW</option>
-                  <option value="mercedes">Mercedes-Benz</option>
-                  <option value="audi">Audi</option>
-                  <option value="nissan">Nissan</option>
-                  <option value="hyundai">Hyundai</option>
-                  <option value="kia">Kia</option>
-                  <option value="volkswagen">Volkswagen</option>
-                  <option value="subaru">Subaru</option>
-                  <option value="mazda">Mazda</option>
-                  <option value="lexus">Lexus</option>
-                  <option value="acura">Acura</option>
-                  <option value="infiniti">Infiniti</option>
-                  <option value="tesla">Tesla</option>
-                  <option value="other">Other</option>
+                <select
+                  name="make"
+                  className="w-full bg-input border-border rounded py-2 px-3"
+                  value={selectedMake}
+                  onChange={(e) => setSelectedMake(e.target.value)}
+                >
+                  <option value="">Select Make</option>
+                  {makes.map(make => (
+                    <option key={make} value={make}>{make}</option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Model</label>
-                <select name="model" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select Option</option>
-                  <option value="model1">Model 1</option>
-                  <option value="model2">Model 2</option>
+                <select name="model" className="w-full bg-input border-border rounded py-2 px-3" disabled={!selectedMake}>
+                  <option value="">Select Model</option>
+                  {models.map(model => (
+                    <option key={model} value={model}>{model}</option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Trim</label>
-                <select name="trim" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="base">Base</option>
-                  <option value="sport">Sport</option>
-                  <option value="premium">Premium</option>
-                </select>
+                <input name="trim" className="w-full bg-input border-border rounded py-2 px-3" placeholder="Enter trim level" />
               </div>
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Made in</label>
                 <select name="made_in" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="usa">USA</option>
-                  <option value="germany">Germany</option>
-                  <option value="japan">Japan</option>
+                  <option value="">Select Country</option>
+                  {countries.map(country => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -380,9 +407,9 @@ export default function SellCar() {
                 <label className="text-sm text-muted-foreground mb-2 block">Body Type</label>
                 <select name="body_type" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select Option</option>
-                  <option value="sedan">Sedan</option>
-                  <option value="hatchback">Hatchback</option>
-                  <option value="suv">SUV</option>
+                  {bodyTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
                 </select>
               </div>
 
@@ -407,69 +434,46 @@ export default function SellCar() {
             </div>
           </section>
 
-          {/* Engine & Powertrain */}
+          {/* Engine */}
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Engine & Powertrain</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h2 className="text-xl font-semibold">Engine</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Engine</label>
-                <select name="engine" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="v6">V6</option>
-                  <option value="v8">V8</option>
-                  <option value="i4">Inline 4</option>
-                </select>
+                <input name="engine" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 2.0L Turbo Inline-4" />
               </div>
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Engine Size</label>
-                <select name="engine_size" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="2.0">2.0L</option>
-                  <option value="3.0">3.0L</option>
-                  <option value="4.0">4.0L</option>
-                </select>
+                <input name="engine_size" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 2.0" />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Engine Block</label>
                 <select name="engine_block" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select Option</option>
                   <option value="inline">Inline</option>
                   <option value="v">V-type</option>
+                  <option value="w">W-type</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Cylinders</label>
+                <input name="cylinders" type="number" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 4" />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Cylinders</label>
-                <select name="cylinders" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="4">4</option>
-                  <option value="6">6</option>
-                  <option value="8">8</option>
-                </select>
-              </div>
-
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Fuel Type</label>
                 <select name="fuel_type" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
-                  <option value="gasoline">Gasoline</option>
-                  <option value="diesel">Diesel</option>
-                  <option value="electric">Electric</option>
-                  <option value="hybrid">Hybrid</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Powertrain type</label>
-                <select name="powertrain" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="fwd">FWD</option>
-                  <option value="rwd">RWD</option>
-                  <option value="awd">AWD</option>
+                  {fuelTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -522,33 +526,18 @@ export default function SellCar() {
             <h2 className="text-xl font-semibold">Dimension & Capacity</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Height</label>
-                <select name="overall_height" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
+                <label className="text-sm text-muted-foreground mb-2 block">Height (inches)</label>
+                <input name="overall_height" type="number" step="0.1" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 56.7" />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Length</label>
-                <select name="overall_length" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="short">Short</option>
-                  <option value="medium">Medium</option>
-                  <option value="long">Long</option>
-                </select>
+                <label className="text-sm text-muted-foreground mb-2 block">Length (inches)</label>
+                <input name="overall_length" type="number" step="0.1" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 182.3" />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Width</label>
-                <select name="overall_width" className="w-full bg-input border-border rounded py-2 px-3">
-                  <option value="">Select option</option>
-                  <option value="narrow">Narrow</option>
-                  <option value="standard">Standard</option>
-                  <option value="wide">Wide</option>
-                </select>
+                <label className="text-sm text-muted-foreground mb-2 block">Width (inches)</label>
+                <input name="overall_width" type="number" step="0.1" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 72.4" />
               </div>
 
               <div>

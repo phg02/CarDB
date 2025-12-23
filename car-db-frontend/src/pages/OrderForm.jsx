@@ -17,7 +17,7 @@ function OrderForm() {
         }
 
         // navigate to OrderSummary (root route) and pass state
-        navigate('/ordersummary', { state: { phone, address } });
+        navigate('/order-summary', { state: { phone, address } });
     }
 
     return (

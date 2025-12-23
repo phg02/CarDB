@@ -23,8 +23,56 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
       setTimeout(() => setShowLoginNotification(false), 3000);
       return;
     }
-    // navigate to the OrderForm page
-    navigate('/order');
+    // Navigate to order summary page with car data
+    navigate('/order-summary', {
+      state: {
+        carData: {
+          heading: carData.name,
+          price: parseFloat(price.replace(/[^0-9.-]+/g, '')) || 0,
+          miles: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value?.replace(' mi', '') || 0,
+          condition: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value === '0 mi' ? 'new' : 'used',
+          vehicle_type: 'car', // Default value
+          year: parseInt(carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Year')?.value) || 0,
+          make: 'Unknown', // Would need to be extracted from car name or API
+          model: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Model')?.value || 'Unknown',
+          trim: 'Unknown', // Not available in current data
+          made_in: 'Unknown', // Not available in current data
+          body_type: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Body Type')?.value || 'Unknown',
+          body_subtype: 'Unknown', // Not available in current data
+          doors: parseInt(carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Doors')?.value) || 0,
+          engine: 'Unknown', // Not available in current data
+          engine_size: 0, // Not available in current data
+          engine_block: 'Unknown', // Not available in current data
+          cylinders: 0, // Not available in current data
+          fuel_type: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Fuel Type')?.value || 'Unknown',
+          transmission: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
+          drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
+          highway_mpg: 0, // Not available in current data
+          city_mpg: 0, // Not available in current data
+          overall_height: 0, // Not available in current data
+          overall_length: 0, // Not available in current data
+          overall_width: 0, // Not available in current data
+          std_seating: 0, // Not available in current data
+          exterior_color: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Color')?.value || 'Unknown',
+          interior_color: 'Unknown', // Not available in current data
+          base_ext_color: 'Unknown', // Not available in current data
+          base_int_color: 'Unknown', // Not available in current data
+          vin: 'Unknown', // Not available in current data
+          inventory_type: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value === '0 mi' ? 'new' : 'used',
+          owners: 0, // Not available in current data
+          carfax_clean_title: 'Unknown', // Not available in current data
+          phone: 'Unknown', // Not available in current data
+          dealer: {
+            street: 'Unknown', // Not available in current data
+            city: 'Unknown', // Not available in current data
+            state: 'Unknown', // Not available in current data
+            country: 'Unknown', // Not available in current data
+          },
+        },
+        imagePreviews: carData.images?.map(url => ({ url, name: 'car-image.jpg', file: null })) || [],
+        isPurchase: true, // Flag to indicate this is a purchase, not a listing
+      }
+    });
   };
 
   const handleCompare = () => {

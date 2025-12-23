@@ -2,8 +2,85 @@ import express from 'express';
 import multer from 'multer';
 import * as carPostController from '../controller/CarPostController.js';
 import { verifyToken, isAdmin } from '../middleware/authMiddleware.js';
+import { VIETNAM_CAR_BRANDS, VIETNAM_CAR_MODELS } from '../services/vietnamCarBrands.js';
+import { COUNTRIES } from '../services/countries.js';
 
 const router = express.Router();
+
+// ==================== CAR DATA ENDPOINTS ====================
+/**
+ * Get all car makes
+ * GET /api/cars/makes
+ */
+router.get('/makes', (req, res) => {
+  res.json({ success: true, data: VIETNAM_CAR_BRANDS });
+});
+
+/**
+ * Get models for a specific make
+ * GET /api/cars/models/:make
+ */
+router.get('/models/:make', (req, res) => {
+  const { make } = req.params;
+
+  const models = VIETNAM_CAR_MODELS[make] || [];
+  res.json({ success: true, data: models });
+});
+
+/**
+ * Get all engine types
+ * GET /api/cars/engines
+ */
+router.get('/engines', (req, res) => {
+  const engines = [
+    '2.0L Inline-4',
+    '2.5L Inline-4',
+    '3.0L V6',
+    '3.5L V6',
+    '4.0L V6',
+    '2.0L Turbo Inline-4',
+    '3.0L Turbo V6',
+    '4.0L V8',
+    '5.0L V8',
+    '6.0L V8',
+    'Electric Motor',
+    '2.0L Hybrid',
+    '3.5L Hybrid V6',
+    'Inline-4',
+    'V6',
+    'V8',
+    'Turbocharged Inline-4',
+    'Turbocharged V6',
+    'Naturally Aspirated V8'
+  ];
+  res.json({ success: true, data: engines });
+});
+
+/**
+ * Get all countries
+ * GET /api/cars/countries
+ */
+router.get('/countries', (req, res) => {
+  res.json({ success: true, data: COUNTRIES });
+});
+
+/**
+ * Get all body types
+ * GET /api/cars/body-types
+ */
+router.get('/body-types', (req, res) => {
+  const bodyTypes = ['Sedan', 'SUV', 'Truck', 'Coupe', 'Hatchback', 'Van', 'Wagon', 'Convertible'];
+  res.json({ success: true, data: bodyTypes });
+});
+
+/**
+ * Get all fuel types
+ * GET /api/cars/fuel-types
+ */
+router.get('/fuel-types', (req, res) => {
+  const fuelTypes = ['Gasoline', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid'];
+  res.json({ success: true, data: fuelTypes });
+});
 
 // Configure multer for file uploads with any field names
 const storage = multer.diskStorage({

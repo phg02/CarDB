@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 import ProductCard from '../carlisting/ProductCard';
@@ -14,6 +15,7 @@ const MyListedCar = () => {
     totalItems: 0,
   });
   const { auth, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log('MyListedCar - useEffect triggered, authLoading:', authLoading, 'auth:', auth ? 'present' : 'null');
@@ -81,31 +83,61 @@ const MyListedCar = () => {
         return;
       }
 
-      console.log('Calling payment API with postingFeeId:', carPost.postingFee._id);
-
-      // Initiate VNPay payment for the existing posting fee
-      const paymentResponse = await api.post('/posting-fee/pay/checkout', {
-        postingFeeId: carPost.postingFee._id,
-      }, {
-        headers: {
-          "Authorization": `Bearer ${auth.accessToken}`,
-        },
+      // Navigate to order summary page with car data for payment
+      navigate('/order-summary', {
+        state: {
+          carData: {
+            heading: carPost.heading,
+            price: carPost.price || 0,
+            miles: carPost.miles || 0,
+            condition: carPost.inventory_type === 'new' ? 'new' : 'used',
+            vehicle_type: carPost.vehicle_type || 'car',
+            year: carPost.year || 0,
+            make: carPost.make || 'Unknown',
+            model: carPost.model || 'Unknown',
+            trim: carPost.trim || 'Unknown',
+            made_in: carPost.made_in || 'Unknown',
+            body_type: carPost.body_type || 'Unknown',
+            body_subtype: carPost.body_subtype || 'Unknown',
+            doors: carPost.doors || 0,
+            engine: carPost.engine || 'Unknown',
+            engine_size: carPost.engine_size || 0,
+            engine_block: carPost.engine_block || 'Unknown',
+            cylinders: carPost.cylinders || 0,
+            fuel_type: carPost.fuel_type || 'Unknown',
+            transmission: carPost.transmission || 'Unknown',
+            drivetrain: carPost.drivetrain || 'Unknown',
+            highway_mpg: carPost.highway_mpg || 0,
+            city_mpg: carPost.city_mpg || 0,
+            overall_height: carPost.overall_height || 0,
+            overall_length: carPost.overall_length || 0,
+            overall_width: carPost.overall_width || 0,
+            std_seating: carPost.std_seating || 0,
+            exterior_color: carPost.exterior_color || 'Unknown',
+            interior_color: carPost.interior_color || 'Unknown',
+            base_ext_color: carPost.base_ext_color || 'Unknown',
+            base_int_color: carPost.base_int_color || 'Unknown',
+            vin: carPost.vin || 'Unknown',
+            inventory_type: carPost.inventory_type || 'used',
+            owners: carPost.owners || 0,
+            carfax_clean_title: carPost.carfax_clean_title || 'Unknown',
+            phone: carPost.phone || 'Unknown',
+            dealer: {
+              street: carPost.dealer?.street || 'Unknown',
+              city: carPost.dealer?.city || 'Unknown',
+              state: carPost.dealer?.state || 'Unknown',
+              country: carPost.dealer?.country || 'Unknown',
+            },
+          },
+          imagePreviews: carPost.photo_links?.map(url => ({ url, name: 'car-image.jpg', file: null })) || [],
+          isPaymentForExistingPost: true, // Flag to indicate this is payment for an existing post
+          postingFeeId: carPost.postingFee._id, // Include the posting fee ID for payment
+        }
       });
 
-      console.log('Payment initiated successfully:', paymentResponse.data);
-      console.log('Payment API success:', paymentResponse.data);
-      console.log('Payment result:', paymentResponse.data);
-
-      if (!paymentResponse.data.data || !paymentResponse.data.data.url) {
-        throw new Error('Invalid payment response - no payment URL received');
-      }
-
-      // Redirect to VNPay payment URL
-      window.location.href = paymentResponse.data.data.url;
-
     } catch (err) {
-      console.error('Error initiating payment:', err);
-      toast.error(err.message || 'Failed to initiate payment');
+      console.error('Error preparing payment:', err);
+      toast.error(err.message || 'Failed to prepare payment');
     }
   };
 

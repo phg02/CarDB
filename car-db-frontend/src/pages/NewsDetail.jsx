@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MessageSquare, Phone, Mail, Trash2 } from "lucide-react";
+import {
+  MessageSquare,
+  Phone,
+  Mail,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 // Mock data - in real app, this would be fetched from API
 const allArticles = [
@@ -155,6 +163,7 @@ const allArticles = [
 const NewsDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { auth } = useAuth();
 
   // Find the article by ID
   const article = allArticles.find((article) => article.id === parseInt(id));
@@ -165,6 +174,38 @@ const NewsDetail = () => {
   );
   const [showAllComments, setShowAllComments] = useState(false);
   const COMMENTS_PER_PAGE = 3;
+
+  // Image slider state
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Collect all images (mainImage + content images)
+  const allImages = article
+    ? [
+        article.mainImage,
+        ...article.content
+          .filter((item) => item.type === "image")
+          .map((item) => item.url),
+      ]
+    : [];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  const handleRelatedNewsClick = (newsId) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate(`/news/${newsId}`);
+  };
 
   // If article not found, show error
   if (!article) {
@@ -201,6 +242,7 @@ const NewsDetail = () => {
       tags: news.tags,
       author: news.author,
       comments: news.comments.length,
+      imageCount: 1 + news.content.filter((c) => c.type === "image").length,
     }));
 
   const handleCommentSubmit = () => {
@@ -222,7 +264,12 @@ const NewsDetail = () => {
   };
 
   const handleDeleteComment = (commentId) => {
-    if (window.confirm("Are you sure you want to delete this comment?")) {
+    const message =
+      auth?.role === "admin"
+        ? "Are you sure you want to delete this comment? (Admin action)"
+        : "Are you sure you want to delete this comment?";
+
+    if (window.confirm(message)) {
       setArticleComments(articleComments.filter((c) => c.id !== commentId));
     }
   };
@@ -243,15 +290,8 @@ const NewsDetail = () => {
           </p>
         );
       case "image":
-        return (
-          <div key={index} className="my-8">
-            <img
-              src={item.url}
-              alt="Article content"
-              className="w-full rounded-lg"
-            />
-          </div>
-        );
+        // Images are now handled by the slider, skip rendering here
+        return null;
       case "heading":
         return (
           <h2 key={index} className="text-2xl font-bold text-white mt-8 mb-4">
@@ -301,17 +341,60 @@ const NewsDetail = () => {
           {article.title}
         </h1>
 
-        {/* Main Image */}
-        <div className="relative mb-8 rounded-lg overflow-hidden">
-          <img
-            src={article.mainImage}
-            alt={article.title}
-            className="w-full h-auto"
-          />
-          <span className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded text-sm">
-            {article.date}
-          </span>
-        </div>
+        {/* Image Slider */}
+        {allImages.length > 0 && (
+          <div className="relative mb-8 rounded-lg overflow-hidden group">
+            <img
+              src={allImages[currentImageIndex]}
+              alt={`${article.title} - Image ${currentImageIndex + 1}`}
+              className="w-full h-auto max-h-[600px] object-cover"
+            />
+            <span className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded text-sm">
+              {article.date}
+            </span>
+
+            {/* Navigation Arrows */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+
+                {/* Image Counter */}
+                <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded text-sm">
+                  {currentImageIndex + 1} / {allImages.length}
+                </div>
+
+                {/* Dots Indicator */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {allImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToImage(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentImageIndex
+                          ? "bg-blue-500 w-6"
+                          : "bg-white/50 hover:bg-white/70"
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Article Content */}
         <div className="mb-12">
@@ -330,33 +413,36 @@ const NewsDetail = () => {
           ))}
         </div>
 
-        {/* Author Card */}
-        <div className="bg-[#0D1F2D] border border-gray-700 rounded-lg p-6 mb-8 flex flex-col md:flex-row items-center md:items-start gap-4">
-          <img
-            src={article.author.avatar}
-            alt={article.author.name}
-            className="w-16 h-16 rounded-full"
-          />
-          <div className="flex-1 text-center md:text-left">
-            <h3 className="text-white font-semibold text-lg mb-1">
-              {article.author.name}
-            </h3>
-          </div>
-          <div className="flex gap-4">
-            <a
-              href={`tel:${article.author.phone}`}
-              className="flex items-center gap-2 text-gray-300 hover:text-blue-500 transition-colors"
-            >
-              <Phone className="w-5 h-5" />
-              <span className="text-sm">{article.author.phone}</span>
-            </a>
-            <a
-              href={`mailto:${article.author.email}`}
-              className="flex items-center gap-2 text-gray-300 hover:text-blue-500 transition-colors"
-            >
-              <Mail className="w-5 h-5" />
-              <span className="text-sm">{article.author.email}</span>
-            </a>
+        {/* Author Info */}
+        <div className="bg-[#0D1F2D] border border-gray-700 rounded-lg p-6 mb-12">
+          <h3 className="text-white font-semibold text-lg mb-4">Author</h3>
+          <div className="flex items-center gap-4">
+            <img
+              src={article.author.avatar}
+              alt={article.author.name}
+              className="w-16 h-16 rounded-full"
+            />
+            <div className="flex-1">
+              <h4 className="text-white font-semibold text-lg mb-1">
+                {article.author.name}
+              </h4>
+              <div className="flex gap-4 mt-2">
+                <a
+                  href={`tel:${article.author.phone}`}
+                  className="flex items-center gap-2 text-gray-300 hover:text-blue-500 transition-colors"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span className="text-sm">{article.author.phone}</span>
+                </a>
+                <a
+                  href={`mailto:${article.author.email}`}
+                  className="flex items-center gap-2 text-gray-300 hover:text-blue-500 transition-colors"
+                >
+                  <Mail className="w-5 h-5" />
+                  <span className="text-sm">{article.author.email}</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -371,15 +457,38 @@ const NewsDetail = () => {
           {/* Add Comment Form */}
           <div className="mb-8">
             <h4 className="text-white font-semibold mb-4">Add a Comment</h4>
+            {!auth?.accessToken && (
+              <div className="mb-4 p-4 bg-[#0D1F2D] border border-blue-500/30 rounded-lg">
+                <p className="text-gray-400 text-sm">
+                  Please{" "}
+                  <button
+                    onClick={() =>
+                      navigate("/login", {
+                        state: { message: "Please sign in to leave a comment" },
+                      })
+                    }
+                    className="text-blue-500 hover:text-blue-400 underline"
+                  >
+                    sign in
+                  </button>{" "}
+                  to leave a comment
+                </p>
+              </div>
+            )}
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Leave a message here"
-              className="w-full bg-[#0D1F2D] border border-gray-700 rounded-lg p-4 text-gray-300 placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none h-32 mb-4"
+              placeholder={
+                auth?.accessToken
+                  ? "Leave a message here"
+                  : "Sign in to leave a comment"
+              }
+              disabled={!auth?.accessToken}
+              className="w-full bg-[#0D1F2D] border border-gray-700 rounded-lg p-4 text-gray-300 placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none h-32 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               onClick={handleCommentSubmit}
-              disabled={!comment.trim()}
+              disabled={!comment.trim() || !auth?.accessToken}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Add Comment
@@ -414,12 +523,17 @@ const NewsDetail = () => {
                           {commentItem.text}
                         </p>
                       </div>
-                      {/* Delete button - only show for current user's comments */}
-                      {commentItem.isCurrentUser && (
+                      {/* Delete button - show for current user's comments OR if user is admin */}
+                      {(commentItem.isCurrentUser ||
+                        auth?.role === "admin") && (
                         <button
                           onClick={() => handleDeleteComment(commentItem.id)}
                           className="absolute top-4 right-4 p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover/comment:opacity-100"
-                          title="Delete comment"
+                          title={
+                            auth?.role === "admin"
+                              ? "Delete comment (Admin)"
+                              : "Delete comment"
+                          }
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -493,7 +607,7 @@ const NewsDetail = () => {
             {relatedNews.map((news) => (
               <div
                 key={news.id}
-                onClick={() => navigate(`/news/${news.id}`)}
+                onClick={() => handleRelatedNewsClick(news.id)}
                 className="bg-[#0D1F2D] border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-colors cursor-pointer group"
               >
                 <div className="relative">
@@ -505,6 +619,32 @@ const NewsDetail = () => {
                   <span className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded text-sm">
                     {news.date}
                   </span>
+                  {news.imageCount > 1 && (
+                    <span className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm flex items-center gap-1">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                      {news.imageCount}
+                    </span>
+                  )}
                 </div>
                 <div className="p-4">
                   <h3 className="text-blue-400 text-lg font-semibold mb-2 group-hover:text-blue-300">

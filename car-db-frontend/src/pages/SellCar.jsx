@@ -73,37 +73,42 @@ export default function SellCar() {
                 price: parseInt(formData.get("price")),
                 miles: parseInt(formData.get("miles")) || 0,
                 condition: condition,
-                vehicleType: formData.get("vehicleType"),
+                vehicle_type: formData.get("vehicle_type"),
                 year: parseInt(formData.get("year")),
                 make: formData.get("make"),
                 model: formData.get("model"),
                 trim: formData.get("trim"),
-                madeIn: formData.get("madeIn"),
-                bodyType: formData.get("bodyType"),
-                bodySubtype: formData.get("bodySubtype"),
+                made_in: formData.get("made_in"),
+                body_type: formData.get("body_type"),
+                body_subtype: formData.get("body_subtype"),
                 doors: formData.get("doors"),
                 engine: formData.get("engine"),
-                engineSize: formData.get("engineSize"),
-                engineBlock: formData.get("engineBlock"),
+                engine_size: formData.get("engine_size"),
+                engine_block: formData.get("engine_block"),
                 cylinders: formData.get("cylinders"),
-                fuelType: formData.get("fuelType"),
+                fuel_type: formData.get("fuel_type"),
                 powertrain: formData.get("powertrain"),
                 transmission: formData.get("transmission"),
                 drivetrain: formData.get("drivetrain"),
-                highwayMpg: parseInt(formData.get("highwayMpg")) || 0,
-                cityMpg: parseInt(formData.get("cityMpg")) || 0,
-                height: formData.get("height"),
-                length: formData.get("length"),
-                width: formData.get("width"),
-                seating: parseInt(formData.get("seating")) || 0,
-                exteriorColor: formData.get("exteriorColor"),
-                interiorColor: formData.get("interiorColor"),
-                baseExteriorColor: formData.get("baseExteriorColor"),
-                baseInteriorColor: formData.get("baseInteriorColor"),
+                highway_mpg: parseInt(formData.get("highway_mpg")) || 0,
+                city_mpg: parseInt(formData.get("city_mpg")) || 0,
+                overall_height: formData.get("overall_height"),
+                overall_length: formData.get("overall_length"),
+                overall_width: formData.get("overall_width"),
+                std_seating: parseInt(formData.get("std_seating")) || 0,
+                exterior_color: formData.get("exterior_color"),
+                interior_color: formData.get("interior_color"),
+                base_ext_color: formData.get("base_ext_color"),
+                base_int_color: formData.get("base_int_color"),
                 owners: parseInt(formData.get("owners")) || 0,
-                cleanTitle: formData.get("cleanTitle"),
+                carfax_clean_title: formData.get("carfax_clean_title"),
                 phone: formData.get("phone"),
-                address: formData.get("address"),
+                dealer: {
+                    street: formData.get("street"),
+                    city: formData.get("city"),
+                    state: formData.get("state"),
+                    country: formData.get("country"),
+                },
             };
 
             // Basic validation
@@ -127,7 +132,14 @@ export default function SellCar() {
             // Create FormData for multipart request
             const submitData = new FormData();
             Object.entries(carData).forEach(([key, value]) => {
-                if (value !== null && value !== undefined && value !== "") {
+                if (key === 'dealer' && typeof value === 'object') {
+                    // Handle nested dealer object
+                    Object.entries(value).forEach(([dealerKey, dealerValue]) => {
+                        if (dealerValue !== null && dealerValue !== undefined && dealerValue !== "") {
+                            submitData.append(`dealer[${dealerKey}]`, dealerValue);
+                        }
+                    });
+                } else if (value !== null && value !== undefined && value !== "") {
                     submitData.append(key, value);
                 }
             });
@@ -206,7 +218,7 @@ export default function SellCar() {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -273,7 +285,7 @@ export default function SellCar() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Vehicle type</label>
-                <select name="vehicleType" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="vehicle_type" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select Option</option>
                   <option value="sedan">Sedan</option>
                   <option value="suv">SUV</option>
@@ -323,7 +335,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Made in</label>
-                <select name="madeIn" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="made_in" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="usa">USA</option>
                   <option value="germany">Germany</option>
@@ -339,7 +351,7 @@ export default function SellCar() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Body Type</label>
-                <select name="bodyType" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="body_type" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select Option</option>
                   <option value="sedan">Sedan</option>
                   <option value="hatchback">Hatchback</option>
@@ -349,7 +361,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Body Subtype</label>
-                <select name="bodySubtype" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="body_subtype" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select Option</option>
                   <option value="standard">Standard</option>
                   <option value="extended">Extended</option>
@@ -384,7 +396,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Engine Size</label>
-                <select name="engineSize" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="engine_size" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="2.0">2.0L</option>
                   <option value="3.0">3.0L</option>
@@ -394,7 +406,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Engine Block</label>
-                <select name="engineBlock" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="engine_block" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select Option</option>
                   <option value="inline">Inline</option>
                   <option value="v">V-type</option>
@@ -415,7 +427,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Fuel Type</label>
-                <select name="fuelType" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="fuel_type" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="gasoline">Gasoline</option>
                   <option value="diesel">Diesel</option>
@@ -463,7 +475,7 @@ export default function SellCar() {
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Highway mpg</label>
                 <div className="relative">
-                  <input type="number" name="highwayMpg" className="bg-input border-border pr-16 rounded w-full py-2 px-3" />
+                  <input type="number" name="highway_mpg" className="bg-input border-border pr-16 rounded w-full py-2 px-3" />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">mpg</span>
                 </div>
               </div>
@@ -471,7 +483,7 @@ export default function SellCar() {
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">City mpg</label>
                 <div className="relative">
-                  <input type="number" name="cityMpg" className="bg-input border-border pr-16 rounded w-full py-2 px-3" />
+                  <input type="number" name="city_mpg" className="bg-input border-border pr-16 rounded w-full py-2 px-3" />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">mpg</span>
                 </div>
               </div>
@@ -484,7 +496,7 @@ export default function SellCar() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Height</label>
-                <select name="height" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="overall_height" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -494,7 +506,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Length</label>
-                <select name="length" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="overall_length" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="short">Short</option>
                   <option value="medium">Medium</option>
@@ -504,7 +516,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Width</label>
-                <select name="width" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="overall_width" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="narrow">Narrow</option>
                   <option value="standard">Standard</option>
@@ -514,7 +526,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Seating</label>
-                <select name="seating" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="std_seating" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="2">2 seats</option>
                   <option value="4">4 seats</option>
@@ -531,7 +543,7 @@ export default function SellCar() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Exterior Color</label>
-                <select name="exteriorColor" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="exterior_color" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="black">Black</option>
                   <option value="white">White</option>
@@ -542,7 +554,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Interior Color</label>
-                <select name="interiorColor" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="interior_color" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="black">Black</option>
                   <option value="tan">Tan</option>
@@ -552,7 +564,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Base Exterior Color</label>
-                <select name="baseExteriorColor" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="base_ext_color" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="black">Black</option>
                   <option value="white">White</option>
@@ -562,7 +574,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Base Interior Color</label>
-                <select name="baseInteriorColor" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="base_int_color" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="black">Black</option>
                   <option value="tan">Tan</option>
@@ -583,7 +595,7 @@ export default function SellCar() {
 
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Clean title</label>
-                <select name="cleanTitle" className="w-full bg-input border-border rounded py-2 px-3">
+                <select name="carfax_clean_title" className="w-full bg-input border-border rounded py-2 px-3">
                   <option value="">Select option</option>
                   <option value="yes">Yes</option>
                   <option value="no">No</option>
@@ -602,8 +614,25 @@ export default function SellCar() {
               </div>
 
               <div>
-                <label htmlFor="address" className="text-sm text-muted-foreground mb-2 block">Address</label>
-                <input id="address" name="address" className="bg-input border-border rounded w-full py-2 px-3" />
+                <label htmlFor="street" className="text-sm text-muted-foreground mb-2 block">Street Address</label>
+                <input id="street" name="street" className="bg-input border-border rounded w-full py-2 px-3" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="city" className="text-sm text-muted-foreground mb-2 block">City</label>
+                <input id="city" name="city" className="bg-input border-border rounded w-full py-2 px-3" />
+              </div>
+
+              <div>
+                <label htmlFor="state" className="text-sm text-muted-foreground mb-2 block">State/Province</label>
+                <input id="state" name="state" className="bg-input border-border rounded w-full py-2 px-3" />
+              </div>
+
+              <div>
+                <label htmlFor="country" className="text-sm text-muted-foreground mb-2 block">Country</label>
+                <input id="country" name="country" className="bg-input border-border rounded w-full py-2 px-3" />
               </div>
             </div>
           </section>

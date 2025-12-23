@@ -41,8 +41,22 @@ export const initiateCarPost = async (req, res) => {
     if (req.body && typeof req.body === 'object') {
       carData = { ...carData, ...req.body };
     }
+
+    // Reconstruct dealer object from FormData fields
+    const dealerFields = {};
+    Object.keys(carData).forEach(key => {
+      if (key.startsWith('dealer[') && key.endsWith(']')) {
+        const dealerKey = key.slice(7, -1); // Extract key from dealer[key]
+        dealerFields[dealerKey] = carData[key];
+        delete carData[key]; // Remove the individual field
+      }
+    });
+    if (Object.keys(dealerFields).length > 0) {
+      carData.dealer = dealerFields;
+    }
     
     console.log('Received car data:', Object.keys(carData));
+    console.log('Dealer object:', carData.dealer);
     console.log('Received files:', photoFiles.length);
     
     // Validate that we have carData

@@ -12,6 +12,7 @@ import postingFeeRouter from './api_routes/PostingFeeRouter.js';
 import userRouter from './api_routes/UserRouter.js';
 import newsRouter from './api_routes/NewsRouter.js';
 import commentRouter from './api_routes/CommentRouter.js';
+import filterRouter from './api_routes/FilterRouter.js';
 
 const app = express();
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/posting-fee', postingFeeRouter);
 app.use('/api/users', userRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/comments', commentRouter);
+app.use('/api/filters', filterRouter);
 
 // Test endpoint
 app.get('/api/test', (req, res) => {

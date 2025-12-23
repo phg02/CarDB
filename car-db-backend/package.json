@@ -12,7 +12,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+<<<<<<< HEAD
     "axios": "^1.13.2",
+=======
+    "@google/generative-ai": "^0.24.1",
+>>>>>>> c63d0c9 (chat ai functionality)
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.8.0",

@@ -19,7 +19,14 @@ const Settings = () => {
     const paymentStatus = searchParams.get('payment_status');
     const tab = searchParams.get('tab');
 
-    if (paymentStatus === 'success') {
+    // Handle tab parameter first (for direct navigation)
+    if (tab === 'my-listed-car') {
+      setActiveTab('my-listed-car');
+      // Clear the query parameter
+      setSearchParams({});
+    }
+    // Then handle payment status
+    else if (paymentStatus === 'success') {
       toast.success('Payment successful! Your car listing has been published.');
       setActiveTab('my-listed-car');
       // Clear the query parameters
@@ -28,10 +35,6 @@ const Settings = () => {
       toast.error('Payment failed. Please try again.');
       setActiveTab('my-listed-car');
       // Clear the query parameters
-      setSearchParams({});
-    } else if (tab === 'my-listed-car') {
-      setActiveTab('my-listed-car');
-      // Clear the query parameter
       setSearchParams({});
     }
   }, [searchParams, setSearchParams]);

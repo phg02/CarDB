@@ -100,6 +100,8 @@ export default function SellCar() {
                 interior_color: formData.get("interior_color"),
                 base_ext_color: formData.get("base_ext_color"),
                 base_int_color: formData.get("base_int_color"),
+                vin: formData.get("vin"),
+                inventory_type: condition === "new" ? "new" : "used",
                 owners: parseInt(formData.get("owners")) || 0,
                 carfax_clean_title: formData.get("carfax_clean_title"),
                 phone: formData.get("phone"),
@@ -314,6 +316,31 @@ export default function SellCar() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Make</label>
+                <select name="make" className="w-full bg-input border-border rounded py-2 px-3">
+                  <option value="">Select Option</option>
+                  <option value="toyota">Toyota</option>
+                  <option value="honda">Honda</option>
+                  <option value="ford">Ford</option>
+                  <option value="chevrolet">Chevrolet</option>
+                  <option value="bmw">BMW</option>
+                  <option value="mercedes">Mercedes-Benz</option>
+                  <option value="audi">Audi</option>
+                  <option value="nissan">Nissan</option>
+                  <option value="hyundai">Hyundai</option>
+                  <option value="kia">Kia</option>
+                  <option value="volkswagen">Volkswagen</option>
+                  <option value="subaru">Subaru</option>
+                  <option value="mazda">Mazda</option>
+                  <option value="lexus">Lexus</option>
+                  <option value="acura">Acura</option>
+                  <option value="infiniti">Infiniti</option>
+                  <option value="tesla">Tesla</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Model</label>
                 <select name="model" className="w-full bg-input border-border rounded py-2 px-3">
@@ -587,7 +614,12 @@ export default function SellCar() {
           {/* Vehicle History */}
           <section className="space-y-4">
             <h2 className="text-xl font-semibold">Vehicle History</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="vin" className="text-sm text-muted-foreground mb-2 block">VIN (Vehicle Identification Number)</label>
+                <input id="vin" name="vin" className="bg-input border-border rounded w-full py-2 px-3" placeholder="Enter 17-character VIN" />
+              </div>
+
               <div>
                 <label htmlFor="owners" className="text-sm text-muted-foreground mb-2 block">Number of Previous Owner</label>
                 <input id="owners" name="owners" type="number" className="bg-input border-border rounded w-full py-2 px-3" placeholder="0" />

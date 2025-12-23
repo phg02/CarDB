@@ -29,7 +29,6 @@ const carPostSchema = new mongoose.Schema(
       required: true,
     },
 
-    carfax_1_owner: { type: Boolean, default: false },
     carfax_clean_title: { type: Boolean, default: false },
 
     inventory_type: {

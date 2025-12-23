@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 import ProductCard from '../carlisting/ProductCard';
+import { api } from '../../lib/utils';
 
 const MyListedCar = () => {
   const [listedCars, setListedCars] = useState([]);
@@ -33,19 +34,14 @@ const MyListedCar = () => {
       }
 
       console.log('MyListedCar - Making API call to fetch cars');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cars/seller`, {
+      const response = await api.get('/cars/seller', {
         headers: {
           'Authorization': `Bearer ${auth.accessToken}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch listed cars');
-      }
-
-      const result = await response.json();
-      console.log('MyListedCar - API call successful, cars:', result.data?.length || 0);
-      setListedCars(result.data || []);
+      console.log('MyListedCar - API call successful, cars:', response.data?.data?.length || 0);
+      setListedCars(response.data?.data || []);
     } catch (err) {
       console.log('MyListedCar - Error fetching cars:', err.message);
       setError(err.message);
@@ -71,36 +67,24 @@ const MyListedCar = () => {
       console.log('Calling payment API with postingFeeId:', carPost.postingFee._id);
 
       // Initiate VNPay payment for the existing posting fee
-      const paymentResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/posting-fee/pay/checkout`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${auth.accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            postingFeeId: carPost.postingFee._id,
-          }),
-        }
-      );
+      const paymentResponse = await api.post('/posting-fee/pay/checkout', {
+        postingFeeId: carPost.postingFee._id,
+      }, {
+        headers: {
+          "Authorization": `Bearer ${auth.accessToken}`,
+        },
+      });
 
-      if (!paymentResponse.ok) {
-        const errorData = await paymentResponse.json();
-        console.error('Payment API error:', errorData);
-        throw new Error(errorData.message || "Failed to initiate payment");
-      }
+      console.log('Payment initiated successfully:', paymentResponse.data);
+      console.log('Payment API success:', paymentResponse.data);
+      console.log('Payment result:', paymentResponse.data);
 
-      const paymentResult = await paymentResponse.json();
-      console.log('Payment API success:', paymentResult);
-      console.log('Payment result:', paymentResult);
-
-      if (!paymentResult.data || !paymentResult.data.url) {
+      if (!paymentResponse.data.data || !paymentResponse.data.data.url) {
         throw new Error('Invalid payment response - no payment URL received');
       }
 
       // Redirect to VNPay payment URL
-      window.location.href = paymentResult.data.url;
+      window.location.href = paymentResponse.data.data.url;
 
     } catch (err) {
       console.error('Error initiating payment:', err);

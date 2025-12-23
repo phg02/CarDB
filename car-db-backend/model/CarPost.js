@@ -79,8 +79,13 @@ const carPostSchema = new mongoose.Schema(
     city_mpg: Number,
     powertrain_type: String,
 
-    // Status fields
-    verified: { type: Boolean, default: false }, // Admin approval status
+    // Payment and Approval Status
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid"],
+      default: "unpaid",
+    }, // Payment status: unpaid (waiting for payment) or paid (payment received, waiting for admin verification)
+    verified: { type: Boolean, default: false }, // Admin approval status (only true if post is paid AND admin verified)
     rejectionReason: { type: String, default: null }, // Reason if rejected
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // Admin who approved
     approvedAt: { type: Date, default: null },

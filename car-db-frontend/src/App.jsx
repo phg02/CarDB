@@ -33,9 +33,20 @@ import {Register} from "./pages/Register";
 import {Login} from "./pages/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import PrivateRoute from "./components/authComponent/PrivateRoute";
 import { PublicRoute } from "./components/authComponent/PublicRoute";
+
+// Wrapper component to conditionally render navbar based on auth role
+function NavbarWrapper({ children }) {
+  const { auth } = useAuth();
+  
+  if (auth?.role === 'admin') {
+    return <AdminNavbar>{children}</AdminNavbar>;
+  }
+  
+  return <Navbar>{children}</Navbar>;
+}
 
 function App() {
   return (
@@ -54,14 +65,14 @@ function App() {
         theme="dark"
       />
       <Routes>
-        <Route path="*" element={<Navbar><NotFound /></Navbar>} />
+        <Route path="*" element={<NavbarWrapper><NotFound /></NavbarWrapper>} />
 
         {/* Public routes - Only accessible to unauthenticated users */}
         <Route 
           path="/register" 
           element={
             <PublicRoute>
-              <Navbar><Register /></Navbar>
+              <NavbarWrapper><Register /></NavbarWrapper>
             </PublicRoute>
           } 
         />
@@ -69,7 +80,7 @@ function App() {
           path="/login" 
           element={
             <PublicRoute>
-              <Navbar><Login /></Navbar>
+              <NavbarWrapper><Login /></NavbarWrapper>
             </PublicRoute>
           } 
         />
@@ -77,7 +88,7 @@ function App() {
           path="/forgot-password" 
           element={
             <PublicRoute>
-              <Navbar><ForgotPassword /></Navbar>
+              <NavbarWrapper><ForgotPassword /></NavbarWrapper>
             </PublicRoute>
           } 
         />
@@ -85,12 +96,13 @@ function App() {
           path="/verification-code" 
           element={
             <PublicRoute>
-              <Navbar><VerificationCode /></Navbar>
+              <NavbarWrapper><VerificationCode /></NavbarWrapper>
             </PublicRoute>
           } 
         />
         
         {/* Common routes - Accessible to all users */}
+<<<<<<< HEAD
         <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />
         <Route path="/car/:id" element={<Navbar><CarDetails /></Navbar>} />
         <Route path="/compare" element={<Navbar><CompareCar /></Navbar>} />
@@ -100,13 +112,23 @@ function App() {
         <Route path="/vin-decoder" element={<Navbar><VinDecoder /></Navbar>} />
         <Route path="/settings" element={<Navbar><Settings /></Navbar>} />
         <Route path="/" element={<Navbar><Homepage /></Navbar>} />
+=======
+        <Route path="/carlisting" element={<NavbarWrapper><CarListing /></NavbarWrapper>} />
+        <Route path="/car/:id" element={<NavbarWrapper><CarDetails /></NavbarWrapper>} />
+        <Route path="/compare" element={<NavbarWrapper><CompareCar /></NavbarWrapper>} />
+        <Route path="/news" element={<NavbarWrapper><News /></NavbarWrapper>} />
+        <Route path="/news/:id" element={<NavbarWrapper><NewsDetail /></NavbarWrapper>} />
+        <Route path="/faq" element={<NavbarWrapper><FAQ /></NavbarWrapper>} />
+        <Route path="/vin-decoder" element={<NavbarWrapper><VinDecoder /></NavbarWrapper>} />
+        <Route path="/" element={<NavbarWrapper><Homepage /></NavbarWrapper>} />
+>>>>>>> b2ac8d6 (admin navbar auth and setting admin)
         
         {/* Private routes - Only accessible to authenticated users */}
         <Route 
           path="/sellcar" 
           element={
             <PrivateRoute>
-              <Navbar><SellCar /></Navbar>
+              <NavbarWrapper><SellCar /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -122,7 +144,7 @@ function App() {
           path="/order" 
           element={
             <PrivateRoute>
-              <Navbar><OrderForm /></Navbar>
+              <NavbarWrapper><OrderForm /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -130,17 +152,28 @@ function App() {
           path="/ordersummary" 
           element={
             <PrivateRoute>
-              <Navbar><OrderSummary /></Navbar>
+              <NavbarWrapper><OrderSummary /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
+<<<<<<< HEAD
+=======
+        <Route 
+          path="/settings" 
+          element={
+            <PrivateRoute>
+              <NavbarWrapper><Settings /></NavbarWrapper>
+            </PrivateRoute>
+          } 
+        />
+>>>>>>> b2ac8d6 (admin navbar auth and setting admin)
         
         {/* Admin routes - Only accessible to authenticated admin users */}
         <Route 
           path="/approved-cars" 
           element={
             <PrivateRoute>
-              <AdminNavbar><ApprovedCar /></AdminNavbar>
+              <NavbarWrapper><ApprovedCar /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -148,7 +181,7 @@ function App() {
           path="/waitlist-cars" 
           element={
             <PrivateRoute>
-              <AdminNavbar><WaitlistCar /></AdminNavbar>
+              <NavbarWrapper><WaitlistCar /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -156,7 +189,7 @@ function App() {
           path="/bought-cars" 
           element={
             <PrivateRoute>
-              <AdminNavbar><BoughtCars /></AdminNavbar>
+              <NavbarWrapper><BoughtCars /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -164,7 +197,7 @@ function App() {
           path="/approved-car/:id" 
           element={
             <PrivateRoute>
-              <AdminNavbar><ApprovedCarDetail /></AdminNavbar>
+              <NavbarWrapper><ApprovedCarDetail /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -172,7 +205,7 @@ function App() {
           path="/waitlist-car/:id" 
           element={
             <PrivateRoute>
-              <AdminNavbar><WaitlistCarDetail /></AdminNavbar>
+              <NavbarWrapper><WaitlistCarDetail /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -180,7 +213,7 @@ function App() {
           path="/bought-car/:id" 
           element={
             <PrivateRoute>
-              <AdminNavbar><BoughtCarDetail /></AdminNavbar>
+              <NavbarWrapper><BoughtCarDetail /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -188,7 +221,7 @@ function App() {
           path="/admin-news" 
           element={
             <PrivateRoute>
-              <AdminNavbar><AdminNews /></AdminNavbar>
+              <NavbarWrapper><AdminNews /></NavbarWrapper>
             </PrivateRoute>
           } 
         />
@@ -196,7 +229,7 @@ function App() {
           path="/post-news" 
           element={
             <PrivateRoute>
-              <AdminNavbar><PostNews /></AdminNavbar>
+              <NavbarWrapper><PostNews /></NavbarWrapper>
             </PrivateRoute>
           } 
         />

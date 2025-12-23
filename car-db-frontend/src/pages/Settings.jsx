@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { User, ShoppingBag, Heart, Car, LogOut, Trash2, Menu, X } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 import EditProfile from '../components/settings/EditProfile';
 import PurchaseHistory from '../components/settings/PurchaseHistory';
 import FavoriteList from '../components/settings/FavoriteList';
 import MyListedCar from '../components/settings/MyListedCar';
 
 const Settings = () => {
+  const { auth } = useAuth();
   const [activeTab, setActiveTab] = useState('edit-profile');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,12 +36,17 @@ const Settings = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  const menuItems = [
-    { id: 'edit-profile', label: 'Edit profile', icon: User },
-    { id: 'purchase-history', label: 'Purchase history', icon: ShoppingBag },
-    { id: 'favorite-list', label: 'Favorite list', icon: Heart },
-    { id: 'my-listed-car', label: 'My listed car', icon: Car },
-  ];
+  // Only show edit-profile for admin users
+  const isAdmin = auth?.role === 'admin';
+
+  const menuItems = isAdmin 
+    ? [{ id: 'edit-profile', label: 'Edit profile', icon: User }]
+    : [
+        { id: 'edit-profile', label: 'Edit profile', icon: User },
+        { id: 'purchase-history', label: 'Purchase history', icon: ShoppingBag },
+        { id: 'favorite-list', label: 'Favorite list', icon: Heart },
+        { id: 'my-listed-car', label: 'My listed car', icon: Car },
+      ];
 
   const handleLogout = () => {
     // Implement logout logic

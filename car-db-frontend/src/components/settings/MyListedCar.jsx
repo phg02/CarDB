@@ -8,16 +8,21 @@ const MyListedCar = () => {
   const [listedCars, setListedCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+  });
   const { auth, loading: authLoading } = useAuth();
 
   useEffect(() => {
     console.log('MyListedCar - useEffect triggered, authLoading:', authLoading, 'auth:', auth ? 'present' : 'null');
     if (!authLoading) {
-      fetchListedCars();
+      fetchListedCars(1); // Start with page 1
     }
   }, [auth, authLoading]);
 
-  const fetchListedCars = async () => {
+  const fetchListedCars = async (page = 1) => {
     console.log('MyListedCar - fetchListedCars called, authLoading:', authLoading, 'auth token:', auth?.accessToken ? 'present' : 'missing');
     try {
       if (authLoading) {
@@ -34,7 +39,7 @@ const MyListedCar = () => {
       }
 
       console.log('MyListedCar - Making API call to fetch cars');
-      const response = await api.get('/cars/seller', {
+      const response = await api.get(`/cars/seller?page=${page}&limit=10`, {
         headers: {
           'Authorization': `Bearer ${auth.accessToken}`,
         },
@@ -42,12 +47,24 @@ const MyListedCar = () => {
 
       console.log('MyListedCar - API call successful, cars:', response.data?.data?.length || 0);
       setListedCars(response.data?.data || []);
+      setPagination(response.data?.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+      });
     } catch (err) {
       console.log('MyListedCar - Error fetching cars:', err.message);
       setError(err.message);
       console.error('Error fetching listed cars:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages && !loading) {
+      setLoading(true);
+      fetchListedCars(newPage);
     }
   };
 
@@ -171,6 +188,47 @@ const MyListedCar = () => {
           })}
         </div>
       )}
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center mt-8 space-x-2">
+          <button
+            onClick={() => handlePageChange(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+
+          {/* Page numbers */}
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(pageNum => (
+            <button
+              key={pageNum}
+              onClick={() => handlePageChange(pageNum)}
+              className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                pageNum === pagination.currentPage
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 bg-gray-800 hover:bg-gray-700'
+              }`}
+            >
+              {pageNum}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Show total count */}
+      <div className="mt-4 text-center text-sm text-gray-400">
+        Showing {listedCars.length} of {pagination.totalItems} listed cars
+      </div>
     </div>
   );
 };

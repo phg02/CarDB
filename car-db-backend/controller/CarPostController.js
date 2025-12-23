@@ -512,11 +512,16 @@ export const getCarPostsBySeller = async (req, res) => {
       });
     }
 
-    // Get all car posts by seller
+    // Get all car posts by seller with pagination
     const carPosts = await CarPost.find({ seller: sellerId, isDeleted: false })
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
       .populate('approvedBy', 'name')
       .lean();
+
+    // Get total count for pagination
+    const totalItems = await CarPost.countDocuments({ seller: sellerId, isDeleted: false });
 
     // Get posting fees for these car posts to determine payment status
     const carPostIds = carPosts.map(post => post._id);
@@ -544,14 +549,10 @@ export const getCarPostsBySeller = async (req, res) => {
       };
     });
 
-    // Apply pagination
-    const totalItems = postsWithPaymentInfo.length;
-    const paginatedItems = postsWithPaymentInfo.slice(skip, skip + parseInt(limit));
-
     res.status(200).json({
       success: true,
       message: 'Seller car posts retrieved successfully',
-      data: paginatedItems,
+      data: postsWithPaymentInfo,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalItems / parseInt(limit)),

@@ -1,4 +1,5 @@
 import CarPost from '../model/CarPost.js';
+import { VIETNAM_CITIES } from '../services/vietnamCities.js';
 
 /**
  * Get all unique car brands/makes from verified car posts
@@ -26,12 +27,38 @@ export const getBrands = async (req, res) => {
 };
 
 /**
- * Get all unique car years from verified car posts
+ * Get all unique car years - all years if no brand, or filtered by brand
  * @route GET /api/filters/years
+ * @query {string} brand - Optional brand filter
  */
 export const getYears = async (req, res) => {
   try {
-    const years = await CarPost.find({ isDeleted: false, verified: true })
+    const { brand } = req.query;
+
+    // If no brand provided, return comprehensive year list
+    if (!brand) {
+      const currentYear = new Date().getFullYear();
+      const startYear = 1990;
+      const allYears = [];
+      for (let year = currentYear; year >= startYear; year--) {
+        allYears.push(year);
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'All years retrieved successfully',
+        data: allYears,
+      });
+    }
+
+    // If brand provided, fetch years from database for that brand
+    const query = {
+      isDeleted: false,
+      verified: true,
+      make: { $regex: brand, $options: 'i' }
+    };
+
+    const years = await CarPost.find(query)
       .distinct('year')
       .sort({ $natural: -1 }); // Sort descending (newest first)
 
@@ -82,19 +109,18 @@ export const getModelsByBrand = async (req, res) => {
 };
 
 /**
- * Get all unique body types
+ * Get all unique body types from schema enum
  * @route GET /api/filters/body-types
  */
 export const getBodyTypes = async (req, res) => {
   try {
-    const bodyTypes = await CarPost.find({ isDeleted: false, verified: true })
-      .distinct('body_type')
-      .sort();
+    // Return body types from schema enum to ensure consistency
+    const bodyTypes = ['Sedan', 'SUV', 'Truck', 'Coupe', 'Hatchback', 'Van', 'Wagon', 'Convertible'];
 
     res.status(200).json({
       success: true,
       message: 'Body types retrieved successfully',
-      data: bodyTypes.filter(type => type),
+      data: bodyTypes,
     });
   } catch (error) {
     console.error('Error fetching body types:', error);
@@ -132,19 +158,18 @@ export const getTransmissions = async (req, res) => {
 };
 
 /**
- * Get all unique fuel types
+ * Get all unique fuel types from schema enum
  * @route GET /api/filters/fuel-types
  */
 export const getFuelTypes = async (req, res) => {
   try {
-    const fuelTypes = await CarPost.find({ isDeleted: false, verified: true })
-      .distinct('fuel_type')
-      .sort();
+    // Return fuel types from schema enum to ensure consistency
+    const fuelTypes = ['Gasoline', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid'];
 
     res.status(200).json({
       success: true,
       message: 'Fuel types retrieved successfully',
-      data: fuelTypes.filter(type => type),
+      data: fuelTypes,
     });
   } catch (error) {
     console.error('Error fetching fuel types:', error);
@@ -212,14 +237,34 @@ export const getColors = async (req, res) => {
  */
 export const getCities = async (req, res) => {
   try {
-    const cities = await CarPost.find({ isDeleted: false, verified: true })
-      .distinct('dealer.city')
-      .sort();
+    const { brand } = req.query;
+
+    // If no brand provided, return full Vietnam cities list
+    if (!brand) {
+      return res.status(200).json({
+        success: true,
+        message: 'Vietnam cities retrieved successfully',
+        data: VIETNAM_CITIES,
+      });
+    }
+
+    const query = {
+      isDeleted: false,
+      verified: true,
+      'dealer.city': { $exists: true, $ne: null, $ne: '' }
+    };
+
+    if (brand) {
+      query.make = { $regex: brand, $options: 'i' };
+    }
+
+    const rawCities = await CarPost.find(query).distinct('dealer.city');
+    const cities = (rawCities || []).filter(Boolean).sort();
 
     res.status(200).json({
       success: true,
       message: 'Cities retrieved successfully',
-      data: cities.filter(city => city),
+      data: cities,
     });
   } catch (error) {
     console.error('Error fetching cities:', error);
@@ -264,31 +309,45 @@ export const getAllFilters = async (req, res) => {
   try {
     const verified = { isDeleted: false, verified: true };
 
-    const [brands, years, bodyTypes, transmissions, fuelTypes, drivetrains, colors, cities, seats] = await Promise.all([
-      CarPost.find(verified).distinct('make').sort(),
-      CarPost.find(verified).distinct('year').sort({ $natural: -1 }),
-      CarPost.find(verified).distinct('body_type').sort(),
-      CarPost.find(verified).distinct('transmission').sort(),
-      CarPost.find(verified).distinct('fuel_type').sort(),
-      CarPost.find(verified).distinct('drivetrain').sort(),
-      CarPost.find(verified).distinct('exterior_color').sort(),
-      CarPost.find(verified).distinct('dealer.city').sort(),
-      CarPost.find(verified).distinct('std_seating').sort(),
+    const [brands, transmissions, drivetrains, colors, seats] = await Promise.all([
+      CarPost.find(verified).distinct('make'),
+      CarPost.find(verified).distinct('transmission'),
+      CarPost.find(verified).distinct('drivetrain'),
+      CarPost.find(verified).distinct('exterior_color'),
+      CarPost.find(verified).distinct('std_seating'),
     ]);
+
+    // Get cities separately with filtering
+    const cities = await CarPost.find({ 
+      ...verified,
+      'dealer.city': { $exists: true, $ne: null, $ne: '' }
+    }).distinct('dealer.city');
+
+    // Use schema enum values for body types and fuel types
+    const bodyTypes = ['Sedan', 'SUV', 'Truck', 'Coupe', 'Hatchback', 'Van', 'Wagon', 'Convertible'];
+    const fuelTypes = ['Gasoline', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid'];
+
+    // Generate comprehensive year list (1990 to current year)
+    const currentYear = new Date().getFullYear();
+    const startYear = 1990;
+    const allYears = [];
+    for (let year = currentYear; year >= startYear; year--) {
+      allYears.push(year);
+    }
 
     res.status(200).json({
       success: true,
       message: 'All filter options retrieved successfully',
       data: {
-        brands: brands.filter(b => b),
-        years: years.filter(y => y),
-        bodyTypes: bodyTypes.filter(bt => bt),
-        transmissions: transmissions.filter(t => t),
-        fuelTypes: fuelTypes.filter(ft => ft),
-        drivetrains: drivetrains.filter(dt => dt),
-        colors: colors.filter(c => c),
-        cities: cities.filter(c => c),
-        seats: seats.filter(s => s),
+        brands: brands.filter(b => b).sort(),
+        years: allYears,
+        bodyTypes: bodyTypes,
+        transmissions: transmissions.filter(t => t).sort(),
+        fuelTypes: fuelTypes,
+        drivetrains: drivetrains.filter(dt => dt).sort(),
+        colors: colors.filter(c => c).sort(),
+        cities: cities.filter(c => c).sort(),
+        seats: seats.filter(s => s).sort(),
       },
     });
   } catch (error) {

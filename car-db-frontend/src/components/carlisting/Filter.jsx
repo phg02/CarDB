@@ -2,6 +2,18 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import PriceRange from "./PriceRange";
 
+// Fallback options if API returns empty lists (matching CarPost schema enums)
+const FALLBACK_OPTIONS = {
+    seatsOptions: ['2', '4', '5', '7'],
+    fuelTypeOptions: ['Gasoline', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid'],
+    drivetrainOptions: ['FWD', 'RWD', 'AWD', '4WD'],
+    transmissionOptions: ['Automatic', 'Manual'],
+    bodyTypeOptions: ['Sedan', 'SUV', 'Truck', 'Coupe', 'Hatchback', 'Van', 'Wagon', 'Convertible'],
+    colorOptions: ['Black', 'White', 'Silver', 'Gray', 'Blue', 'Red']
+};
+
+const withFallback = (arr, key) => (Array.isArray(arr) && arr.length > 0) ? arr : (FALLBACK_OPTIONS[key] || []);
+
 function Filter({ onFilterChange }) {
     // Dropdown toggle states
     const [openDropdowns, setOpenDropdowns] = useState({
@@ -68,19 +80,19 @@ function Filter({ onFilterChange }) {
                 setLoading(true);
                 const response = await axios.get("/api/filters/all");
                 
-                setFilterOptions({
+                // Preserve cityOptions; they come from the dedicated /cities endpoint
+                setFilterOptions(prev => ({
+                    ...prev,
                     statusOptions: ["New", "Used"],
-                    yearOptions: response.data.data.years || [],
                     brandOptions: response.data.data.brands || [],
                     modelOptions: [],
-                    bodyTypeOptions: response.data.data.bodyTypes || [],
-                    transmissionOptions: response.data.data.transmissions || [],
-                    fuelTypeOptions: response.data.data.fuelTypes || [],
-                    drivetrainOptions: response.data.data.drivetrains || [],
-                    seatsOptions: response.data.data.seats || [],
-                    colorOptions: response.data.data.colors || [],
-                    cityOptions: response.data.data.cities || []
-                });
+                    bodyTypeOptions: withFallback(response.data.data.bodyTypes, 'bodyTypeOptions'),
+                    transmissionOptions: withFallback(response.data.data.transmissions, 'transmissionOptions'),
+                    fuelTypeOptions: withFallback(response.data.data.fuelTypes, 'fuelTypeOptions'),
+                    drivetrainOptions: withFallback(response.data.data.drivetrains, 'drivetrainOptions'),
+                    seatsOptions: withFallback(response.data.data.seats, 'seatsOptions'),
+                    colorOptions: withFallback(response.data.data.colors, 'colorOptions'),
+                }));
                 setError(null);
             } catch (err) {
                 console.error("Error fetching filters:", err);
@@ -92,6 +104,25 @@ function Filter({ onFilterChange }) {
 
         fetchFilters();
     }, []);
+
+    // Fetch years from dedicated API endpoint (optionally filtered by brand)
+    useEffect(() => {
+        const fetchYears = async () => {
+            try {
+                const response = await axios.get('/api/filters/years', {
+                    params: selectedBrand ? { brand: selectedBrand } : {}
+                });
+                setFilterOptions(prev => ({
+                    ...prev,
+                    yearOptions: response.data?.data || []
+                }));
+            } catch (err) {
+                console.error('Error fetching years:', err);
+            }
+        };
+
+        fetchYears();
+    }, [selectedBrand]);
 
     // Fetch models when brand is selected
     useEffect(() => {
@@ -121,6 +152,59 @@ function Filter({ onFilterChange }) {
 
         fetchModels();
     }, [selectedBrand]);
+
+    // Fetch cities from dedicated API endpoint (optionally filtered by brand)
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const response = await axios.get('/api/filters/cities', {
+                    params: selectedBrand ? { brand: selectedBrand } : {}
+                });
+                setFilterOptions(prev => ({
+                    ...prev,
+                    cityOptions: response.data?.data || []
+                }));
+            } catch (err) {
+                console.error('Error fetching cities:', err);
+            }
+        };
+
+        fetchCities();
+    }, [selectedBrand]);
+
+    // Fetch seats options (dedicated endpoint)
+    useEffect(() => {
+        const fetchSeats = async () => {
+            try {
+                const response = await axios.get('/api/filters/seats');
+                setFilterOptions(prev => ({
+                    ...prev,
+                    seatsOptions: withFallback(response.data?.data, 'seatsOptions')
+                }));
+            } catch (err) {
+                console.error('Error fetching seats:', err);
+            }
+        };
+
+        fetchSeats();
+    }, []);
+
+    // Fetch fuel types (dedicated endpoint)
+    useEffect(() => {
+        const fetchFuelTypes = async () => {
+            try {
+                const response = await axios.get('/api/filters/fuel-types');
+                setFilterOptions(prev => ({
+                    ...prev,
+                    fuelTypeOptions: withFallback(response.data?.data, 'fuelTypeOptions')
+                }));
+            } catch (err) {
+                console.error('Error fetching fuel types:', err);
+            }
+        };
+
+        fetchFuelTypes();
+    }, []);
 
     // Notify parent component of filter changes
     useEffect(() => {

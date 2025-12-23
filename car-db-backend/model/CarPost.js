@@ -54,12 +54,18 @@ const carPostSchema = new mongoose.Schema(
     model: String,
     trim: String,
     version: String,
-    body_type: String,
+    body_type: {
+      type: String,
+      enum: ['Sedan', 'SUV', 'Truck', 'Coupe', 'Hatchback', 'Van', 'Wagon', 'Convertible'],
+    },
     body_subtype: String,
     vehicle_type: String,
     transmission: String,
     drivetrain: String,
-    fuel_type: String,
+    fuel_type: {
+      type: String,
+      enum: ['Gasoline', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid'],
+    },
     engine: String,
     engine_size: Number,
     engine_block: String,
@@ -70,13 +76,13 @@ const carPostSchema = new mongoose.Schema(
     interior_color: String,
     base_int_color: String,
     base_ext_color: String,
-    overall_height: String,
-    overall_length: String,
-    overall_width: String,
-    std_seating: String,
+    overall_height: Number,
+    overall_length: Number,
+    overall_width: Number,
+    std_seating: Number,
     highway_mpg: Number,
     city_mpg: Number,
-    powertrain_type: String,
+
 
     // Payment and Approval Status
     paymentStatus: {

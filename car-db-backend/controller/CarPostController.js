@@ -158,7 +158,8 @@ export const createCarPost = async (req, res) => {
         seller: postingFee.seller,
         ...postingFee.carData,
         photo_links: postingFee.photoLinks,
-        verified: true, // Mark as paid and published
+        paymentStatus: 'paid', // Mark as paid after successful payment
+        verified: false, // Not verified yet - waiting for admin approval
       });
 
       await newCarPost.save();
@@ -167,16 +168,9 @@ export const createCarPost = async (req, res) => {
       postingFee.carPost = newCarPost._id;
       await postingFee.save();
 
-      // Add to seller's selling list
-      await User.findByIdAndUpdate(
-        postingFee.seller,
-        { $push: { sellingList: newCarPost._id } },
-        { new: true }
-      );
-
       res.status(200).json({
         success: true,
-        message: 'Car post published successfully after payment',
+        message: 'Payment successful! Your car post is now awaiting admin verification.',
         data: newCarPost,
       });
     } else {
@@ -203,17 +197,61 @@ export const createCarPost = async (req, res) => {
  */
 export const getAllCarPosts = async (req, res) => {
   try {
-    const { page = 1, limit = 12, status, minPrice, maxPrice, make, year, inventory_type } = req.query;
+    const { 
+      page = 1, 
+      limit = 12, 
+      status, 
+      minPrice, 
+      maxPrice, 
+      make, 
+      model, 
+      year, 
+      inventory_type,
+      body_type,
+      transmission,
+      fuel_type,
+      drivetrain,
+      exterior_color,
+      city,
+      seats
+    } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     // Only show verified posts (admin approved)
     const filter = { isDeleted: false, verified: true };
 
-    // Apply filters
-    if (status) filter.status = status;
-    if (inventory_type) filter.inventory_type = inventory_type;
-    if (make) filter.make = { $regex: make, $options: 'i' };
+    // Apply filters - Status (New/Used)
+    if (status) filter.inventory_type = status.toLowerCase();
+    
+    // Apply filters - Year
     if (year) filter.year = parseInt(year);
+    
+    // Apply filters - Brand/Make
+    if (make) filter.make = { $regex: make, $options: 'i' };
+    
+    // Apply filters - Model
+    if (model) filter.model = { $regex: model, $options: 'i' };
+    
+    // Apply filters - Body Type
+    if (body_type) filter.body_type = { $regex: body_type, $options: 'i' };
+    
+    // Apply filters - Transmission
+    if (transmission) filter.transmission = { $regex: transmission, $options: 'i' };
+    
+    // Apply filters - Fuel Type
+    if (fuel_type) filter.fuel_type = { $regex: fuel_type, $options: 'i' };
+    
+    // Apply filters - Drivetrain
+    if (drivetrain) filter.drivetrain = { $regex: drivetrain, $options: 'i' };
+    
+    // Apply filters - Exterior Color
+    if (exterior_color) filter.exterior_color = { $regex: exterior_color, $options: 'i' };
+    
+    // Apply filters - City
+    if (city) filter['dealer.city'] = { $regex: city, $options: 'i' };
+    
+    // Apply filters - Seats
+    if (seats) filter.std_seating = seats.toString();
     
     // Price range filter
     if (minPrice || maxPrice) {
@@ -253,22 +291,75 @@ export const getAllCarPosts = async (req, res) => {
 };
 
 /**
- * Get all car posts for admin (including unverified)
+ * Get all car posts for admin (including paid/verified and unpaid/unverified)
  * @route GET /api/cars/admin/all
+ * Query params: verified=true (paid), verified=false (unpaid), verified=all (both)
  */
 export const getAllCarPostsAdmin = async (req, res) => {
   try {
-    const { page = 1, limit = 12, status, minPrice, maxPrice, make, year, inventory_type, verified } = req.query;
+    const { 
+      page = 1, 
+      limit = 12, 
+      verified = 'all',
+      status, 
+      minPrice, 
+      maxPrice, 
+      make, 
+      model,
+      year, 
+      inventory_type,
+      body_type,
+      transmission,
+      fuel_type,
+      drivetrain,
+      exterior_color,
+      city,
+      seats
+    } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const filter = { isDeleted: false };
 
-    // Apply filters
-    if (status) filter.status = status;
-    if (inventory_type) filter.inventory_type = inventory_type;
-    if (make) filter.make = { $regex: make, $options: 'i' };
+    // Apply verified filter: 'true' (paid), 'false' (unpaid), 'all' (both)
+    if (verified === 'true') {
+      filter.verified = true;
+    } else if (verified === 'false') {
+      filter.verified = false;
+    }
+    // If 'all' or undefined, no verified filter is applied
+
+    // Apply filters - Status (New/Used)
+    if (status) filter.inventory_type = status.toLowerCase();
+    
+    // Apply filters - Year
     if (year) filter.year = parseInt(year);
-    if (verified !== undefined) filter.verified = verified === 'true';
+    
+    // Apply filters - Brand/Make
+    if (make) filter.make = { $regex: make, $options: 'i' };
+    
+    // Apply filters - Model
+    if (model) filter.model = { $regex: model, $options: 'i' };
+    
+    // Apply filters - Body Type
+    if (body_type) filter.body_type = { $regex: body_type, $options: 'i' };
+    
+    // Apply filters - Transmission
+    if (transmission) filter.transmission = { $regex: transmission, $options: 'i' };
+    
+    // Apply filters - Fuel Type
+    if (fuel_type) filter.fuel_type = { $regex: fuel_type, $options: 'i' };
+    
+    // Apply filters - Drivetrain
+    if (drivetrain) filter.drivetrain = { $regex: drivetrain, $options: 'i' };
+    
+    // Apply filters - Exterior Color
+    if (exterior_color) filter.exterior_color = { $regex: exterior_color, $options: 'i' };
+    
+    // Apply filters - City
+    if (city) filter['dealer.city'] = { $regex: city, $options: 'i' };
+    
+    // Apply filters - Seats
+    if (seats) filter.std_seating = seats.toString();
     
     // Price range filter
     if (minPrice || maxPrice) {
@@ -308,15 +399,17 @@ export const getAllCarPostsAdmin = async (req, res) => {
 };
 
 /**
- * Get all unverified car posts (for admin review)
+ * Get all paid and unverified car posts (for admin review)
  * @route GET /api/cars/admin/unverified
+ * Shows posts that have been paid but not yet verified by admin
  */
 export const getUnverifiedCarPosts = async (req, res) => {
   try {
     const { page = 1, limit = 12, make, year } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const filter = { isDeleted: false, verified: false };
+    // Filter for paid (paymentStatus = 'paid') AND unverified (verified = false)
+    const filter = { isDeleted: false, paymentStatus: 'paid', verified: false };
 
     if (make) filter.make = { $regex: make, $options: 'i' };
     if (year) filter.year = parseInt(year);
@@ -331,7 +424,7 @@ export const getUnverifiedCarPosts = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Unverified car posts retrieved successfully',
+      message: 'Paid and unverified car posts retrieved successfully',
       data: carPosts,
       pagination: {
         currentPage: parseInt(page),
@@ -726,6 +819,7 @@ export const markCarAsAvailable = async (req, res) => {
 // ==================== ADMIN APPROVAL ====================
 /**
  * Approve car post (admin only)
+ * Mark as verified - only possible if posting fee has been paid
  * @route PATCH /api/cars/admin/:id/approve
  */
 export const approveCarPost = async (req, res) => {
@@ -749,27 +843,32 @@ export const approveCarPost = async (req, res) => {
       });
     }
 
-    // Check if posting fee was paid (verify it exists and is linked)
-    const PostingFee = require('../model/PostingFee.js').default;
-    const postingFee = await PostingFee.findOne({ carPost: id, paymentStatus: 'paid' });
-
-    if (!postingFee) {
+    // Check if posting fee has been paid (paymentStatus = 'paid')
+    if (carPost.paymentStatus !== 'paid') {
       return res.status(400).json({
         success: false,
-        message: 'Cannot approve this post. The posting fee has not been paid.',
+        message: 'Cannot verify this post. The posting fee has not been paid yet.',
+        currentPaymentStatus: carPost.paymentStatus,
       });
     }
 
-    // Approve the post
+    // Verify the post (only if paid)
     carPost.verified = true;
     carPost.approvedBy = adminId;
     carPost.approvedAt = new Date();
     carPost.rejectionReason = null;
     await carPost.save();
 
+    // Add to seller's selling list
+    await User.findByIdAndUpdate(
+      carPost.seller,
+      { $addToSet: { sellingList: carPost._id } },
+      { new: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Car post approved successfully',
+      message: 'Car post verified successfully and added to seller listing',
       data: {
         carPost,
         approvedAt: carPost.approvedAt,
@@ -777,10 +876,10 @@ export const approveCarPost = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error approving car post:', error);
+    console.error('Error verifying car post:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to approve car post',
+      message: 'Failed to verify car post',
       error: error.message,
     });
   }

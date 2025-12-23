@@ -1,5 +1,7 @@
 import CarPost from '../model/CarPost.js';
 import { VIETNAM_CITIES } from '../services/vietnamCities.js';
+import { VIETNAM_CAR_BRANDS, VIETNAM_CAR_MODELS } from '../services/vietnamCarBrands.js';
+
 
 /**
  * Get all unique car brands/makes from verified car posts
@@ -359,3 +361,61 @@ export const getAllFilters = async (req, res) => {
     });
   }
 };
+
+/**
+ * Get all car brands available in Vietnam (for post creation)
+ * @route GET /api/filters/vietnam-brands
+ */
+export const getVietnamBrands = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      message: 'Vietnam car brands retrieved successfully',
+      data: VIETNAM_CAR_BRANDS,
+    });
+  } catch (error) {
+    console.error('Error fetching Vietnam brands:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch Vietnam brands',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get all models for a specific brand in Vietnam (for post creation)
+ * @route GET /api/filters/vietnam-models/:brand
+ */
+export const getVietnamModels = async (req, res) => {
+  try {
+    const { brand } = req.params;
+
+    // Find the brand (case-insensitive)
+    const brandKey = VIETNAM_CAR_BRANDS.find(
+      b => b.toLowerCase() === brand.toLowerCase()
+    );
+
+    if (!brandKey || !VIETNAM_CAR_MODELS[brandKey]) {
+      return res.status(404).json({
+        success: false,
+        message: 'Brand not found',
+        data: [],
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Models retrieved successfully',
+      data: VIETNAM_CAR_MODELS[brandKey],
+    });
+  } catch (error) {
+    console.error('Error fetching Vietnam models:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch models',
+      error: error.message,
+    });
+  }
+};
+

@@ -191,7 +191,7 @@ function VinDecoder() {
                 <h3 className="text-lg font-semibold text-white mb-4">Pricing Information</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InfoItem label="MSRP" value={result?.msrp ? `$${result.msrp.toLocaleString()}` : undefined} />
-                  <InfoItem label="Listing Confidence" value={result?.listing_confidence} badge={result?.listing_confidence} />
+                  <InfoItem label="Combined MSRP" value={result?.combined_msrp ? `$${result.combined_msrp.toLocaleString()}` : undefined} />
                 </div>
               </div>
             </div>

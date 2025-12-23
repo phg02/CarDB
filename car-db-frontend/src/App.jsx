@@ -102,17 +102,6 @@ function App() {
         />
         
         {/* Common routes - Accessible to all users */}
-<<<<<<< HEAD
-        <Route path="/carlisting" element={<Navbar><CarListing /></Navbar>} />
-        <Route path="/car/:id" element={<Navbar><CarDetails /></Navbar>} />
-        <Route path="/compare" element={<Navbar><CompareCar /></Navbar>} />
-        <Route path="/news" element={<Navbar><News /></Navbar>} />
-        <Route path="/news/:id" element={<Navbar><NewsDetail /></Navbar>} />
-        <Route path="/faq" element={<Navbar><FAQ /></Navbar>} />
-        <Route path="/vin-decoder" element={<Navbar><VinDecoder /></Navbar>} />
-        <Route path="/settings" element={<Navbar><Settings /></Navbar>} />
-        <Route path="/" element={<Navbar><Homepage /></Navbar>} />
-=======
         <Route path="/carlisting" element={<NavbarWrapper><CarListing /></NavbarWrapper>} />
         <Route path="/car/:id" element={<NavbarWrapper><CarDetails /></NavbarWrapper>} />
         <Route path="/compare" element={<NavbarWrapper><CompareCar /></NavbarWrapper>} />
@@ -121,7 +110,6 @@ function App() {
         <Route path="/faq" element={<NavbarWrapper><FAQ /></NavbarWrapper>} />
         <Route path="/vin-decoder" element={<NavbarWrapper><VinDecoder /></NavbarWrapper>} />
         <Route path="/" element={<NavbarWrapper><Homepage /></NavbarWrapper>} />
->>>>>>> b2ac8d6 (admin navbar auth and setting admin)
         
         {/* Private routes - Only accessible to authenticated users */}
         <Route 
@@ -156,8 +144,7 @@ function App() {
             </PrivateRoute>
           } 
         />
-<<<<<<< HEAD
-=======
+
         <Route 
           path="/settings" 
           element={
@@ -166,7 +153,6 @@ function App() {
             </PrivateRoute>
           } 
         />
->>>>>>> b2ac8d6 (admin navbar auth and setting admin)
         
         {/* Admin routes - Only accessible to authenticated admin users */}
         <Route 

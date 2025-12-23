@@ -181,13 +181,13 @@ router.get('/vnpay/return', async (req, res) => {
       // For posting fees, update the associated car post
       if (recordType === 'posting_fee') {
         try {
-          // Update the car post to mark it as verified/paid
+          // Update the car post to mark it as paid (not verified yet - waiting for admin)
           await CarPost.findByIdAndUpdate(
             record.carPost,
-            { verified: true },
+            { paymentStatus: 'paid' },
             { new: true }
           );
-          console.log('Car post updated with payment confirmation');
+          console.log('Car post marked as paid - awaiting admin verification');
         } catch (error) {
           console.error('Error updating car post after payment:', error);
         }

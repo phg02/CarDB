@@ -33,6 +33,7 @@ export const getUserProfile = async (req, res) => {
           role: user.role,
           verified: user.verified,
           createdAt: user.createdAt,
+          profileImage: user.profileImage,
         },
       },
     });

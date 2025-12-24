@@ -72,7 +72,8 @@ export const LoginForm = () => {
         accessToken: response.data.accessToken,
         role: response.data.data.user.role,
         verified: response.data.data.user.verified,
-        email: response.data.data.user.email
+        email: response.data.data.user.email,
+        profileImage: response.data.data.user.profileImage
       });
       console.log('Auth state set:', { accessToken: !!response.data.accessToken, role: response.data.data.user.role });
       toast.success("Login successful!");

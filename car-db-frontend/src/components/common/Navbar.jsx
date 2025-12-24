@@ -104,11 +104,17 @@ export default function Navbar(props) {
             {auth?.accessToken ? (
               <Menu as="div" className="relative ml-3">
                 <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">                
-                  <img
-                    alt="Profile"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10"
-                  />
+                  <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 text-xs font-semibold overflow-hidden outline -outline-offset-1 outline-white/10">
+                    {auth?.profileImage ? (
+                      <img
+                        alt="Profile"
+                        src={auth.profileImage}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      auth?.email?.charAt(0).toUpperCase() || 'U'
+                    )}
+                  </div>
                 </MenuButton>
                 <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                   <MenuItem>

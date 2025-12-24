@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const EditProfile = () => {
-  const { auth } = useAuth();
+  const { auth, setAuth } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,6 +16,7 @@ const EditProfile = () => {
     profileImage: null
   });
   const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,31 +64,49 @@ const EditProfile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result);
+        setImagePreview(reader.result);
+        setProfileImage(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleProfileImageUpload = async (file) => {
-    const formDataObj = new FormData();
-    formDataObj.append('profileImage', file);
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append('profileImage', file);
 
-    const response = await axios.post('/api/users/profile-image', formDataObj, {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${auth.accessToken}`
-      },
-    });
+      const response = await axios.post('/api/users/profile-image', formDataObj, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`
+        },
+      });
 
-    // Update userData with new profile image URL
-    setUserData(prev => ({
-      ...prev,
-      profileImage: response.data.data.profileImage
-    }));
-    setProfileImage(null); // Clear the preview
-    return response;
+      const newProfileImage = response.data.data.user.profileImage;
+      
+      // Update userData with new profile image URL
+      setUserData(prev => ({
+        ...prev,
+        profileImage: newProfileImage
+      }));
+
+      // Update auth context with new profile image
+      setAuth(prev => ({
+        ...prev,
+        profileImage: newProfileImage
+      }));
+
+      // Clear preview and file
+      setImagePreview(null);
+      setProfileImage(null);
+      return response;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to upload profile image';
+      toast.error(errorMessage);
+      throw error;
+    }
   };
 
   const handleEditProfile = async () => {
@@ -115,13 +134,15 @@ const EditProfile = () => {
       }));
 
       // If there's a new profile image to upload
-      if (profileImage && profileImage.startsWith('data:')) {
-        // Convert data URL to file
-        const response = await fetch(profileImage);
-        const blob = await response.blob();
-        const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
-        
-        await handleProfileImageUpload(file);
+      if (profileImage) {
+        try {
+          await handleProfileImageUpload(profileImage);
+        } catch (imageError) {
+          console.error('Error uploading profile image:', imageError);
+          toast.error('Profile name updated, but image upload failed');
+          setLoading(false);
+          return;
+        }
       }
 
       toast.success('Profile updated successfully');
@@ -236,7 +257,11 @@ const EditProfile = () => {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-white text-xl font-semibold">Edit profile</h3>
               <button
-                onClick={() => setShowEditModal(false)}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setImagePreview(null);
+                  setProfileImage(null);
+                }}
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <X className="w-6 h-6" />
@@ -253,8 +278,8 @@ const EditProfile = () => {
                   className="hidden"
                 />
                 <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-3xl font-semibold overflow-hidden">
-                  {profileImage || userData.profileImage ? (
-                    <img src={profileImage || userData.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  {imagePreview || userData.profileImage ? (
+                    <img src={imagePreview || userData.profileImage} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     formData.username ? formData.username.charAt(0).toUpperCase() : 'U'
                   )}
@@ -277,14 +302,27 @@ const EditProfile = () => {
               />
             </div>
 
-            {/* Edit Button */}
-            <button
-              onClick={handleEditProfile}
-              disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-[3px] transition-colors font-medium"
-            >
-              {loading ? 'Updating...' : 'Edit'}
-            </button>
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setImagePreview(null);
+                  setProfileImage(null);
+                }}
+                disabled={loading}
+                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded-[3px] transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditProfile}
+                disabled={loading}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-[3px] transition-colors font-medium"
+              >
+                {loading ? 'Updating...' : 'Update'}
+              </button>
+            </div>
           </div>
         </div>
       )}

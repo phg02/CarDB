@@ -24,7 +24,8 @@ export const AuthProvider = ({children}) =>{
                     accessToken: res.data.accessToken, 
                     role: res.data.data.user.role,
                     verified: res.data.data.user.verified,
-                    email: res.data.data.user.email
+                    email: res.data.data.user.email,
+                    profileImage: res.data.data.user.profileImage
                 };
                 console.log('AuthContext - refresh successful:', { hasToken: !!newAuth.accessToken, role: newAuth.role });
                 setAuth(newAuth);

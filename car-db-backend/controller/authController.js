@@ -271,6 +271,7 @@ export const login = async (req, res) => {
           phone: user.phone,
           role: user.role,
           verified: user.verified,
+          profileImage: user.profileImage,
         },
       },
     });
@@ -514,6 +515,7 @@ export const refreshToken = async (req, res) => {
           email: user.email,
           role: user.role,
           verified: user.verified,
+          profileImage: user.profileImage,
         },
       },
     });

@@ -1,6 +1,9 @@
-import News from '../model/News.js';
-import User from '../model/User.js';
-import { uploadNewsThumbnail, validateImageFile } from '../services/newsImageService.js';
+import News from "../model/News.js";
+import User from "../model/User.js";
+import {
+  uploadNewsThumbnail,
+  validateImageFile,
+} from "../services/newsImageService.js";
 
 // ==================== CREATE NEWS ====================
 /**
@@ -19,28 +22,28 @@ export const createNews = async (req, res) => {
     if (!title || !title.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Title is required',
+        message: "Title is required",
       });
     }
 
     if (!content || !content.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Content is required',
+        message: "Content is required",
       });
     }
 
     if (title.trim().length < 5) {
       return res.status(400).json({
         success: false,
-        message: 'Title must be at least 5 characters long',
+        message: "Title must be at least 5 characters long",
       });
     }
 
     if (content.trim().length < 20) {
       return res.status(400).json({
         success: false,
-        message: 'Content must be at least 20 characters long',
+        message: "Content must be at least 20 characters long",
       });
     }
 
@@ -49,38 +52,41 @@ export const createNews = async (req, res) => {
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: 'Admin user not found',
+        message: "Admin user not found",
       });
     }
 
-    // Process images array - first image is the thumbnail
-    let imagesArray = Array.isArray(images) ? images : [];
+    // Process uploaded image files
     let thumbnailUrl = null;
+    let imagesArray = [];
 
-    // Use first image from images array as thumbnail
-    if (imagesArray.length > 0) {
-      thumbnailUrl = imagesArray[0];
-    }
+    if (req.files && req.files.length > 0) {
+      // Upload all images to Cloudinary
+      for (const file of req.files) {
+        const validation = validateImageFile(file);
+        if (!validation.success) {
+          return res.status(400).json({
+            success: false,
+            message: validation.message,
+          });
+        }
 
-    // If thumbnail file is uploaded via multipart, it overrides the images array thumbnail
-    if (req.file) {
-      const validation = validateImageFile(req.file);
-      if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          message: validation.message,
-        });
+        const uploadResult = await uploadNewsThumbnail(file.path, adminId);
+        if (!uploadResult.success) {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to upload image",
+            error: uploadResult.error,
+          });
+        }
+
+        imagesArray.push(uploadResult.url);
       }
 
-      const uploadResult = await uploadNewsThumbnail(req.file.path, adminId);
-      if (!uploadResult.success) {
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to upload thumbnail',
-          error: uploadResult.error,
-        });
+      // First image becomes the thumbnail
+      if (imagesArray.length > 0) {
+        thumbnailUrl = imagesArray[0];
       }
-      thumbnailUrl = uploadResult.url;
     }
 
     // Create news post
@@ -93,20 +99,20 @@ export const createNews = async (req, res) => {
     });
 
     await news.save();
-    await news.populate('author', 'name email');
+    await news.populate("author", "name email");
 
     res.status(201).json({
       success: true,
-      message: 'News post created successfully',
+      message: "News post created successfully",
       data: {
         news,
       },
     });
   } catch (error) {
-    console.error('Error creating news:', error);
+    console.error("Error creating news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create news post',
+      message: "Failed to create news post",
       error: error.message,
     });
   }
@@ -120,7 +126,7 @@ export const createNews = async (req, res) => {
  */
 export const getAllNewsForUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = "" } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build search query
@@ -130,13 +136,13 @@ export const getAllNewsForUsers = async (req, res) => {
 
     if (search && search.trim()) {
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
       ];
     }
 
     const news = await News.find(query)
-      .populate('author', 'name email profileImage')
+      .populate("author", "name email profileImage")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -145,7 +151,7 @@ export const getAllNewsForUsers = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'News posts retrieved successfully',
+      message: "News posts retrieved successfully",
       data: {
         news,
       },
@@ -157,10 +163,10 @@ export const getAllNewsForUsers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching news:', error);
+    console.error("Error fetching news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch news posts',
+      message: "Failed to fetch news posts",
       error: error.message,
     });
   }
@@ -173,28 +179,33 @@ export const getAllNewsForUsers = async (req, res) => {
  */
 export const getAllNewsForAdmin = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '', isDeleted = 'false' } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      isDeleted = "false",
+    } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build query
     let query = {};
 
-    if (isDeleted === 'true') {
+    if (isDeleted === "true") {
       query.isDeleted = true;
-    } else if (isDeleted === 'false') {
+    } else if (isDeleted === "false") {
       query.isDeleted = false;
     }
     // If 'all', no isDeleted filter
 
     if (search && search.trim()) {
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
       ];
     }
 
     const news = await News.find(query)
-      .populate('author', 'name email profileImage')
+      .populate("author", "name email profileImage")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -203,7 +214,7 @@ export const getAllNewsForAdmin = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'News posts retrieved successfully',
+      message: "News posts retrieved successfully",
       data: {
         news,
       },
@@ -215,10 +226,10 @@ export const getAllNewsForAdmin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching news:', error);
+    console.error("Error fetching news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch news posts',
+      message: "Failed to fetch news posts",
       error: error.message,
     });
   }
@@ -236,27 +247,27 @@ export const getNewsById = async (req, res) => {
     const news = await News.findOne({
       _id: id,
       isDeleted: false,
-    }).populate('author', 'name email profileImage');
+    }).populate("author", "name email profileImage");
 
     if (!news) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found',
+        message: "News post not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: 'News post retrieved successfully',
+      message: "News post retrieved successfully",
       data: {
         news,
       },
     });
   } catch (error) {
-    console.error('Error fetching news:', error);
+    console.error("Error fetching news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch news post',
+      message: "Failed to fetch news post",
       error: error.message,
     });
   }
@@ -281,14 +292,14 @@ export const updateNews = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found',
+        message: "News post not found",
       });
     }
 
     if (news.isDeleted) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found (deleted)',
+        message: "News post not found (deleted)",
       });
     }
 
@@ -297,13 +308,13 @@ export const updateNews = async (req, res) => {
       if (!title || !title.trim()) {
         return res.status(400).json({
           success: false,
-          message: 'Title cannot be empty',
+          message: "Title cannot be empty",
         });
       }
       if (title.trim().length < 5) {
         return res.status(400).json({
           success: false,
-          message: 'Title must be at least 5 characters long',
+          message: "Title must be at least 5 characters long",
         });
       }
       news.title = title.trim();
@@ -313,13 +324,13 @@ export const updateNews = async (req, res) => {
       if (!content || !content.trim()) {
         return res.status(400).json({
           success: false,
-          message: 'Content cannot be empty',
+          message: "Content cannot be empty",
         });
       }
       if (content.trim().length < 20) {
         return res.status(400).json({
           success: false,
-          message: 'Content must be at least 20 characters long',
+          message: "Content must be at least 20 characters long",
         });
       }
       news.content = content.trim();
@@ -349,7 +360,7 @@ export const updateNews = async (req, res) => {
       if (!uploadResult.success) {
         return res.status(500).json({
           success: false,
-          message: 'Failed to upload thumbnail',
+          message: "Failed to upload thumbnail",
           error: uploadResult.error,
         });
       }
@@ -358,20 +369,20 @@ export const updateNews = async (req, res) => {
 
     // Save updates
     await news.save();
-    await news.populate('author', 'name email profileImage');
+    await news.populate("author", "name email profileImage");
 
     res.status(200).json({
       success: true,
-      message: 'News post updated successfully',
+      message: "News post updated successfully",
       data: {
         news,
       },
     });
   } catch (error) {
-    console.error('Error updating news:', error);
+    console.error("Error updating news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update news post',
+      message: "Failed to update news post",
       error: error.message,
     });
   }
@@ -393,14 +404,14 @@ export const deleteNews = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found',
+        message: "News post not found",
       });
     }
 
     if (news.isDeleted) {
       return res.status(404).json({
         success: false,
-        message: 'News post already deleted',
+        message: "News post already deleted",
       });
     }
 
@@ -411,13 +422,13 @@ export const deleteNews = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'News post deleted successfully',
+      message: "News post deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting news:', error);
+    console.error("Error deleting news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete news post',
+      message: "Failed to delete news post",
       error: error.message,
     });
   }
@@ -438,14 +449,14 @@ export const restoreNews = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found',
+        message: "News post not found",
       });
     }
 
     if (!news.isDeleted) {
       return res.status(400).json({
         success: false,
-        message: 'News post is not deleted',
+        message: "News post is not deleted",
       });
     }
 
@@ -453,20 +464,20 @@ export const restoreNews = async (req, res) => {
     news.isDeleted = false;
     news.deletedAt = null;
     await news.save();
-    await news.populate('author', 'name email profileImage');
+    await news.populate("author", "name email profileImage");
 
     res.status(200).json({
       success: true,
-      message: 'News post restored successfully',
+      message: "News post restored successfully",
       data: {
         news,
       },
     });
   } catch (error) {
-    console.error('Error restoring news:', error);
+    console.error("Error restoring news:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to restore news post',
+      message: "Failed to restore news post",
       error: error.message,
     });
   }

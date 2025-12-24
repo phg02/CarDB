@@ -1,7 +1,7 @@
-import express from 'express';
-import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
 import {
   createNews,
   getAllNewsForUsers,
@@ -10,8 +10,8 @@ import {
   updateNews,
   deleteNews,
   restoreNews,
-} from '../controller/NewsController.js';
-import { verifyToken, isAdmin } from '../middleware/authMiddleware.js';
+} from "../controller/NewsController.js";
+import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -21,10 +21,10 @@ const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/news'));
+    cb(null, path.join(__dirname, "../uploads/news"));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
@@ -32,11 +32,11 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed.'));
+      cb(new Error("Invalid file type. Only JPEG, PNG, and WebP are allowed."));
     }
   },
 });
@@ -49,7 +49,13 @@ const upload = multer({
  * Multipart form data with optional thumbnail file
  * Body: { title, content, images[]? }
  */
-router.post('/create', verifyToken, isAdmin, upload.single('thumbnail'), createNews);
+router.post(
+  "/create",
+  verifyToken,
+  isAdmin,
+  upload.array("images", 10),
+  createNews
+);
 
 // ==================== READ NEWS ====================
 /**
@@ -58,7 +64,7 @@ router.post('/create', verifyToken, isAdmin, upload.single('thumbnail'), createN
  * Public endpoint - no authentication required
  * This must come BEFORE /:id route
  */
-router.get('/', getAllNewsForUsers);
+router.get("/", getAllNewsForUsers);
 
 /**
  * Get all news posts (for admin - including deleted)
@@ -66,14 +72,14 @@ router.get('/', getAllNewsForUsers);
  * Requires: Admin authentication
  * This must come BEFORE /:id route
  */
-router.get('/admin/all', verifyToken, isAdmin, getAllNewsForAdmin);
+router.get("/admin/all", verifyToken, isAdmin, getAllNewsForAdmin);
 
 /**
  * Get a single news post by ID
  * GET /api/news/:id
  * Public endpoint - no authentication required
  */
-router.get('/:id', getNewsById);
+router.get("/:id", getNewsById);
 
 // ==================== UPDATE NEWS (ADMIN ONLY) ====================
 /**
@@ -83,7 +89,13 @@ router.get('/:id', getNewsById);
  * Multipart form data with optional thumbnail file
  * Body: { title?, content?, images[]? }
  */
-router.patch('/:id', verifyToken, isAdmin, upload.single('thumbnail'), updateNews);
+router.patch(
+  "/:id",
+  verifyToken,
+  isAdmin,
+  upload.single("thumbnail"),
+  updateNews
+);
 
 // ==================== DELETE NEWS (ADMIN ONLY) ====================
 /**
@@ -91,13 +103,13 @@ router.patch('/:id', verifyToken, isAdmin, upload.single('thumbnail'), updateNew
  * DELETE /api/news/:id
  * Requires: Admin authentication
  */
-router.delete('/:id', verifyToken, isAdmin, deleteNews);
+router.delete("/:id", verifyToken, isAdmin, deleteNews);
 
 /**
  * Restore deleted news post
  * PATCH /api/news/:id/restore
  * Requires: Admin authentication
  */
-router.patch('/:id/restore', verifyToken, isAdmin, restoreNews);
+router.patch("/:id/restore", verifyToken, isAdmin, restoreNews);
 
 export default router;

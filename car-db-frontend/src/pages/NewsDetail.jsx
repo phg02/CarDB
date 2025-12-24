@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import {
   MessageSquare,
   Phone,
@@ -10,183 +12,121 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
-// Mock data - in real app, this would be fetched from API
-const allArticles = [
-  {
-    id: 1,
-    title: "The Future of Electric Vehicles",
-    breadcrumb: "Homepage / News / The Future of Electric Vehicles",
-    mainImage:
-      "https://images.unsplash.com/photo-1502877338535-766e1452684a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    date: "June, 01 2021",
-    content: [
-      {
-        type: "text",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget praesent gravida sed rutrum suspendisse ac. Lectus fermentum in gravida nibh in vel. Accumsan gravida nec ultricies nec eget arcu nisi turpis lorem.",
-      },
-      {
-        type: "text",
-        text: "Ullamcorper pellentesque diam eget volutpat. Ut senectus rhoncus elit nist vitae erat. Orci quisque in. Quisque ut viverra interdum id ut in. Consequat, convallis iaculis dictum urna tellus fames arcu, at. Pretium venenatis, pharettra, rhus, sagittis interdum viverra suspendisse morbi cursus.",
-      },
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      },
-      {
-        type: "heading",
-        text: "Why?",
-      },
-      {
-        type: "list",
-        items: [
-          "Leo amet, posuere nibh nam nulla vestibulum sagittis mauris.",
-          "Elementum lacus, et sed praesent lectus nis diam pulvinar eget.",
-          "Vulputate nibh molestie eros dapibus.",
-          "Blandit venenatis, commodo magna dictumst ac consequat, etiam sed.",
-        ],
-      },
-      {
-        type: "heading",
-        text: "How?",
-      },
-      {
-        type: "list",
-        items: [
-          "Leo amet, posuere nibh nam nulla vestibulum sagittis mauris.",
-          "Elementum lacus, et sed praesent lectus nis diam pulvinar eget.",
-          "Vulputate nibh molestie eros dapibus.",
-          "Blandit venenatis, commodo magna dictumst ac consequat, etiam sed.",
-        ],
-      },
-      {
-        type: "heading",
-        text: "Finishing",
-      },
-      {
-        type: "text",
-        text: "Leo amet, posuere nibh nam nulla vestibulum sagittis mauris. Fermentum lacus, et sed praesent lectus nis diam pulvinar eget. Vulputate nibh molestie eros dapibus. Blandit venenatis, commodo magna dictumst ac consequat, etiam sed. Scelerisque nisi nam et lacus, fringilla amet ut enim. Dui porttitor faucibus mauris habitasse adipiscing pellentesque sem nulla nec. Fermentum, blandit mollis defermd volutpat. Risus agia enim sed a id risus, malesuet it.",
-      },
-    ],
-    tags: ["Dealer", "Electric"],
-    author: {
-      name: "John Smith",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      phone: "240-865-3730",
-      email: "john.smith@mail.com",
-    },
-    comments: [
-      {
-        id: 1,
-        author: "Ryan Gander",
-        avatar: "https://i.pravatar.cc/150?img=12",
-        date: "1 day ago",
-        text: "Quis placerat mi semper amet neque. Lacus ut natoque non pretium tortiquet idipsum vitae. US lorem sem mauris accumsit. Gratia uni ante, lobor sint. Etiam Malesuada vel, tempor ante magna, blandic magna dui. Auctor quisque Maecenas sed porttior pretium sodales gravida Aliquam ac tempor nibh. Aliquam porttitor consequt pulvinar lectus vel aliauam magha. Velit feu platea nsi et. Est morbi gravida pretium.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Top Sports Cars of 2024 - 2025",
-    breadcrumb: "Homepage / News / Top Sports Cars of 2024",
-    mainImage:
-      "https://tse3.mm.bing.net/th/id/OIP.ShBl0daSHVhATYHqHF5W4QHaEK?pid=Api&P=0&h=180",
-    date: "June, 01 2021",
-    content: [
-      {
-        type: "text",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget praesent gravida sed rutrum suspendisse ac. Lectus fermentum in gravida nibh in vel. Accumsan gravida nec ultricies nec eget arcu nisi turpis lorem.",
-      },
-      {
-        type: "heading",
-        text: "Performance",
-      },
-      {
-        type: "text",
-        text: "Ullamcorper pellentesque diam eget volutpat. Ut senectus rhoncus elit nist vitae erat. Orci quisque in. Quisque ut viverra interdum id ut in.",
-      },
-    ],
-    tags: ["Sports", "Performance"],
-    author: {
-      name: "Sarah Johnson",
-      avatar: "https://i.pravatar.cc/150?img=7",
-      phone: "240-865-3731",
-      email: "sarah.j@mail.com",
-    },
-    comments: [],
-  },
-  {
-    id: 3,
-    title: "Electric Car Charging Infrastructure",
-    breadcrumb: "Homepage / News / Electric Car Charging Infrastructure",
-    mainImage:
-      "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    date: "May, 28 2021",
-    content: [
-      {
-        type: "text",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget praesent gravida sed rutrum suspendisse ac. Lectus fermentum in gravida nibh in vel. Accumsan gravida nec ultricies nec eget arcu nisi turpis lorem.",
-      },
-    ],
-    tags: ["Electric", "Technology"],
-    author: {
-      name: "Mike Davis",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      phone: "240-865-3732",
-      email: "mike.d@mail.com",
-    },
-    comments: [],
-  },
-  {
-    id: 4,
-    title: "Autonomous Driving Technology Advances",
-    breadcrumb: "Homepage / News / Autonomous Driving Technology Advances",
-    mainImage:
-      "https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    date: "May, 25 2021",
-    content: [
-      {
-        type: "text",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget praesent gravida sed rutrum suspendisse ac. Lectus fermentum in gravida nibh in vel. Accumsan gravida nec ultricies nec eget arcu nisi turpis lorem.",
-      },
-    ],
-    tags: ["Technology", "Innovation"],
-    author: {
-      name: "Emily Chen",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      phone: "240-865-3733",
-      email: "emily.c@mail.com",
-    },
-    comments: [],
-  },
-];
-
 const NewsDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
 
-  // Find the article by ID
-  const article = allArticles.find((article) => article.id === parseInt(id));
-
+  const [article, setArticle] = useState(null);
+  const [relatedNews, setRelatedNews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState("");
-  const [articleComments, setArticleComments] = useState(
-    article?.comments || []
-  );
+  const [articleComments, setArticleComments] = useState([]);
   const [showAllComments, setShowAllComments] = useState(false);
   const COMMENTS_PER_PAGE = 3;
-
-  // Image slider state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Collect all images (mainImage + content images)
-  const allImages = article
-    ? [
-        article.mainImage,
-        ...article.content
-          .filter((item) => item.type === "image")
-          .map((item) => item.url),
-      ]
-    : [];
+  const fetchArticle = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/news/${id}`, {
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        const newsData = response.data.data.news;
+        setArticle({
+          id: newsData._id,
+          title: newsData.title,
+          content: newsData.content,
+          mainImage:
+            newsData.thumbnail ||
+            newsData.images?.[0] ||
+            "https://via.placeholder.com/800x600",
+          images: newsData.images || [],
+          date: new Date(newsData.createdAt).toLocaleDateString("en-US", {
+            month: "long",
+            day: "2-digit",
+            year: "numeric",
+          }),
+          author: {
+            name: newsData.author?.name || "Unknown",
+            email: newsData.author?.email || "",
+            phone: newsData.author?.phone || "",
+            avatar:
+              newsData.author?.profileImage ||
+              `https://ui-avatars.com/api/?name=${
+                newsData.author?.name || "U"
+              }`,
+          },
+          tags: newsData.tags || [],
+        });
+
+        // Fetch related news
+        const allNewsResponse = await axios.get("/api/news", {
+          withCredentials: true,
+        });
+        if (allNewsResponse.data.success) {
+          const related = allNewsResponse.data.data.news
+            .filter((n) => n._id !== id)
+            .slice(0, 2)
+            .map((n) => ({
+              id: n._id,
+              title: n.title,
+              description: n.content.substring(0, 150) + "...",
+              image:
+                n.thumbnail ||
+                n.images?.[0] ||
+                "https://via.placeholder.com/400x300",
+              date: new Date(n.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              }),
+              tags: n.tags || [],
+              author: { name: n.author?.name || "Unknown", avatar: "" },
+              comments: 0,
+              imageCount: 1 + (n.images?.length || 0),
+            }));
+          setRelatedNews(related);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching article:", error);
+      toast.error("Failed to load article");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  const fetchComments = useCallback(async () => {
+    try {
+      const response = await axios.get(`/api/comments/news/${id}`, {
+        withCredentials: true,
+      });
+      if (response.data.success) {
+        const mappedComments = response.data.data.map((c) => ({
+          id: c._id,
+          author: c.user?.name || "Anonymous",
+          avatar:
+            c.user?.profileImage ||
+            `https://ui-avatars.com/api/?name=${c.user?.name || "A"}`,
+          date: new Date(c.createdAt).toLocaleDateString(),
+          text: c.content,
+          isCurrentUser:
+            auth?.userId === c.user?._id || auth?.email === c.user?.email,
+        }));
+        setArticleComments(mappedComments);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  }, [id, auth?.userId, auth?.email]);
+
+  useEffect(() => {
+    fetchArticle();
+    fetchComments();
+  }, [fetchArticle, fetchComments]);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
@@ -207,7 +147,81 @@ const NewsDetail = () => {
     navigate(`/news/${newsId}`);
   };
 
-  // If article not found, show error
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (comment.trim()) {
+      try {
+        const token = auth?.accessToken;
+        const response = await axios.post(
+          `/api/comments/create/${id}`,
+          { content: comment },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+
+        if (response.data.success) {
+          const newComment = {
+            id: response.data.data.comment._id,
+            author: response.data.data.comment.user?.name || "You",
+            avatar:
+              response.data.data.comment.user?.profileImage ||
+              `https://ui-avatars.com/api/?name=Y`,
+            date: new Date(
+              response.data.data.comment.createdAt
+            ).toLocaleDateString(),
+            text: response.data.data.comment.content,
+            isCurrentUser: true,
+          };
+          setArticleComments([...articleComments, newComment]);
+          setComment("");
+          toast.success("Comment posted successfully");
+        }
+      } catch (error) {
+        console.error("Error posting comment:", error);
+        toast.error("Failed to post comment");
+      }
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    const message =
+      auth?.role === "admin"
+        ? "Are you sure you want to delete this comment? (Admin action)"
+        : "Are you sure you want to delete this comment?";
+
+    if (window.confirm(message)) {
+      try {
+        const token = auth?.accessToken;
+        const response = await axios.delete(`/api/comments/${commentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+
+        if (response.data.success) {
+          setArticleComments(articleComments.filter((c) => c.id !== commentId));
+          toast.success(
+            auth?.role === "admin"
+              ? "Comment removed by admin"
+              : "Comment deleted"
+          );
+        }
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+        toast.error("Failed to delete comment");
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A1929] flex items-center justify-center">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
   if (!article) {
     return (
       <div className="min-h-screen bg-[#0A1929] flex items-center justify-center">
@@ -229,89 +243,15 @@ const NewsDetail = () => {
     );
   }
 
-  // Get related news (other articles excluding current one)
-  const relatedNews = allArticles
-    .filter((a) => a.id !== article.id)
-    .slice(0, 2)
-    .map((news) => ({
-      id: news.id,
-      title: news.title,
-      description: news.content.find((c) => c.type === "text")?.text || "",
-      image: news.mainImage,
-      date: news.date,
-      tags: news.tags,
-      author: news.author,
-      comments: news.comments.length,
-      imageCount: 1 + news.content.filter((c) => c.type === "image").length,
-    }));
-
-  const handleCommentSubmit = () => {
-    if (comment.trim()) {
-      const newComment = {
-        id: Date.now(),
-        author: "Current User",
-        avatar: `https://i.pravatar.cc/150?img=${Math.floor(
-          Math.random() * 70
-        )}`,
-        date: "Just now",
-        text: comment.trim(),
-        isCurrentUser: true, // Mark as current user's comment
-      };
-
-      setArticleComments([newComment, ...articleComments]);
-      setComment("");
-    }
-  };
-
-  const handleDeleteComment = (commentId) => {
-    const message =
-      auth?.role === "admin"
-        ? "Are you sure you want to delete this comment? (Admin action)"
-        : "Are you sure you want to delete this comment?";
-
-    if (window.confirm(message)) {
-      setArticleComments(articleComments.filter((c) => c.id !== commentId));
-    }
-  };
-
-  // Determine which comments to display
   const displayedComments = showAllComments
     ? articleComments
     : articleComments.slice(0, COMMENTS_PER_PAGE);
 
   const hasMoreComments = articleComments.length > COMMENTS_PER_PAGE;
 
-  const renderContent = (item, index) => {
-    switch (item.type) {
-      case "text":
-        return (
-          <p key={index} className="text-gray-300 leading-relaxed mb-6">
-            {item.text}
-          </p>
-        );
-      case "image":
-        // Images are now handled by the slider, skip rendering here
-        return null;
-      case "heading":
-        return (
-          <h2 key={index} className="text-2xl font-bold text-white mt-8 mb-4">
-            {item.text}
-          </h2>
-        );
-      case "list":
-        return (
-          <ul key={index} className="list-disc list-inside space-y-2 mb-6">
-            {item.items.map((listItem, i) => (
-              <li key={i} className="text-gray-300">
-                {listItem}
-              </li>
-            ))}
-          </ul>
-        );
-      default:
-        return null;
-    }
-  };
+  const allImages = article
+    ? [article.mainImage, ...(article.images || [])]
+    : [];
 
   return (
     <div className="min-h-screen bg-black">
@@ -397,8 +337,8 @@ const NewsDetail = () => {
         )}
 
         {/* Article Content */}
-        <div className="mb-12">
-          {article.content.map((item, index) => renderContent(item, index))}
+        <div className="text-gray-300 leading-relaxed mb-12 whitespace-pre-wrap">
+          {article.content}
         </div>
 
         {/* Tags */}

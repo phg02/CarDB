@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
   const navigate = useNavigate();
@@ -49,53 +51,85 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
           drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
           highway_mpg: 0, // Not available in current data
           city_mpg: 0, // Not available in current data
-          overall_height: 0, // Not available in current data
-          overall_length: 0, // Not available in current data
-          overall_width: 0, // Not available in current data
-          std_seating: 0, // Not available in current data
-          exterior_color: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Color')?.value || 'Unknown',
-          interior_color: 'Unknown', // Not available in current data
-          base_ext_color: 'Unknown', // Not available in current data
-          base_int_color: 'Unknown', // Not available in current data
-          vin: 'Unknown', // Not available in current data
-          inventory_type: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value === '0 mi' ? 'new' : 'used',
-          owners: 0, // Not available in current data
-          carfax_clean_title: 'Unknown', // Not available in current data
-          phone: 'Unknown', // Not available in current data
-          dealer: {
-            street: 'Unknown', // Not available in current data
-            city: 'Unknown', // Not available in current data
-            state: 'Unknown', // Not available in current data
-            country: 'Unknown', // Not available in current data
-          },
-        },
-        imagePreviews: carData.images?.map(url => ({ url, name: 'car-image.jpg', file: null })) || [],
-        isPurchase: true, // Flag to indicate this is a purchase, not a listing
+          combined_mpg: 0, // Not available in current data
+          exterior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Exterior Color')?.value || 'Unknown',
+          interior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Interior Color')?.value || 'Unknown',
+          base_exterior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Base Exterior Color')?.value || 'Unknown',
+          base_interior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Base Interior Color')?.value || 'Unknown',
+          previous_owners: parseInt(carData.specifications?.rightColumn?.[3]?.items?.find(item => item.label === 'Previous Owner')?.value) || 0,
+          clean_title: carData.specifications?.rightColumn?.[3]?.items?.find(item => item.label === 'Clean Title')?.value === 'Yes',
+          height: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Height')?.value || 'Unknown',
+          length: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Length')?.value || 'Unknown',
+          width: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Width')?.value || 'Unknown',
+          cargo_capacity: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Cargo Capacity')?.value || 'Unknown',
+          powertrain_type: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Powertrain Type')?.value || 'Unknown',
+          engine_block: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine Block')?.value || 'Unknown',
+          cylinders: parseInt(carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Cylinders')?.value) || 0,
+          engine_size: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine Size')?.value || 'Unknown',
+        }
       }
     });
   };
 
   const handleCompare = () => {
-    // Get existing comparison list from localStorage
-    const existingCompare = JSON.parse(localStorage.getItem('compareList') || '[]');
-    
-    // Check if car is already in the list
-    const isAlreadyAdded = existingCompare.some(car => car.name === carData.name);
-    
-    if (isAlreadyAdded) {
+    const storedCars = JSON.parse(localStorage.getItem('compareCars') || '[]');
+    const isAlreadyCompared = storedCars.some(car => car.id === carId);
+
+    if (isAlreadyCompared) {
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000);
       return;
     }
-    
-    if (existingCompare.length < 3) {
-      // Add car to comparison list
-      existingCompare.push(carData);
-      localStorage.setItem('compareList', JSON.stringify(existingCompare));
-    }
-    
-    // Redirect to compare page
+
+    const carToCompare = {
+      id: carId,
+      name: carData.name,
+      price: price,
+      image: carData.images?.[0] || 'https://via.placeholder.com/400x300',
+      year: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Year')?.value || 'Unknown',
+      mileage: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value || 'Unknown',
+      fuel: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Fuel Type')?.value || 'Unknown',
+      transmission: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
+      drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
+    };
+
+    storedCars.push(carToCompare);
+    localStorage.setItem('compareCars', JSON.stringify(storedCars));
     navigate('/compare');
+  };
+
+  const handleApprove = async () => {
+    try {
+      await axios.patch(`/api/cars/admin/${carId}/approve`, {}, {
+        headers: {
+          'Authorization': `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      });
+      toast.success('Car approved successfully');
+      // Navigate back to waitlist or refresh
+      navigate('/admin/waitlist-cars');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to approve car');
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await axios.patch(`/api/cars/admin/${carId}/reject`, {
+        reason: 'Rejected by admin'
+      }, {
+        headers: {
+          'Authorization': `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      });
+      toast.success('Car rejected successfully');
+      // Navigate back to waitlist or refresh
+      navigate('/admin/waitlist-cars');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reject car');
+    }
   };
 
   return (
@@ -147,14 +181,16 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
         {isAdminWaitlist && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
             <button 
+              onClick={handleApprove}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
               Approve
             </button>
             <button 
+              onClick={handleReject}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
             >
-              Delete
+              Reject
             </button>
           </div>
         )}

@@ -1,93 +1,137 @@
 import '../index.css';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 import ProductCard from '../components/carlisting/ProductCard';
 import Filter from '../components/carlisting/Filter';
 import Result from '../components/carlisting/Result';
+import { useAuth } from '../context/AuthContext';
 
 function ApprovedCar() {
+  const { auth } = useAuth();
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchApprovedCars = async (page = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get('/api/cars/admin/all', {
+        params: { page, limit: 12, verified: 'true' },
+        headers: {
+          'Authorization': `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      });
+      setCars(response.data.data || []);
+      setTotalPages(response.data.pagination?.totalPages || 1);
+      setCurrentPage(page);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch approved cars');
+      toast.error('Failed to load approved cars');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApprovedCars();
+  }, []);
+
+  const handleDelete = async (carId) => {
+    if (!window.confirm('Are you sure you want to delete this approved car?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/cars/${carId}`, {
+        headers: {
+          'Authorization': `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      });
+      toast.success('Car deleted successfully');
+      // Remove the car from the list
+      setCars(cars.filter(car => car._id !== carId));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete car');
+    }
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN').format(price) + ' đ';
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
+        <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px]">
+          <Filter />
+          <div className="flex flex-col gap-6 sm:gap-9 py-5 lg:py-0 w-full lg:flex-1">
+            <Result count={0} />
+            <div className="text-center text-white">Loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
+        <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px]">
+          <Filter />
+          <div className="flex flex-col gap-6 sm:gap-9 py-5 lg:py-0 w-full lg:flex-1">
+            <Result count={0} />
+            <div className="text-center text-red-500">{error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-black min-h-screen flex flex-col items-center py-6 px-4 sm:py-10">
-      
-      {/* This wrapper controls the whole layout width */}
       <div className="flex flex-col lg:flex-row lg:gap-20 w-full max-w-[1200px]">
           <Filter />
 
-          {/* Right panel has custom width */}
           <div className="flex flex-col gap-6 sm:gap-9 py-5 lg:py-0 w-full lg:flex-1">
-            <Result count={4} />
-            
+            <Result count={cars.length} />
+
             <div className="grid grid-cols-1 sm:grid-cols-2 min-[1400px]:grid-cols-3 gap-6 sm:gap-8 auto-rows-fr">
-              <ProductCard
-                  id={1}
-                  to={`/approved-car/1`}
-                    img="https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg" 
-                    status="New" 
-                    name="Tesla Model 3 Standard Range Plus" 
-                    price="360.000.000 đ" 
-                    location="Florida, USA" 
-                    year={2020} 
-                    wheel="Rear-wheel Drive" 
-                    fuel="Electric" 
-                    seats={5}>
-
-                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
-                      Delete
-                    </button>
-              </ProductCard>
-
-              <ProductCard
-                  id={2}
-                  to={`/approved-car/2`}
-                    img="https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg" 
-                    status="Used" 
-                    name="BMW i4 M50" 
-                    price="1.200.000.000 đ" 
-                    location="California, USA" 
-                    year={2022} 
-                    wheel="All-wheel Drive" 
-                    fuel="Electric" 
-                    seats={5}>
-
-                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
-                      Delete
-                    </button>
-              </ProductCard>
-
-              <ProductCard
-                  id={3}
-                  to={`/approved-car/3`}
-                    img="https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg" 
-                    status="New" 
-                    name="Mercedes-Benz C-Class 300" 
-                    price="900.000.000 đ" 
-                    location="New York, USA" 
-                    year={2021} 
-                    wheel="Rear-wheel Drive" 
-                    fuel="Gasoline" 
-                    seats={5}>
-
-                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
-                      Delete
-                    </button>
-              </ProductCard>
-
-                  <ProductCard
-                    id={4}
-                    to={`/approved-car/4`}
-                    img="https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp" 
-                    status="Used" 
-                    name="Audi e-tron GT" 
-                    price="3.500.000.000 đ" 
-                    location="Florida, USA" 
-                    year={2023} 
-                    wheel="All-wheel Drive" 
-                    fuel="Electric" 
-                    seats={5}>
-
-                    <button className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition">
-                      Delete
-                    </button>
-              </ProductCard>
+              {cars.map((car) => (
+                <ProductCard
+                  key={car._id}
+                  id={car._id}
+                  to={`/approved-car/${car._id}`}
+                  img={car.photo_links && car.photo_links.length > 0 ? car.photo_links[0] : 'https://via.placeholder.com/400x300'}
+                  status={car.inventory_type === 'new' ? 'New' : 'Used'}
+                  name={car.heading || `${car.make} ${car.model}`}
+                  price={formatPrice(car.price)}
+                  location={car.dealer ? `${car.dealer.city || ''}, ${car.dealer.state || ''}, ${car.dealer.country || ''}`.replace(/^, |, $/, '') : 'Location not specified'}
+                  year={car.year}
+                  wheel={car.drivetrain || 'Unknown'}
+                  fuel={car.fuel_type || 'Unknown'}
+                  seats={car.std_seating || 5}
+                >
+                  <button
+                    onClick={() => handleDelete(car._id)}
+                    className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition"
+                  >
+                    Delete
+                  </button>
+                </ProductCard>
+              ))}
             </div>
+
+            {cars.length === 0 && (
+              <div className="text-center text-gray-400 py-8">
+                No approved cars found
+              </div>
+            )}
           </div>
       </div>
     </div>

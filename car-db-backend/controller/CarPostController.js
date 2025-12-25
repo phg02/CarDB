@@ -1036,8 +1036,11 @@ export const removeFromWatchlist = async (req, res) => {
 };
 
 export default {
+  initiateCarPost,
   createCarPost,
   getAllCarPosts,
+  getAllCarPostsAdmin,
+  getUnverifiedCarPosts,
   getCarPostById,
   getCarPostsBySeller,
   updateCarPost,
@@ -1046,6 +1049,8 @@ export default {
   permanentlyDeleteCarPost,
   markCarAsSold,
   markCarAsAvailable,
+  approveCarPost,
+  rejectCarPost,
   addToWatchlist,
   removeFromWatchlist,
 };

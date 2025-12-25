@@ -43,9 +43,7 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
           body_subtype: 'Unknown', // Not available in current data
           doors: parseInt(carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Doors')?.value) || 0,
           engine: 'Unknown', // Not available in current data
-          engine_size: 0, // Not available in current data
           engine_block: 'Unknown', // Not available in current data
-          cylinders: 0, // Not available in current data
           fuel_type: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Fuel Type')?.value || 'Unknown',
           transmission: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
           drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',

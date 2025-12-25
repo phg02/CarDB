@@ -67,6 +67,11 @@ function OrderSummary() {
           submitData.append("photos", preview.file);
         });
 
+        // Backward-compatibility: backend expects `miles` field name
+        if ((carData.km || carData.km === 0) && !submitData.has('miles')) {
+          submitData.append('miles', carData.km);
+        }
+
         // Initiate car post
         const response = await axios.post('/api/cars/initiate', submitData, {
           withCredentials: true,

@@ -158,7 +158,7 @@ function OrderSummary() {
                   <h5 className="font-medium text-white mb-2">Basic Information</h5>
                   <div className="space-y-1 text-sm text-gray-300">
                     <p><span className="font-medium">Title:</span> {carData?.heading}</p>
-                    <p><span className="font-medium">Price:</span> ${carData?.price?.toLocaleString()}</p>
+                    <p><span className="font-medium">Price:</span> VND {carData?.price?.toLocaleString()}</p>
                     <p><span className="font-medium">Condition:</span> {carData?.condition === 'new' ? 'New' : 'Used'}</p>
                     <p><span className="font-medium">Mileage:</span> {carData?.miles?.toLocaleString()} miles</p>
                     <p><span className="font-medium">Year:</span> {carData?.year}</p>
@@ -183,7 +183,7 @@ function OrderSummary() {
                     <p><span className="font-medium">Engine Size:</span> {carData?.engine_size}L</p>
                     <p><span className="font-medium">Transmission:</span> {carData?.transmission}</p>
                     <p><span className="font-medium">Drivetrain:</span> {carData?.drivetrain}</p>
-                    <p><span className="font-medium">MPG:</span> {carData?.city_mpg} city / {carData?.highway_mpg} highway</p>
+                    <p><span className="font-medium">Km/L:</span> {carData?.city_mpg} city / {carData?.highway_mpg} highway</p>
                   </div>
                 </div>
 

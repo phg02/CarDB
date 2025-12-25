@@ -2,10 +2,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import CarPost from '../model/CarPost.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const BOT_NAME = "Carlo";
 
 // Simple in-memory cache for chatbot responses
 const responseCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1500; // 5 minutes
 
 function getCacheKey(intent, filters) {
   return JSON.stringify({ intent, filters });
@@ -118,8 +119,8 @@ function sanitizeFilters(filters) {
  * Helper to generate content with fallback models
  */
 const generateContentSafe = async (prompt) => {
-  // Updated model list based on available models for this API key
-  const modelsToTry = ["gemma-3-12b-it", "gemini-2.5-flash-lite"];
+  // Use gemma-3-4b model
+  const modelsToTry = ["gemma-3-4b-it"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
@@ -220,7 +221,20 @@ Return JSON:
 
       console.log(`Found ${cars.length} cars`);
 
-      finalPrompt = `You are a helpful car dealer assistant in Vietnam.
+      // If no cars found, return immediately with a specific message
+      if (cars.length === 0) {
+        const responseData = {
+          success: true,
+          botName: BOT_NAME,
+          intent,
+          filters: parsed.filters,
+          matchedCars: 0,
+          reply: `We don't have any cars matching your search criteria. We apologize for the inconvenience. You might want to try adjusting your preferences or checking back later.`
+        };
+        return res.json(responseData);
+      }
+
+      finalPrompt = `You are ${BOT_NAME}, a helpful car dealer assistant in Vietnam.
 User message: "${message}"
 Matched Cars: ${JSON.stringify(cars)}
 
@@ -229,26 +243,31 @@ Tone: Natural, professional, and helpful. Start with something like "Based on yo
 Details to mention: Highlight features relevant to the user's request (e.g., if they asked for seats, mention seat count; if fuel, mention MPG).
 Currency: The 'price' field is already in VND. Display the exact value from the data followed by "VND" (e.g. "1,212 VND"). Do not convert, multiply, or change the unit.
 Context: You are speaking to a Vietnamese consumer but in English.
-Format: Keep the response in a single paragraph. Do not use line breaks, newlines (\\n), or bullet points.
-If no matches found: "I couldn't find any cars matching those exact criteria in our current inventory. You might consider..."`;
+Format: Keep the response in a single paragraph. Do not use line breaks, newlines (\\n), or bullet points. Do not use markdown formatting. Limit your response to maximum 150 words.`;
     }
 
     if (intent === "policy") {
-      finalPrompt = `Answer about our policies:
+      finalPrompt = `You are ${BOT_NAME}, a helpful car dealer assistant in Vietnam.
+Answer about our policies:
 
 Policy: New/Used 6mo warranty, EV 8yr battery, 7-day return, financing 10% down 3.5-9% APR, free delivery 50km
 
-Question: "${message}"`;
+Question: "${message}"
+
+Do not use markdown formatting. Limit your response to maximum 150 words.`;
     }
 
     if (intent === "troubleshooting") {
-      finalPrompt = `Help with car issue: "${message}"
+      finalPrompt = `You are ${BOT_NAME}, a helpful car assistant.
+Help with car issue: "${message}"
 
-Give safe, simple steps. Recommend mechanic if dangerous/complex.`;
+Give safe, simple steps. Recommend mechanic if dangerous/complex. Do not use markdown formatting. Limit your response to maximum 150 words.`;
     }
 
     if (intent === "general") {
-      finalPrompt = `Answer: "${message}"`;
+      finalPrompt = `You are ${BOT_NAME}. Answer: "${message}"
+
+Do not use markdown formatting. Limit your response to maximum 150 words.`;
     }
 
     // --- SECOND CALL: Generate final response ---
@@ -256,6 +275,7 @@ Give safe, simple steps. Recommend mechanic if dangerous/complex.`;
 
     const responseData = {
       success: true,
+      botName: BOT_NAME,
       intent,
       filters: parsed.filters,
       matchedCars: cars.length,

@@ -1,4 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
+import axios from 'axios';
+
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
+const STORAGE_KEY = 'chatbot_responses_cache';
 
 function Chatbot() {
   const [open, setOpen] = useState(false);
@@ -13,6 +17,7 @@ function Chatbot() {
   const [messages, setMessages] = useState([
     { id: 1, from: 'bot', text: "Hi! I'm your assistant. How can I help today?" },
   ]);
+  const [loading, setLoading] = useState(false);
 
   function onPointerDown(e) {
     dragging.current = true;
@@ -53,24 +58,89 @@ function Chatbot() {
     setOpen((v) => !v);
   }
 
+  // Get cached response from local storage
+  const getCachedResponse = (message) => {
+    try {
+      const cache = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const cacheEntry = cache[message];
+      
+      if (cacheEntry) {
+        const age = Date.now() - cacheEntry.timestamp;
+        if (age < CACHE_TTL) {
+          return cacheEntry.reply;
+        } else {
+          // Cache expired, remove it
+          delete cache[message];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+        }
+      }
+    } catch (error) {
+      console.error('Error reading from cache:', error);
+    }
+    return null;
+  };
+
+  // Store response in local storage
+  const setCachedResponse = (message, reply) => {
+    try {
+      const cache = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      cache[message] = {
+        reply,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+    } catch (error) {
+      console.error('Error writing to cache:', error);
+    }
+  };
+
   useEffect(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
   }, [messages, open]);
 
-  function sendMessage(e) {
+  async function sendMessage(e) {
     e?.preventDefault();
     const text = input.trim();
-    if (!text) return;
+    if (!text || loading) return;
+
     const userMsg = { id: Date.now(), from: 'user', text };
     setMessages((m) => [...m, userMsg]);
     setInput('');
+    setLoading(true);
 
-    setTimeout(() => {
-      const botReply = { id: Date.now() + 1, from: 'bot', text: `Echo: ${text}` };
-      setMessages((m) => [...m, botReply]);
-    }, 600);
+    try {
+      // Check cache first
+      const cachedReply = getCachedResponse(text);
+      if (cachedReply) {
+        const botReply = { id: Date.now() + 1, from: 'bot', text: cachedReply };
+        setMessages((m) => [...m, botReply]);
+        setLoading(false);
+        return;
+      }
+
+      // Call chatbot API
+      const response = await axios.post('/api/chatbot/chat', 
+        { message: text },
+        { withCredentials: true }
+      );
+
+      const botReply = response.data.reply || 'Sorry, I could not process your request.';
+      
+      // Cache the response
+      setCachedResponse(text, botReply);
+
+      const botMsg = { id: Date.now() + 1, from: 'bot', text: botReply };
+      setMessages((m) => [...m, botMsg]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorReply = error.response?.data?.error || 'Sorry, something went wrong. Please try again.';
+      const botMsg = { id: Date.now() + 1, from: 'bot', text: errorReply };
+      setMessages((m) => [...m, botMsg]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -127,11 +197,18 @@ function Chatbot() {
               aria-label="Type a message"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 rounded-md px-2 py-1.5 text-sm bg-gray-600 text-white"
+              disabled={loading}
+              className="flex-1 rounded-md px-2 py-1.5 text-sm bg-gray-600 text-white disabled:opacity-50"
               placeholder="Type a message..."
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(e); } }}
             />
-            <button type="submit" className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-md text-sm whitespace-nowrap">Send</button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-md text-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '...' : 'Send'}
+            </button>
           </form>
         </div>
       )}

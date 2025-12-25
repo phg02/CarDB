@@ -163,7 +163,7 @@ export default function SellCar() {
             const carData = {
                 heading: formData.get("title"),
                 price: parseInt(formData.get("price")),
-                miles: parseInt(formData.get("miles")) || 0,
+                km: parseInt(formData.get("km")) || 0,
                 condition: condition,
                 vehicle_type: formData.get("vehicle_type"),
                 year: parseInt(formData.get("year")),
@@ -213,7 +213,7 @@ export default function SellCar() {
                 setError("Please enter a valid price");
                 return;
             }
-            if (carData.miles < 0) {
+            if (carData.km < 0) {
                 setError("Please enter valid mileage");
                 return;
             }
@@ -308,8 +308,8 @@ export default function SellCar() {
             <div>
               <label htmlFor="price" className="text-sm text-muted-foreground mb-2 block">Full Price</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                <input id="price" name="price" type="number" className="pl-8 bg-input border-border rounded w-full py-2" placeholder="0" />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">VND</span>
+                <input id="price" name="price" type="number" className="pl-14 bg-input border-border rounded w-full py-2" placeholder="0" />
               </div>
             </div>
           </section>
@@ -362,8 +362,8 @@ export default function SellCar() {
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Mileage</label>
                 <div className="relative">
-                  <input id="miles" name="miles" type="number" className="bg-input border-border pr-16 rounded w-full py-2 px-3" placeholder="0" />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">miles</span>
+                  <input id="km" name="km" type="number" className="bg-input border-border pr-16 rounded w-full py-2 px-3" placeholder="0" />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">km</span>
                 </div>
               </div>
             </div>
@@ -516,18 +516,18 @@ export default function SellCar() {
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Highway mpg</label>
+                <label className="text-sm text-muted-foreground mb-2 block">Highway km/l</label>
                 <div className="relative">
                   <input type="number" name="highway_mpg" className="bg-input border-border pr-16 rounded w-full py-2 px-3" />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">mpg</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">km/l</span>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">City mpg</label>
+                <label className="text-sm text-muted-foreground mb-2 block">City km/l</label>
                 <div className="relative">
                   <input type="number" name="city_mpg" className="bg-input border-border pr-16 rounded w-full py-2 px-3" />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">mpg</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">km/l</span>
                 </div>
               </div>
             </div>
@@ -538,17 +538,17 @@ export default function SellCar() {
             <h2 className="text-xl font-semibold">Dimension & Capacity</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Height (inches)</label>
+                <label className="text-sm text-muted-foreground mb-2 block">Height (cm)</label>
                 <input name="overall_height" type="number" step="0.1" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 56.7" />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Length (inches)</label>
+                <label className="text-sm text-muted-foreground mb-2 block">Length (cm)</label>
                 <input name="overall_length" type="number" step="0.1" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 182.3" />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Width (inches)</label>
+                <label className="text-sm text-muted-foreground mb-2 block">Width (cm)</label>
                 <input name="overall_width" type="number" step="0.1" className="w-full bg-input border-border rounded py-2 px-3" placeholder="e.g. 72.4" />
               </div>
 

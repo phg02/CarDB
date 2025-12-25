@@ -4,7 +4,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({children}) =>{
     const [auth, setAuth] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);  // Start as true to prevent premature redirects
 
     const updateAuth = (newAuth) => {
         console.log('AuthContext - updating auth:', newAuth ? { hasToken: !!newAuth.accessToken, role: newAuth.role } : 'null');

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export const LoginForm = () => {
@@ -12,6 +12,7 @@ export const LoginForm = () => {
   const [errors, setErrors] = useState({});
   const {setAuth} = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Load saved email from localStorage on component mount
   useEffect(() => {
@@ -73,11 +74,15 @@ export const LoginForm = () => {
         role: response.data.data.user.role,
         verified: response.data.data.user.verified,
         email: response.data.data.user.email,
+        name: response.data.data.user.name,
         profileImage: response.data.data.user.profileImage
       });
       console.log('Auth state set:', { accessToken: !!response.data.accessToken, role: response.data.data.user.role });
       toast.success("Login successful!");
-      navigate("/");
+      
+      // Redirect to the page they were trying to access, or home if no previous page
+      const from = location.state?.from?.pathname || "/";
+      navigate(from);
     } catch (err) {
       console.error('Login error:', err.response?.data);
       const errorMessage = err.response?.data?.message || "Login failed";

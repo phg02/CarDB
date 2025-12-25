@@ -43,7 +43,7 @@ function Filter({ onFilterChange }) {
         seats: [],
         colors: [],
         cities: [],
-        priceRange: { min: 0, max: 1000000 }
+        priceRange: { min: 0, max: 20000000000 }
     });
 
     // Filter options from API
@@ -206,34 +206,43 @@ function Filter({ onFilterChange }) {
         fetchFuelTypes();
     }, []);
 
-    // Notify parent component of filter changes
-    useEffect(() => {
+    // Call parent when a filter is toggled. We compute the updated filters
+    // and call `onFilterChange` immediately so parent doesn't rely on
+    // React state update timing inside this component.
+    const notifyParent = (updatedFilters, immediate = false) => {
+        console.debug('Filter.notifyParent', { updatedFilters, immediate });
         if (onFilterChange) {
-            onFilterChange(selectedFilters);
+            try {
+                onFilterChange(updatedFilters, immediate);
+            } catch (err) {
+                console.error('onFilterChange error:', err);
+            }
         }
-    }, [selectedFilters, onFilterChange]);
+    };
 
     // Toggle filter function
     const toggleFilter = (filterType, value) => {
+        console.debug('Filter.toggleFilter', { filterType, value });
         setSelectedFilters(prev => {
             const filterArray = prev[filterType];
             const updatedArray = filterArray.includes(value)
                 ? filterArray.filter(v => v !== value)
                 : [...filterArray, value];
-            
-            return {
+
+            const updated = {
                 ...prev,
                 [filterType]: updatedArray
             };
+
+            // Notify parent immediately with the computed filters (apply on click)
+            notifyParent(updated, true);
+
+            return updated;
         });
 
         // Handle brand selection to fetch models
         if (filterType === "brands") {
-            if (!selectedFilters.brands.includes(value)) {
-                setSelectedBrand(value);
-            } else {
-                setSelectedBrand("");
-            }
+            setSelectedBrand(prevBrand => (prevBrand === value ? "" : value));
         }
     };
 
@@ -277,11 +286,12 @@ function Filter({ onFilterChange }) {
                     <div className="absolute left-0 right-0 mt-1 rounded shadow-lg bg-gray-700 p-3 z-20 max-h-48 overflow-y-auto">
                         {options.length > 0 ? (
                             options.map((option) => (
-                                <label key={option} className="flex items-center gap-2 py-1 text-sm text-white cursor-pointer hover:bg-gray-600 px-1 rounded">
+                                <label key={option} onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 py-1 text-sm text-white cursor-pointer hover:bg-gray-600 px-1 rounded">
                                     <input
                                         type="checkbox"
                                         checked={filterType && selectedFilters[filterType].includes(option)}
-                                        onChange={() => {
+                                        onChange={(e) => {
+                                            e.stopPropagation();
                                             if (filterType) toggleFilter(filterType, option);
                                         }}
                                         className="cursor-pointer"
@@ -332,11 +342,15 @@ function Filter({ onFilterChange }) {
                     {renderDropdown("Color", "color", filterOptions.colorOptions)}
                     {renderDropdown("City", "city", filterOptions.cityOptions)}
 
-                    <PriceRange className="col-span-2 sm:col-span-3 lg:col-span-1" onPriceChange={(min, max) => {
-                        setSelectedFilters(prev => ({
-                            ...prev,
-                            priceRange: { min, max }
-                        }));
+                    <PriceRange className="col-span-2 sm:col-span-3 lg:col-span-1" minProp={0} maxProp={20000000000} step={10000} onPriceChange={(min, max, immediate=false) => {
+                        setSelectedFilters(prev => {
+                            const updated = {
+                                ...prev,
+                                priceRange: { min, max }
+                            };
+                            notifyParent(updated, Boolean(immediate));
+                            return updated;
+                        });
                     }} />
                 </div>
             )}
@@ -344,7 +358,7 @@ function Filter({ onFilterChange }) {
             {activeFiltersCount > 0 && (
                 <button
                     onClick={() => {
-                        setSelectedFilters({
+                        const reset = {
                             statuses: [],
                             years: [],
                             brands: [],
@@ -356,8 +370,10 @@ function Filter({ onFilterChange }) {
                             seats: [],
                             colors: [],
                             cities: [],
-                            priceRange: { min: 0, max: 1000000 }
-                        });
+                            priceRange: { min: 0, max: 20000000000 }
+                        };
+                        setSelectedFilters(reset);
+                        notifyParent(reset, true);
                         setSelectedBrand("");
                     }}
                     className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded transition text-sm truncate"

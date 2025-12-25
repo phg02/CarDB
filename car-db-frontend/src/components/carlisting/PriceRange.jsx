@@ -1,56 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
-function PriceRange() {
-  const MIN = 0;
-  const MAX = 20_000_000_000;
-  const STEP = 10000;
+function PriceRange({ onPriceChange, minProp = 0, maxProp = 20000000000, step = 10000, className = '' }) {
+  const MIN = minProp;
+  const MAX = maxProp;
+  const STEP = step;
 
-  const [min, setMin] = useState(0);
-  const [max, setMax] = useState(20_000_000_000);
+  const [min, setMin] = useState(MIN);
+  const [max, setMax] = useState(MAX);
+  const debounceRef = useRef(null);
+  const pointerUpListenerRef = useRef(null);
 
-  // Format VND currency
-  const formatVND = (v) =>
-    v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " VND";
-
-  // Normalize to percentage for UI bar width
+  const formatVND = (v) => Number(v).toLocaleString('vi-VN') + ' đ';
   const pct = (value) => ((value - MIN) / (MAX - MIN)) * 100;
 
-  const handleMin = (e) => {
-    const v = Math.min(Number(e.target.value), max - STEP);
-    setMin(v);
+  const handleMin = (e) => setMin(Math.min(Number(e.target.value), max - STEP));
+  const handleMax = (e) => setMax(Math.max(Number(e.target.value), min + STEP));
+
+  const flushNow = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (typeof onPriceChange === 'function') {
+      console.debug('PriceRange.flushNow', { min, max, immediate: true });
+      onPriceChange(min, max, true);
+    }
   };
 
-  const handleMax = (e) => {
-    const v = Math.max(Number(e.target.value), min + STEP);
-    setMax(v);
+  const onPointerDown = () => {
+    if (pointerUpListenerRef.current) return;
+    const handler = () => {
+      flushNow();
+      window.removeEventListener('pointerup', handler);
+      pointerUpListenerRef.current = null;
+    };
+    pointerUpListenerRef.current = handler;
+    window.addEventListener('pointerup', handler);
   };
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (typeof onPriceChange === 'function') {
+        console.debug('PriceRange.debounced', { min, max, immediate: false });
+        onPriceChange(min, max, false);
+      }
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (pointerUpListenerRef.current) {
+        window.removeEventListener('pointerup', pointerUpListenerRef.current);
+        pointerUpListenerRef.current = null;
+      }
+    };
+  }, [min, max, onPriceChange]);
 
   return (
-    <div className="col-span-3">
-      <label className="block mb-2 text-sm font-medium text-white">
-        Price Range
-      </label>
+    <div className={"col-span-3 " + className}>
+      <label className="block mb-2 text-sm font-medium text-white">Price Range</label>
 
-      {/* Display values */}
       <div className="flex justify-between text-sm text-white mb-2">
         <span>{formatVND(min)}</span>
         <span>{formatVND(max)}</span>
-      </div> 
+      </div>
 
       <div className="relative w-full h-2">
-        {/* Background track */}
         <div className="absolute w-full h-2 bg-neutral-700 rounded-full"></div>
-
-        {/* Highlighted selected bar */}
         <div
           className="absolute h-2 bg-blue-400 rounded-full"
-          style={{
-            left: `${pct(min)}%`,
-            width: `${pct(max) - pct(min)}%`,
-          }}
-        ></div>
+          style={{ left: `${pct(min)}%`, width: `${pct(max) - pct(min)}%` }}
+        />
 
-        {/* MIN thumb */}
         <input
           type="range"
           min={MIN}
@@ -58,6 +79,9 @@ function PriceRange() {
           step={STEP}
           value={min}
           onChange={handleMin}
+          onPointerDown={onPointerDown}
+          onMouseUp={flushNow}
+          onTouchEnd={flushNow}
           className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none
                      [&::-webkit-slider-thumb]:pointer-events-auto
                      [&::-webkit-slider-thumb]:appearance-none
@@ -67,7 +91,6 @@ function PriceRange() {
                      [&::-webkit-slider-thumb]:bg-blue-500"
         />
 
-        {/* MAX thumb */}
         <input
           type="range"
           min={MIN}
@@ -75,6 +98,9 @@ function PriceRange() {
           step={STEP}
           value={max}
           onChange={handleMax}
+          onPointerDown={onPointerDown}
+          onMouseUp={flushNow}
+          onTouchEnd={flushNow}
           className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none
                      [&::-webkit-slider-thumb]:pointer-events-auto
                      [&::-webkit-slider-thumb]:appearance-none

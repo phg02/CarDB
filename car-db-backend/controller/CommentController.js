@@ -1,5 +1,5 @@
-import Comment from '../model/Comment.js';
-import News from '../model/News.js';
+import Comment from "../model/Comment.js";
+import News from "../model/News.js";
 
 // ==================== CREATE COMMENT ====================
 /**
@@ -17,21 +17,21 @@ export const createComment = async (req, res) => {
     if (!content || !content.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Comment content cannot be empty',
+        message: "Comment content cannot be empty",
       });
     }
 
     if (content.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        message: 'Comment must be at least 2 characters long',
+        message: "Comment must be at least 2 characters long",
       });
     }
 
     if (content.trim().length > 2000) {
       return res.status(400).json({
         success: false,
-        message: 'Comment cannot exceed 2000 characters',
+        message: "Comment cannot exceed 2000 characters",
       });
     }
 
@@ -40,7 +40,7 @@ export const createComment = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found',
+        message: "News post not found",
       });
     }
 
@@ -48,7 +48,7 @@ export const createComment = async (req, res) => {
     if (news.isDeleted) {
       return res.status(403).json({
         success: false,
-        message: 'Cannot comment on deleted news post',
+        message: "Cannot comment on deleted news post",
       });
     }
 
@@ -60,20 +60,20 @@ export const createComment = async (req, res) => {
     });
 
     await newComment.save();
-    await newComment.populate('user', 'name email profileImage');
+    await newComment.populate("user", "name email profileImage");
 
     res.status(201).json({
       success: true,
-      message: 'Comment created successfully',
+      message: "Comment created successfully",
       data: {
         comment: newComment,
       },
     });
   } catch (error) {
-    console.error('Error creating comment:', error);
+    console.error("Error creating comment:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create comment',
+      message: "Failed to create comment",
       error: error.message,
     });
   }
@@ -95,7 +95,7 @@ export const getCommentsByNews = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         success: false,
-        message: 'News post not found',
+        message: "News post not found",
       });
     }
 
@@ -104,7 +104,7 @@ export const getCommentsByNews = async (req, res) => {
       news: newsId,
       isDeleted: false,
     })
-      .populate('user', 'name email profileImage')
+      .populate("user", "name email profileImage")
       .sort({ createdAt: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
@@ -117,7 +117,7 @@ export const getCommentsByNews = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Comments retrieved successfully',
+      message: "Comments retrieved successfully",
       data: {
         comments,
         pagination: {
@@ -129,10 +129,10 @@ export const getCommentsByNews = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching comments:', error);
+    console.error("Error fetching comments:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch comments',
+      message: "Failed to fetch comments",
       error: error.message,
     });
   }
@@ -149,35 +149,35 @@ export const getCommentById = async (req, res) => {
     const { commentId } = req.params;
 
     const comment = await Comment.findById(commentId)
-      .populate('user', 'name email profileImage')
-      .populate('news', 'title');
+      .populate("user", "name email profileImage")
+      .populate("news", "title");
 
     if (!comment) {
       return res.status(404).json({
         success: false,
-        message: 'Comment not found',
+        message: "Comment not found",
       });
     }
 
     if (comment.isDeleted) {
       return res.status(404).json({
         success: false,
-        message: 'Comment has been deleted',
+        message: "Comment has been deleted",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: 'Comment retrieved successfully',
+      message: "Comment retrieved successfully",
       data: {
         comment,
       },
     });
   } catch (error) {
-    console.error('Error fetching comment:', error);
+    console.error("Error fetching comment:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch comment',
+      message: "Failed to fetch comment",
       error: error.message,
     });
   }
@@ -200,14 +200,14 @@ export const updateComment = async (req, res) => {
     if (!comment) {
       return res.status(404).json({
         success: false,
-        message: 'Comment not found',
+        message: "Comment not found",
       });
     }
 
     if (comment.isDeleted) {
       return res.status(404).json({
         success: false,
-        message: 'Cannot update a deleted comment',
+        message: "Cannot update a deleted comment",
       });
     }
 
@@ -215,7 +215,7 @@ export const updateComment = async (req, res) => {
     if (comment.user.toString() !== userId) {
       return res.status(403).json({
         success: false,
-        message: 'You can only edit your own comments',
+        message: "You can only edit your own comments",
       });
     }
 
@@ -224,21 +224,21 @@ export const updateComment = async (req, res) => {
       if (!content || !content.trim()) {
         return res.status(400).json({
           success: false,
-          message: 'Comment content cannot be empty',
+          message: "Comment content cannot be empty",
         });
       }
 
       if (content.trim().length < 2) {
         return res.status(400).json({
           success: false,
-          message: 'Comment must be at least 2 characters long',
+          message: "Comment must be at least 2 characters long",
         });
       }
 
       if (content.trim().length > 2000) {
         return res.status(400).json({
           success: false,
-          message: 'Comment cannot exceed 2000 characters',
+          message: "Comment cannot exceed 2000 characters",
         });
       }
 
@@ -246,20 +246,20 @@ export const updateComment = async (req, res) => {
     }
 
     await comment.save();
-    await comment.populate('user', 'name email profileImage');
+    await comment.populate("user", "name email profileImage");
 
     res.status(200).json({
       success: true,
-      message: 'Comment updated successfully',
+      message: "Comment updated successfully",
       data: {
         comment,
       },
     });
   } catch (error) {
-    console.error('Error updating comment:', error);
+    console.error("Error updating comment:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update comment',
+      message: "Failed to update comment",
       error: error.message,
     });
   }
@@ -282,22 +282,22 @@ export const deleteComment = async (req, res) => {
     if (!comment) {
       return res.status(404).json({
         success: false,
-        message: 'Comment not found',
+        message: "Comment not found",
       });
     }
 
     if (comment.isDeleted) {
       return res.status(404).json({
         success: false,
-        message: 'Comment is already deleted',
+        message: "Comment is already deleted",
       });
     }
 
     // Check if user is the comment author or admin
-    if (comment.user.toString() !== userId && !isAdmin) {
+    if (comment.user.toString() !== userId.toString() && !isAdmin) {
       return res.status(403).json({
         success: false,
-        message: 'You can only delete your own comments',
+        message: "You can only delete your own comments",
       });
     }
 
@@ -308,16 +308,16 @@ export const deleteComment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Comment deleted successfully',
+      message: "Comment deleted successfully",
       data: {
         commentId,
       },
     });
   } catch (error) {
-    console.error('Error deleting comment:', error);
+    console.error("Error deleting comment:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete comment',
+      message: "Failed to delete comment",
       error: error.message,
     });
   }
@@ -338,8 +338,8 @@ export const getCommentsByUser = async (req, res) => {
       user: userId,
       isDeleted: false,
     })
-      .populate('user', 'name email profileImage')
-      .populate('news', 'title')
+      .populate("user", "name email profileImage")
+      .populate("news", "title")
       .sort({ createdAt: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
@@ -351,7 +351,7 @@ export const getCommentsByUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'User comments retrieved successfully',
+      message: "User comments retrieved successfully",
       data: {
         comments,
         pagination: {
@@ -363,10 +363,10 @@ export const getCommentsByUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching user comments:', error);
+    console.error("Error fetching user comments:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch user comments',
+      message: "Failed to fetch user comments",
       error: error.message,
     });
   }

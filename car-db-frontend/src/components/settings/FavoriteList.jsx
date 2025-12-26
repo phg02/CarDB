@@ -1,50 +1,62 @@
 import ProductCard from '../carlisting/ProductCard';
+import { useAuth } from '../../context/AuthContext';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const FavoriteList = () => {
-  const favoriteCars = [
-    {
-      id: 3,
-      name: 'Mercedes-Benz C-Class 300',
-      price: '900.000.000 đ',
-      img: 'https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg',
-      status: 'New',
-      location: 'New York, USA',
-      year: 2021,
-      wheel: 'Rear-wheel Drive',
-      fuel: 'Gasoline',
-      seats: 5
-    },
-    {
-      id: 4,
-      name: 'Audi e-tron GT',
-      price: '3.500.000.000 đ',
-      img: 'https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp',
-      status: 'New',
-      location: 'Florida, USA',
-      year: 2023,
-      wheel: 'All-wheel Drive',
-      fuel: 'Electric',
-      seats: 5
-    },
-    {
-      id: 1,
-      name: 'Tesla Model 3 Standard Range Plus',
-      price: '360.000.000 đ',
-      img: 'https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg',
-      status: 'New',
-      location: 'Florida, USA',
-      year: 2020,
-      wheel: 'Rear-wheel Drive',
-      fuel: 'Electric',
-      seats: 5
-    }
-  ];
+  const { auth } = useAuth();
+  const [favoriteCars, setFavoriteCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      if (!auth?.accessToken) {
+        setFavoriteCars([]);
+        setLoading(false);
+        return;
+      }
+
+        try {
+        const res = await axios.get('/api/cars/watchlist', {
+          headers: { Authorization: `Bearer ${auth.accessToken}` }
+        });
+        const list = res.data?.data?.watchlist || [];
+        // Map to the props ProductCard expects
+        const mapped = list.map(c => ({
+          id: c._id || c.id,
+          name: c.heading || `${c.make || ''} ${c.model || ''}`.trim() || c.name,
+          price: c.price ? new Intl.NumberFormat('vi-VN').format(c.price) + ' đ' : c.price || 'N/A',
+          img: (c.photo_links && c.photo_links[0]) || c.heroImage || c.img || 'https://via.placeholder.com/400x300',
+          status: c.inventory_type === 'new' ? 'New' : 'Used',
+          location: c.dealer ? `${c.dealer.city || ''}, ${c.dealer.state || ''}, ${c.dealer.country || ''}`.replace(/^, |, $/, '') : 'Location not specified',
+          year: c.year,
+          wheel: c.drivetrain || c.wheel || 'Unknown',
+          fuel: c.fuel_type || c.fuel || 'Unknown',
+          seats: c.std_seating || c.seats || 5
+        }));
+        setFavoriteCars(mapped);
+      } catch (err) {
+        console.error('Failed to load favorites', err);
+        setFavoriteCars([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [auth]);
 
   return (
     <div>
       <h2 className="text-white text-2xl font-semibold mb-6">Favorite List</h2>
-      
-      {favoriteCars.length === 0 ? (
+
+      {loading ? (
+        <div className="text-gray-400">Loading...</div>
+      ) : !auth?.accessToken ? (
+        <div className="text-center py-16">
+          <p className="text-gray-400 text-lg">Please login to view your favorites.</p>
+        </div>
+      ) : favoriteCars.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-gray-400 text-lg">You haven't added any favorites yet.</p>
         </div>

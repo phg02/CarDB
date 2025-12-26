@@ -165,9 +165,33 @@ router.get('/admin/unverified', verifyToken, isAdmin, carPostController.getUnver
  */
 router.get('/seller', verifyToken, carPostController.getCarPostsBySeller);
 
+// ==================== WATCHLIST ====================
 /**
- * Get a single car post by ID
- * GET /api/cars/:id
+ * Get current user's watchlist
+ * GET /api/cars/watchlist
+ * Optionally supports GET /api/cars/watchlist/:userId for compatibility
+ */
+router.get('/watchlist', verifyToken, carPostController.getWatchlist);
+router.get('/watchlist/:userId', verifyToken, carPostController.getWatchlist);
+
+/**
+ * Add car to user's watchlist
+ * POST /api/cars/:carId/watchlist/:userId
+ * NOTE: requires authentication; route param is kept for compatibility
+ */
+router.post('/:carId/watchlist/:userId', verifyToken, carPostController.addToWatchlist);
+
+/**
+ * Remove car from user's watchlist
+ * DELETE /api/cars/:carId/watchlist/:userId
+ */
+router.delete('/:carId/watchlist/:userId', verifyToken, carPostController.removeFromWatchlist);
+
+
+/**
+ * Note: watchlist routes must be placed before the `/:id` param route to avoid
+ * Express treating 'watchlist' as an :id value. The watchlist routes were
+ * inserted earlier in the file; this `/:id` route remains but comes after them.
  */
 router.get('/:id', carPostController.getCarPostById);
 
@@ -211,18 +235,6 @@ router.patch('/:id/sold', carPostController.markCarAsSold);
  */
 router.patch('/:id/available', carPostController.markCarAsAvailable);
 
-// ==================== WATCHLIST ====================
-/**
- * Add car to user's watchlist
- * POST /api/cars/:carId/watchlist/:userId
- */
-router.post('/:carId/watchlist/:userId', carPostController.addToWatchlist);
-
-/**
- * Remove car from user's watchlist
- * DELETE /api/cars/:carId/watchlist/:userId
- */
-router.delete('/:carId/watchlist/:userId', carPostController.removeFromWatchlist);
 
 // ==================== ADMIN APPROVAL ====================
 /**

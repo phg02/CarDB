@@ -56,6 +56,7 @@ const CompareCar = () => {
       }
     ],
     mediaItems: (car.images || []).slice(0, 4).map(img => ({ type: "image", src: img })),
+    image: car.heroImage || car.images?.[0] || 'https://via.placeholder.com/400x300',
     vehicleHistoryId: `CAR-${Date.now()}-${Math.floor(Math.random() * 1000)}`
   });
 

@@ -7,7 +7,7 @@ import axios from 'axios';
 const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const [showNotification, setShowNotification] = useState(false);
+  const [showNotification, setShowNotification] = useState('');
   const [showLoginNotification, setShowLoginNotification] = useState(false);
   const [deliveryStatus, setDeliveryStatus] = useState(() => {
     try {
@@ -70,29 +70,75 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
   };
 
   const handleCompare = () => {
-    const storedCars = JSON.parse(localStorage.getItem('compareCars') || '[]');
-    const isAlreadyCompared = storedCars.some(car => car.id === carId);
+    let storedCars;
+    try {
+      storedCars = JSON.parse(localStorage.getItem('compareList') || '[]');
+      if (!Array.isArray(storedCars)) storedCars = [];
+    } catch (e) {
+      storedCars = [];
+    }
 
-    if (isAlreadyCompared) {
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
+    if (storedCars.length >= 3) {
+      setShowNotification("You've already compared 3 cars");
+      setTimeout(() => setShowNotification(''), 3000);
+      return;
+    }
+
+    const storedIds = storedCars.map(c => String(c.id ?? c.carId ?? c._id ?? '')).filter(Boolean);
+    const normalizedCarId = String(carId ?? '');
+
+    if (storedIds.includes(normalizedCarId)) {
+      setShowNotification("You've chosen this car for comparison already");
+      setTimeout(() => setShowNotification(''), 3000);
       return;
     }
 
     const carToCompare = {
       id: carId,
-      name: carData.name,
+      name: carData?.name || '',
+      heroImage: carData?.heroImage || carData?.images?.[0] || 'https://via.placeholder.com/400x300',
       price: price,
-      image: carData.images?.[0] || 'https://via.placeholder.com/400x300',
-      year: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Year')?.value || 'Unknown',
-      mileage: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value || 'Unknown',
-      fuel: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Fuel Type')?.value || 'Unknown',
-      transmission: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
-      drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
+      dealer: { location: carData?.dealer?.location || '' },
+      specifications: carData?.specifications || {
+        leftColumn: [
+          {
+            items: [
+              { label: 'Year', value: carData?.specifications?.leftColumn?.[0]?.items?.find?.(item => item.label === 'Year')?.value || (carData?.year ?? 'Unknown') },
+              { label: 'Body Type', value: 'Unknown' },
+              { label: 'Color', value: carData?.exterior_color || 'Unknown' },
+              { label: 'Doors', value: (carData?.doors ?? 'N/A') },
+              { label: 'Fuel Type', value: carData?.fuel || carData?.fuel_type || 'Unknown' }
+            ]
+          },
+          {
+            items: [
+              { label: 'Roof Type', value: 'Unknown' },
+              { label: 'Drivetrain', value: carData?.drivetrain || carData?.wheel || 'Unknown' },
+              { label: 'Seats', value: carData?.seats || 'Unknown' },
+              { label: 'Transmission', value: carData?.transmission || 'Unknown' }
+            ]
+          },
+          {
+            items: [
+              { label: 'Engine Type', value: 'Unknown' },
+              { label: 'Horsepower', value: 'N/A' },
+              { label: 'Torque', value: 'N/A' }
+            ]
+          },
+          {
+            items: [
+              { label: 'Length', value: 'N/A' },
+              { label: 'Width', value: 'N/A' },
+              { label: 'Height', value: 'N/A' }
+            ]
+          }
+        ]
+      },
+      images: carData?.images && carData.images.length ? carData.images : [carData?.heroImage || 'https://via.placeholder.com/400x300']
     };
 
     storedCars.push(carToCompare);
-    localStorage.setItem('compareCars', JSON.stringify(storedCars));
+    localStorage.setItem('compareList', JSON.stringify(storedCars));
     navigate('/compare');
   };
 
@@ -134,7 +180,7 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
     <div className="container mx-auto px-4 pb-8 relative">
       {showNotification && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-yellow-500 text-gray-900 px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
-          You've chosen this car for comparison already
+          {showNotification}
         </div>
       )}
       {showLoginNotification && (

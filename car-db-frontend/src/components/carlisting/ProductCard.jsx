@@ -1,5 +1,6 @@
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
 function ProductCard({ children, to, ...props }) {
@@ -15,12 +16,30 @@ function ProductCard({ children, to, ...props }) {
 
     useEffect(() => {
         try {
-            const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            setIsWishlisted(existingWishlist.includes(props.id));
+            // If user is logged in, check server watchlist
+            const check = async () => {
+                if (auth?.accessToken) {
+                    try {
+                        const res = await axios.get('/api/cars/watchlist', {
+                            headers: { Authorization: `Bearer ${auth.accessToken}` }
+                        });
+                        const list = res.data?.data?.watchlist || [];
+                        const ids = list.map(c => (c._id || c.id || c));
+                        setIsWishlisted(ids.includes(props.id));
+                        return;
+                    } catch (err) {
+                        console.debug('Could not fetch watchlist, falling back to localStorage');
+                    }
+                }
+
+                const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+                setIsWishlisted(existingWishlist.includes(props.id));
+            };
+            check();
         } catch (err) {
             setIsWishlisted(false);
         }
-    }, [props.id]);
+    }, [props.id, auth]);
 
     const handleAddToCompare = (e) => {
         e.preventDefault();
@@ -103,26 +122,42 @@ function ProductCard({ children, to, ...props }) {
             setTimeout(() => setShowLoginNotification(false), 3000);
             return;
         }
+        // Call backend API to toggle watchlist
+        (async () => {
+            try {
+                if (isWishlisted) {
+                    await axios.delete(`/api/cars/${props.id}/watchlist/me`, {
+                        headers: { Authorization: `Bearer ${auth.accessToken}` }
+                    });
+                    setIsWishlisted(false);
+                    setWishlistMessage('Removed from wishlist');
+                } else {
+                    await axios.post(`/api/cars/${props.id}/watchlist/me`, {}, {
+                        headers: { Authorization: `Bearer ${auth.accessToken}` }
+                    });
+                    setIsWishlisted(true);
+                    setWishlistMessage('Added to wishlist');
+                }
+                // Update local cache for unauthenticated views
+                try {
+                    const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+                    let newList = existingWishlist.filter(Boolean);
+                    if (isWishlisted) newList = newList.filter(id => id !== props.id);
+                    else newList = Array.from(new Set([...newList, props.id]));
+                    localStorage.setItem('wishlist', JSON.stringify(newList));
+                } catch (err) {
+                    // ignore
+                }
 
-        try {
-            const existingWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            const isAlready = existingWishlist.includes(props.id);
-            let newList;
-            if (isAlready) {
-                newList = existingWishlist.filter(id => id !== props.id);
-                setIsWishlisted(false);
-                setWishlistMessage('Removed from wishlist');
-            } else {
-                newList = [...existingWishlist, props.id];
-                setIsWishlisted(true);
-                setWishlistMessage('Added to wishlist');
+                setShowWishlistNotification(true);
+                setTimeout(() => setShowWishlistNotification(false), 2000);
+            } catch (err) {
+                console.error('Wishlist API error', err);
+                setWishlistMessage(err.response?.data?.message || 'Failed to update wishlist');
+                setShowWishlistNotification(true);
+                setTimeout(() => setShowWishlistNotification(false), 2500);
             }
-            localStorage.setItem('wishlist', JSON.stringify(newList));
-            setShowWishlistNotification(true);
-            setTimeout(() => setShowWishlistNotification(false), 2000);
-        } catch (err) {
-            console.error('Wishlist error', err);
-        }
+        })();
     };
 
     const handleCardClick = (e) => {

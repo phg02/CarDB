@@ -957,45 +957,33 @@ export const rejectCarPost = async (req, res) => {
  */
 export const addToWatchlist = async (req, res) => {
   try {
-    const { carId, userId } = req.params;
+    const { carId } = req.params;
+    // Prefer authenticated user id when available (secure); fall back to route param for backward compatibility
+    const userId = req.user?.userId || req.params.userId;
 
     // Verify car exists
     const carPost = await CarPost.findById(carId);
     if (!carPost) {
-      return res.status(404).json({
-        success: false,
-        message: 'Car post not found',
-      });
+      return res.status(404).json({ success: false, message: 'Car post not found' });
     }
 
     // Verify user exists
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Add to watchlist
+    // Add to watchlist using $addToSet to avoid duplicates
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $addToSet: { watchlist: carId } },
       { new: true }
     ).select('watchlist');
 
-    res.status(200).json({
-      success: true,
-      message: 'Car added to watchlist',
-      data: { watchlistCount: updatedUser.watchlist.length },
-    });
+    res.status(200).json({ success: true, message: 'Car added to watchlist', data: { watchlistCount: updatedUser.watchlist.length } });
   } catch (error) {
     console.error('Error adding to watchlist:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to add to watchlist',
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: 'Failed to add to watchlist', error: error.message });
   }
 };
 
@@ -1005,7 +993,8 @@ export const addToWatchlist = async (req, res) => {
  */
 export const removeFromWatchlist = async (req, res) => {
   try {
-    const { carId, userId } = req.params;
+    const { carId } = req.params;
+    const userId = req.user?.userId || req.params.userId;
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
@@ -1014,24 +1003,32 @@ export const removeFromWatchlist = async (req, res) => {
     ).select('watchlist');
 
     if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Car removed from watchlist',
-      data: { watchlistCount: updatedUser.watchlist.length },
-    });
+    res.status(200).json({ success: true, message: 'Car removed from watchlist', data: { watchlistCount: updatedUser.watchlist.length } });
   } catch (error) {
     console.error('Error removing from watchlist:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to remove from watchlist',
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: 'Failed to remove from watchlist', error: error.message });
+  }
+};
+
+/**
+ * Get current user's watchlist (populated car posts)
+ * Supports optional :userId param for compatibility
+ */
+export const getWatchlist = async (req, res) => {
+  try {
+    const userId = req.user?.userId || req.params.userId;
+    if (!userId) return res.status(400).json({ success: false, message: 'User id required' });
+
+    const user = await User.findById(userId).populate({ path: 'watchlist' });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    res.status(200).json({ success: true, message: 'Watchlist retrieved', data: { watchlist: user.watchlist } });
+  } catch (error) {
+    console.error('Error getting watchlist:', error);
+    res.status(500).json({ success: false, message: 'Failed to get watchlist', error: error.message });
   }
 };
 

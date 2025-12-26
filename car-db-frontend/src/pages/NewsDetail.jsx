@@ -105,23 +105,24 @@ const NewsDetail = () => {
         withCredentials: true,
       });
       if (response.data.success) {
-        const mappedComments = response.data.data.map((c) => ({
+        const mappedComments = response.data.data.comments.map((c) => ({
           id: c._id,
+          userId: c.user?._id,
           author: c.user?.name || "Anonymous",
+          email: c.user?.email,
           avatar:
             c.user?.profileImage ||
             `https://ui-avatars.com/api/?name=${c.user?.name || "A"}`,
           date: new Date(c.createdAt).toLocaleDateString(),
           text: c.content,
-          isCurrentUser:
-            auth?.userId === c.user?._id || auth?.email === c.user?.email,
+          isCurrentUser: auth?.email === c.user?.email,
         }));
         setArticleComments(mappedComments);
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
-  }, [id, auth?.userId, auth?.email]);
+  }, [id, auth?.email]);
 
   useEffect(() => {
     fetchArticle();
@@ -174,7 +175,7 @@ const NewsDetail = () => {
             text: response.data.data.comment.content,
             isCurrentUser: true,
           };
-          setArticleComments([...articleComments, newComment]);
+          setArticleComments([newComment, ...articleComments]);
           setComment("");
           toast.success("Comment posted successfully");
         }
@@ -186,6 +187,8 @@ const NewsDetail = () => {
   };
 
   const handleDeleteComment = async (commentId) => {
+    const comment = articleComments.find((c) => c.id === commentId);
+
     const message =
       auth?.role === "admin"
         ? "Are you sure you want to delete this comment? (Admin action)"
@@ -194,6 +197,19 @@ const NewsDetail = () => {
     if (window.confirm(message)) {
       try {
         const token = auth?.accessToken;
+        if (!token) {
+          toast.error("Not authenticated. Please login again.");
+          return;
+        }
+
+        console.log("🔍 Delete Debug Info:", {
+          currentUserEmail: auth?.email,
+          commentAuthorEmail: comment?.email,
+          userRole: auth?.role,
+          isCurrentUser: comment?.isCurrentUser,
+          commentId: commentId,
+        });
+
         const response = await axios.delete(`/api/comments/${commentId}`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -206,10 +222,30 @@ const NewsDetail = () => {
               ? "Comment removed by admin"
               : "Comment deleted"
           );
+        } else {
+          toast.error(response.data.message || "Failed to delete comment");
         }
       } catch (error) {
-        console.error("Error deleting comment:", error);
-        toast.error("Failed to delete comment");
+        console.error("❌ Error deleting comment:", error.response?.data);
+
+        // For 403 errors
+        if (error.response?.status === 403) {
+          const isOwnComment = comment?.isCurrentUser;
+          if (isOwnComment) {
+            toast.error("You can only delete your own comments");
+          } else if (auth?.role === "admin") {
+            toast.error(
+              "Admin comment deletion requires backend configuration update"
+            );
+          } else {
+            toast.error("You don't have permission to delete this comment");
+          }
+          return;
+        }
+
+        const errorMessage =
+          error.response?.data?.message || "Failed to delete comment";
+        toast.error(errorMessage);
       }
     }
   };
@@ -249,9 +285,11 @@ const NewsDetail = () => {
 
   const hasMoreComments = articleComments.length > COMMENTS_PER_PAGE;
 
-  const allImages = article
-    ? [article.mainImage, ...(article.images || [])]
-    : [];
+  // Use only images array to avoid duplicate thumbnail
+  const allImages =
+    article?.images && article.images.length > 0
+      ? article.images
+      : [article?.mainImage || "https://via.placeholder.com/800x600"];
 
   return (
     <div className="min-h-screen bg-black">
@@ -472,7 +510,7 @@ const NewsDetail = () => {
                           title={
                             auth?.role === "admin"
                               ? "Delete comment (Admin)"
-                              : "Delete comment"
+                              : "Delete your comment"
                           }
                         >
                           <Trash2 className="w-4 h-4" />

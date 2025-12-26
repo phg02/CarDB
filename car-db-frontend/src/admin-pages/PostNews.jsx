@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Upload, X } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -6,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 
 function PostNews() {
   const { auth } = useAuth();
+  const navigate = useNavigate();
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
   const [title, setTitle] = useState("");
@@ -18,8 +20,12 @@ function PostNews() {
       url: URL.createObjectURL(file),
       name: file.name,
     }));
+    // Accumulate images (add to existing ones)
     setImagePreviews((prev) => [...prev, ...previews]);
     setImageFiles((prev) => [...prev, ...files]);
+
+    // Reset input value so the same file can be selected again
+    e.target.value = "";
   };
 
   const removeImage = (index) => {
@@ -91,6 +97,11 @@ function PostNews() {
         setContent("");
         setImagePreviews([]);
         setImageFiles([]);
+        // Redirect to the newly created post details after 1 second
+        const newsId = response.data.data.news._id;
+        setTimeout(() => {
+          navigate(`/news/${newsId}`);
+        }, 1000);
       }
     } catch (error) {
       console.error("Error posting news:", error);

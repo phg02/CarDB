@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import SearchBar from "../components/news/SearchBar";
 import NewsCard from "../components/news/NewsCard";
 
 const News = () => {
+  const location = useLocation();
   const [newsArticles, setNewsArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,7 +14,7 @@ const News = () => {
 
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [location]);
 
   const fetchNews = async () => {
     try {
@@ -20,24 +22,69 @@ const News = () => {
       const response = await axios.get("/api/news", { withCredentials: true });
 
       if (response.data.success) {
-        const mappedNews = response.data.data.news.map((article) => ({
-          id: article._id,
-          title: article.title,
-          description: article.content.substring(0, 200) + "...",
-          image:
-            article.thumbnail ||
-            article.images?.[0] ||
-            "https://via.placeholder.com/800x600",
-          date: new Date(article.createdAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          author: article.author?.name || "Unknown",
-          tags: article.tags || [],
-          comments: 0,
-        }));
-        setNewsArticles(mappedNews);
+        const newsWithComments = await Promise.all(
+          response.data.data.news.map(async (article) => {
+            try {
+              // Fetch comment count for each article
+              const commentsResponse = await axios.get(
+                `/api/comments/news/${article._id}`,
+                { withCredentials: true }
+              );
+
+              // Debug: log the response structure
+              console.log(
+                `Comments for ${article._id}:`,
+                commentsResponse.data
+              );
+
+              const commentCount =
+                commentsResponse.data.data?.pagination?.totalComments ||
+                commentsResponse.data.data?.comments?.length ||
+                0;
+
+              return {
+                id: article._id,
+                title: article.title,
+                description: article.content.substring(0, 200) + "...",
+                image:
+                  article.thumbnail ||
+                  article.images?.[0] ||
+                  "https://via.placeholder.com/800x600",
+                date: new Date(article.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                }),
+                author: article.author?.name || "Unknown",
+                tags: article.tags || [],
+                comments: commentCount,
+              };
+            } catch (err) {
+              console.error(
+                `Error fetching comments for article ${article._id}:`,
+                err.message
+              );
+              return {
+                id: article._id,
+                title: article.title,
+                description: article.content.substring(0, 200) + "...",
+                image:
+                  article.thumbnail ||
+                  article.images?.[0] ||
+                  "https://via.placeholder.com/800x600",
+                date: new Date(article.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                }),
+                author: article.author?.name || "Unknown",
+                tags: article.tags || [],
+                comments: 0,
+              };
+            }
+          })
+        );
+        setNewsArticles(newsWithComments);
       }
     } catch (error) {
       console.error("Error fetching news:", error);

@@ -29,25 +29,65 @@ const AdminNews = () => {
       });
 
       if (response.data.success) {
-        const mappedNews = response.data.data.news.map((article) => ({
-          id: article._id,
-          title: article.title,
-          description: article.content.substring(0, 200) + "...",
-          image:
-            article.thumbnail ||
-            article.images?.[0] ||
-            "https://via.placeholder.com/800x600",
-          date: new Date(article.createdAt).toLocaleDateString("en-US", {
-            month: "long",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          author: article.author?.name || "Unknown",
-          tags: article.tags || [],
-          comments: 0,
-          isDeleted: article.isDeleted,
-        }));
-        setNewsArticles(mappedNews);
+        const newsWithComments = await Promise.all(
+          response.data.data.news.map(async (article) => {
+            try {
+              // Fetch comment count for each article
+              const commentsResponse = await axios.get(
+                `/api/comments/news/${article._id}`,
+                { withCredentials: true }
+              );
+
+              const commentCount =
+                commentsResponse.data.data?.pagination?.totalComments ||
+                commentsResponse.data.data?.comments?.length ||
+                0;
+
+              return {
+                id: article._id,
+                title: article.title,
+                description: article.content.substring(0, 200) + "...",
+                image:
+                  article.thumbnail ||
+                  article.images?.[0] ||
+                  "https://via.placeholder.com/800x600",
+                date: new Date(article.createdAt).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "2-digit",
+                  year: "numeric",
+                }),
+                author: article.author?.name || "Unknown",
+                tags: article.tags || [],
+                comments: commentCount,
+                isDeleted: article.isDeleted,
+              };
+            } catch (err) {
+              console.error(
+                `Error fetching comments for article ${article._id}:`,
+                err.message
+              );
+              return {
+                id: article._id,
+                title: article.title,
+                description: article.content.substring(0, 200) + "...",
+                image:
+                  article.thumbnail ||
+                  article.images?.[0] ||
+                  "https://via.placeholder.com/800x600",
+                date: new Date(article.createdAt).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "2-digit",
+                  year: "numeric",
+                }),
+                author: article.author?.name || "Unknown",
+                tags: article.tags || [],
+                comments: 0,
+                isDeleted: article.isDeleted,
+              };
+            }
+          })
+        );
+        setNewsArticles(newsWithComments);
       }
     } catch (error) {
       console.error("Error fetching news:", error);

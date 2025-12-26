@@ -55,7 +55,29 @@ function CarListing() {
     const parsePrice = (p) => {
       if (p == null) return 0;
       if (typeof p === 'number') return p;
-      const n = Number(String(p).replace(/[^0-9.-]+/g, ''));
+      const s = String(p).toLowerCase();
+
+      // Helper to extract numeric portion (handles dots/commas)
+      const extractNumber = (str) => {
+        const cleaned = String(str).replace(/[^0-9.,-]+/g, '').replace(/,/g, '');
+        // Remove dots used as thousand separators, but keep digits
+        const digits = cleaned.replace(/\./g, '');
+        const n = Number(digits || 0);
+        return Number.isNaN(n) ? 0 : n;
+      };
+
+      if (s.includes('tri') || s.includes('triệu')) {
+        // e.g. "836 triệu" => 836 * 1e6
+        return extractNumber(s) * 1e6;
+      }
+      if (s.includes('t') && (s.includes('ỷ') || s.includes('ty') || s.includes('tỷ'))) {
+        // handle 'tỷ' or 'ty'
+        return extractNumber(s) * 1e9;
+      }
+
+      // Fallback: strip non-digits
+      const digits = s.replace(/\D+/g, '');
+      const n = Number(digits || 0);
       return Number.isNaN(n) ? 0 : n;
     };
     switch (sortKey) {
@@ -132,9 +154,12 @@ function CarListing() {
   };
 
   const handleSortChange = (value) => {
+    // Use authoritative `cars` array to compute sorted results so
+    // initial clicks always sort the full dataset rather than a
+    // possibly already-filtered/partial `displayCars` slice.
+    const sorted = applySort(cars, value);
     setSortBy(value);
-    // re-apply client-side sort on displayed data
-    setDisplayCars(prev => applySort(prev, value));
+    setDisplayCars(sorted);
   };
 
   const formatPrice = (price) => {
@@ -198,7 +223,7 @@ function CarListing() {
 
           {/* Right panel has custom width */}
           <div className="flex flex-col gap-6 sm:gap-9 py-5 lg:py-0 w-full lg:flex-1">
-            <Result count={displayCars.length} onSortChange={handleSortChange} />
+            <Result count={displayCars.length} onSortChange={handleSortChange} sort={sortBy} />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 min-[1400px]:grid-cols-3 gap-6 sm:gap-8 auto-rows-fr">
               {displayCars.map((car) => (

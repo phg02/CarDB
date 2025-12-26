@@ -1,14 +1,6 @@
-import { useState } from "react";
-
-function Result({ count = 0, onSortChange }) {
-    const [sort, setSort] = useState("default");
-
+function Result({ count = 0, onSortChange, sort = 'default' }) {
     const handleSort = (value) => {
-        setSort(value);
-
-        if (onSortChange) {
-            onSortChange(value);
-        }
+        if (onSortChange) onSortChange(value);
     };
 
     return (

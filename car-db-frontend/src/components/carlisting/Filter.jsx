@@ -14,7 +14,7 @@ const FALLBACK_OPTIONS = {
 
 const withFallback = (arr, key) => (Array.isArray(arr) && arr.length > 0) ? arr : (FALLBACK_OPTIONS[key] || []);
 
-function Filter({ onFilterChange }) {
+function Filter({ onFilterChange, apiParams = {} }) {
     // Dropdown toggle states
     const [openDropdowns, setOpenDropdowns] = useState({
         status: false,
@@ -78,7 +78,7 @@ function Filter({ onFilterChange }) {
         const fetchFilters = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get("/api/filters/all");
+                    const response = await axios.get("/api/filters/all", { params: { ...apiParams } });
                 
                 // Preserve cityOptions; they come from the dedicated /cities endpoint
                 setFilterOptions(prev => ({
@@ -110,7 +110,7 @@ function Filter({ onFilterChange }) {
         const fetchYears = async () => {
             try {
                 const response = await axios.get('/api/filters/years', {
-                    params: selectedBrand ? { brand: selectedBrand } : {}
+                    params: { ...(selectedBrand ? { brand: selectedBrand } : {}), ...apiParams }
                 });
                 setFilterOptions(prev => ({
                     ...prev,
@@ -140,7 +140,7 @@ function Filter({ onFilterChange }) {
 
         const fetchModels = async () => {
             try {
-                const response = await axios.get(`/api/filters/models/${selectedBrand}`);
+                const response = await axios.get(`/api/filters/models/${selectedBrand}`, { params: { ...apiParams } });
                 setFilterOptions(prev => ({
                     ...prev,
                     modelOptions: response.data.data || []
@@ -158,7 +158,7 @@ function Filter({ onFilterChange }) {
         const fetchCities = async () => {
             try {
                 const response = await axios.get('/api/filters/cities', {
-                    params: selectedBrand ? { brand: selectedBrand } : {}
+                    params: { ...(selectedBrand ? { brand: selectedBrand } : {}), ...apiParams }
                 });
                 setFilterOptions(prev => ({
                     ...prev,
@@ -176,7 +176,7 @@ function Filter({ onFilterChange }) {
     useEffect(() => {
         const fetchSeats = async () => {
             try {
-                const response = await axios.get('/api/filters/seats');
+                const response = await axios.get('/api/filters/seats', { params: { ...apiParams } });
                 setFilterOptions(prev => ({
                     ...prev,
                     seatsOptions: withFallback(response.data?.data, 'seatsOptions')
@@ -193,7 +193,7 @@ function Filter({ onFilterChange }) {
     useEffect(() => {
         const fetchFuelTypes = async () => {
             try {
-                const response = await axios.get('/api/filters/fuel-types');
+                const response = await axios.get('/api/filters/fuel-types', { params: { ...apiParams } });
                 setFilterOptions(prev => ({
                     ...prev,
                     fuelTypeOptions: withFallback(response.data?.data, 'fuelTypeOptions')
@@ -223,26 +223,25 @@ function Filter({ onFilterChange }) {
     // Toggle filter function
     const toggleFilter = (filterType, value) => {
         console.debug('Filter.toggleFilter', { filterType, value });
-        setSelectedFilters(prev => {
-            const filterArray = prev[filterType];
-            const updatedArray = filterArray.includes(value)
-                ? filterArray.filter(v => v !== value)
-                : [...filterArray, value];
 
-            const updated = {
-                ...prev,
-                [filterType]: updatedArray
-            };
+        // compute updated array from current state synchronously
+        const currentArray = Array.isArray(selectedFilters[filterType]) ? selectedFilters[filterType] : [];
+        const updatedArray = currentArray.includes(value)
+            ? currentArray.filter(v => v !== value)
+            : [...currentArray, value];
 
-            // Notify parent immediately with the computed filters (apply on click)
-            notifyParent(updated, true);
+        const updated = {
+            ...selectedFilters,
+            [filterType]: updatedArray
+        };
 
-            return updated;
-        });
+        // update local state and notify parent after state update initiation
+        setSelectedFilters(updated);
+        notifyParent(updated, true);
 
         // Handle brand selection to fetch models
         if (filterType === "brands") {
-            setSelectedBrand(prevBrand => (prevBrand === value ? "" : value));
+            setSelectedBrand(selectedBrand === value ? "" : value);
         }
     };
 
@@ -343,14 +342,12 @@ function Filter({ onFilterChange }) {
                     {renderDropdown("City", "city", filterOptions.cityOptions)}
 
                     <PriceRange className="col-span-2 sm:col-span-3 lg:col-span-1" minProp={0} maxProp={20000000000} step={10000} onPriceChange={(min, max, immediate=false) => {
-                        setSelectedFilters(prev => {
-                            const updated = {
-                                ...prev,
-                                priceRange: { min, max }
-                            };
-                            notifyParent(updated, Boolean(immediate));
-                            return updated;
-                        });
+                        const updated = {
+                            ...selectedFilters,
+                            priceRange: { min, max }
+                        };
+                        setSelectedFilters(updated);
+                        notifyParent(updated, Boolean(immediate));
                     }} />
                 </div>
             )}

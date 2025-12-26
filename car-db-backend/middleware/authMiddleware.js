@@ -65,7 +65,6 @@ export const verifyToken = async (req, res, next) => {
       name: user.name,
       role: user.role,
       verified: user.verified,
-      isAdmin: user.role === "admin",
     };
 
     next();

@@ -518,6 +518,7 @@ export const getCarPostsBySeller = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit))
       .populate('approvedBy', 'name')
+      .populate('seller', 'name email phone')
       .lean();
 
     // Get total count for pagination

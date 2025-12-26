@@ -122,7 +122,7 @@ const MyListedCar = () => {
             inventory_type: carPost.inventory_type || 'used',
             owners: carPost.owners || 0,
             carfax_clean_title: carPost.carfax_clean_title || 'Unknown',
-            phone: carPost.phone || 'Unknown',
+            phone: carPost.phone || carPost.seller?.phone || 'Unknown',
             dealer: {
               street: carPost.dealer?.street || 'Unknown',
               city: carPost.dealer?.city || 'Unknown',

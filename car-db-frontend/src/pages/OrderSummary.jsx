@@ -13,6 +13,7 @@ function OrderSummary() {
 
   const { carData, imagePreviews, isPurchase, isPaymentForExistingPost, postingFeeId } = (location && location.state) || {};
   const { phone, address } = (location && location.state) || {};
+  const [agreed, setAgreed] = useState(false);
 
   // Redirect back to sell car if no data
   useEffect(() => {
@@ -165,7 +166,14 @@ function OrderSummary() {
                     <p><span className="font-medium">Title:</span> {carData?.heading}</p>
                     <p><span className="font-medium">Price:</span> VND {carData?.price?.toLocaleString()}</p>
                     <p><span className="font-medium">Condition:</span> {carData?.condition === 'new' ? 'New' : 'Used'}</p>
-                    <p><span className="font-medium">Mileage:</span> {carData?.miles?.toLocaleString()} miles</p>
+                    <p>
+                      <span className="font-medium">Mileage:</span>{' '}
+                      {carData?.miles != null && carData?.miles !== ''
+                        ? `${Number(carData.miles).toLocaleString()} miles`
+                        : carData?.km != null && carData?.km !== ''
+                        ? `${Number(carData.km).toLocaleString()} km`
+                        : 'N/A'}
+                    </p>
                     <p><span className="font-medium">Year:</span> {carData?.year}</p>
                   </div>
                 </div>
@@ -260,13 +268,15 @@ function OrderSummary() {
                   <input
                     id="terms-checkbox-2"
                     type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
                   />
                   <label
                     htmlFor="terms-checkbox-2"
                     className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                   >
-                    I agree with the{" "}
+                    I agree with the{' '}
                     <a
                       href="#"
                       className="text-primary-700 underline hover:no-underline dark:text-primary-500"
@@ -280,11 +290,17 @@ function OrderSummary() {
                 {/* BUTTONS */}
                 <div className="gap-4 sm:flex sm:items-center">
                   <button
-                    onClick={handlePayment}
+                    onClick={() => {
+                      if (!agreed) {
+                        toast.error('You must agree to the Terms and Conditions before paying');
+                        return;
+                      }
+                      handlePayment();
+                    }}
                     disabled={loading}
                     className="mt-4 flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed sm:mt-0"
                   >
-                    {loading ? "Processing..." : (isPurchase ? "Confirm Purchase" : "Confirm & Pay")}
+                    {loading ? 'Processing...' : (isPurchase ? 'Confirm Purchase' : 'Confirm & Pay')}
                   </button>
                 </div>
               </div>

@@ -28,7 +28,7 @@ const CompareCar = () => {
   // Convert car data to comparison format
   const formatCarForComparison = (car) => ({
     name: car.name,
-    image: car.heroImage || car.images?.[0] || "",
+    // image is set below with a placeholder fallback
     price: car.price,
     location: car.dealer?.location || "Unknown",
     quickSpecs: [

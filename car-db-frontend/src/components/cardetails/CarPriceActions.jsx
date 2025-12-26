@@ -43,7 +43,6 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
           body_subtype: 'Unknown', // Not available in current data
           doors: parseInt(carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Doors')?.value) || 0,
           engine: 'Unknown', // Not available in current data
-          engine_block: 'Unknown', // Not available in current data
           fuel_type: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Fuel Type')?.value || 'Unknown',
           transmission: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
           drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
@@ -61,7 +60,6 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
           width: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Width')?.value || 'Unknown',
           cargo_capacity: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Cargo Capacity')?.value || 'Unknown',
           powertrain_type: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Powertrain Type')?.value || 'Unknown',
-          engine_block: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine Block')?.value || 'Unknown',
           cylinders: parseInt(carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Cylinders')?.value) || 0,
           engine_size: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine Size')?.value || 'Unknown',
         }

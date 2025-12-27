@@ -1,6 +1,8 @@
 function Result({ count = 0, onSortChange, sort = 'default' }) {
     const handleSort = (value) => {
-        if (onSortChange) onSortChange(value);
+        if (onSortChange) {
+            onSortChange(value);
+        }
     };
 
     return (
@@ -19,9 +21,9 @@ function Result({ count = 0, onSortChange, sort = 'default' }) {
 
                     <dd>
                         <select
-                            value={sort}
+                            value={sort || 'default'}
                             onChange={(e) => handleSort(e.target.value)}
-                            className="rounded-[3px] text-white bg-gray-700 px-2 py-2"
+                            className="rounded-[3px] text-white bg-gray-700 px-2 py-2 cursor-pointer hover:bg-gray-600 transition-colors"
                         >
                             <option value="default">Sort by</option>
                             <option value="price_low">Price: Low → High</option>

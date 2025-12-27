@@ -33,8 +33,6 @@ function CarListing() {
       });
       const data = response.data.data || [];
       setCars(data);
-      // apply current client-side sort before displaying
-      setDisplayCars(applySort(data, sortBy));
       setTotalPages(response.data.pagination?.totalPages || 1);
       setCurrentPage(page);
     } catch (err) {
@@ -48,6 +46,11 @@ function CarListing() {
       }
     }
   };
+
+  // Apply sort whenever cars data or sortBy changes
+  useEffect(() => {
+    setDisplayCars(applySort(cars, sortBy));
+  }, [cars, sortBy]);
 
   const applySort = (items, sortKey) => {
     if (!Array.isArray(items)) return items || [];
@@ -90,6 +93,7 @@ function CarListing() {
       case 'year_old':
         return copy.sort((a, b) => (a.year || 0) - (b.year || 0));
       default:
+        // Return in original order for 'default' sort
         return copy;
     }
   };

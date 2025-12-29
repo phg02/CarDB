@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import NotFound from "./pages/NotFound";
 import VerificationCode from "./pages/VerificationCode";
 import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 import CarListing from "./pages/CarListing";
 import OrderSummary from "./pages/OrderSummary";
@@ -99,6 +100,14 @@ function App() {
               <NavbarWrapper><VerificationCode /></NavbarWrapper>
             </PublicRoute>
           } 
+        />
+        <Route 
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <NavbarWrapper><ResetPassword /></NavbarWrapper>
+            </PublicRoute>
+          }
         />
         
         {/* Common routes - Accessible to all users */}

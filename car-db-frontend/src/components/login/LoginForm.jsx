@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext"
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export const LoginForm = () => {
@@ -143,9 +143,9 @@ export const LoginForm = () => {
           />
           Remember me
         </label>
-        <a href="#" className="text-sm text-primary hover:underline">
+        <Link to="/forgot-password" className="text-sm text-primary hover:underline">
           Forgot password?
-        </a>
+        </Link>
       </div>
 
       <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-12 rounded-md transition-colors" onClick={handleLogin}>
@@ -154,9 +154,9 @@ export const LoginForm = () => {
 
       <p className="text-center text-sm text-foreground">
         Don't have an account?{" "}
-        <a href="/" className="text-primary hover:underline">
+        <Link to="/register" className="text-primary hover:underline">
           Sign up here
-        </a>
+        </Link>
       </p>
     </div>
   );

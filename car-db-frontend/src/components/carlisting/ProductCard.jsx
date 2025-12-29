@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 
 function ProductCard({ children, to, ...props }) {
@@ -50,14 +51,14 @@ function ProductCard({ children, to, ...props }) {
         // Check if already added
         const isAlreadyAdded = existingCompare.some(car => car.id === props.id);
         if (isAlreadyAdded) {
-            alert('This car is already in your comparison list');
+            toast.info('This car is already in your comparison list');
             navigate('/compare');
             return;
         }
         
         // Check if list is full
         if (existingCompare.length >= 3) {
-            alert('You can only compare up to 3 cars');
+            toast.error('You can only compare up to 3 cars');
             navigate('/compare');
             return;
         }
@@ -239,7 +240,7 @@ function ProductCard({ children, to, ...props }) {
     const showActions = location.pathname === '/carlisting' || location.pathname.startsWith('/carlisting');
 
     return (
-        <div className="w-full rounded-[3px] border p-4 border-blue-300 bg-gray-900 flex flex-col h-full">
+        <div className="relative w-full rounded-[3px] border p-6 border-blue-300 bg-gray-900 flex flex-col h-full pb-20">
             {showLoginNotification && (
                 <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold animate-fade-in">
                     You need to login before adding to wishlist.
@@ -251,12 +252,12 @@ function ProductCard({ children, to, ...props }) {
                     {wishlistMessage}
                 </div>
             )}
-            <div className="h-[12rem] w-full flex-shrink-0">
+            <div className="h-[14rem] w-full flex-shrink-0">
             <Link to={linkTo}>
                 <img className="mx-auto h-full w-full block rounded-[3px] object-cover" src={props.img} alt="" />
             </Link>
             </div>
-            <div className="pt-2 flex-1 flex flex-col">
+            <div className="pt-2 flex-1 flex flex-col justify-between">
             <div className="mb-2 flex items-center justify-between gap-4">
                 <div className="border border-blue-500 text-blue-500 px-3 py-0.5 rounded-[3px] bg-transparent text-sm">
                     {props.status}
@@ -303,38 +304,40 @@ function ProductCard({ children, to, ...props }) {
                 </li>
             </ul>
 
-            {/* Action Buttons (only on public Car Listing) */}
-            {showActions && (
-              <div className="mt-4 flex gap-2">
-                <button
-                    onClick={handleAddToWishlist}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-[3px] transition-colors text-sm font-medium"
-                >
-                    <svg
-                        className={`h-4 w-4 ${isWishlisted ? 'text-pink-600' : ''}`}
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        fill={isWishlisted ? 'currentColor' : 'none'}
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z" />
-                    </svg>
-                    <span>{isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
-                </button>
-                <button
-                    onClick={handleAddToCompare}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[3px] transition-colors text-sm font-medium"
-                >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span>Add to Compare</span>
-                </button>
-            </div>
-            )}
+            {/* Action Buttons (only on public Car Listing) - moved into bottom children area so they align */}
 
             {/* CHILDREN EXTRA UI (admin delete button, etc.) */}
-            <div className={`mt-4 ${children ? 'min-h-[3rem]' : ''} flex items-end`}>
+            <div className={`${children ? '' : ''} absolute left-6 right-6 bottom-6 flex gap-2 items-center`}> 
+                {showActions && (
+                  <>
+                    <button
+                        onClick={handleAddToWishlist}
+                        className="flex-1 min-w-0 flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-[3px] transition-colors text-sm font-medium"
+                    >
+                        <svg
+                            className={`h-4 w-4 ${isWishlisted ? 'text-pink-600' : ''}`}
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            fill={isWishlisted ? 'currentColor' : 'none'}
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z" />
+                        </svg>
+                        <span className="truncate whitespace-nowrap">{isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
+                    </button>
+                    <button
+                        onClick={handleAddToCompare}
+                        className="flex-1 min-w-0 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[3px] transition-colors text-sm font-medium"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span className="truncate whitespace-nowrap">Add to Compare</span>
+                    </button>
+                  </>
+                )}
+
+                {/* Admin / custom children (Delete, Approve/Reject) */}
                 {children}
             </div>
             

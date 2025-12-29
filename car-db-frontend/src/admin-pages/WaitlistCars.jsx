@@ -287,16 +287,16 @@ function WaitlistCar() {
                   fuel={car.fuel_type || 'Unknown'}
                   seats={car.std_seating || 5}
                 >
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full">
                     <button
                       onClick={() => handleApprove(car._id)}
-                      className="w-full py-2 text-blue-400 border border-blue-400 rounded hover:bg-blue-500 hover:text-white transition"
+                      className="w-1/2 py-2 text-blue-400 border border-blue-400 rounded hover:bg-blue-500 hover:text-white transition text-center"
                     >
                       Approve
                     </button>
                     <button
                       onClick={() => handleReject(car._id)}
-                      className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition"
+                      className="w-1/2 py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition text-center"
                     >
                       Reject
                     </button>

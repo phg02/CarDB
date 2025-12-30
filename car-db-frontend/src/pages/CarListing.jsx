@@ -248,6 +248,22 @@ function CarListing() {
                   overall_width={car.overall_width}
                   overall_height={car.overall_height}
                   std_seating={car.std_seating}
+                  photo_links={car.photo_links}
+                  engine={car.engine}
+                  engine_size={car.engine_size}
+                  engine_block={car.engine_block}
+                  cylinders={car.cylinders}
+                  doors={car.doors}
+                  vehicle_type={car.vehicle_type}
+                  body_type={car.body_type}
+                  exterior_color={car.exterior_color}
+                  transmission={car.transmission}
+                  highway_mpg={car.highway_mpg}
+                  city_mpg={car.city_mpg}
+                  exterior_color={car.exterior_color}
+                  interior_color={car.interior_color}
+                  carfax_clean_title={car.carfax_clean_title}
+                  inventory_type={car.inventory_type}
                 />
               ))}
             </div>

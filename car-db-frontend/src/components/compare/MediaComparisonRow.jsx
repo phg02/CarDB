@@ -39,8 +39,8 @@ const MediaComparisonRow = ({ cars }) => {
       >
       <div className={`grid ${cars.length === 1 ? 'grid-cols-1' : cars.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-4`}>
         {cars.map((car, carIndex) => (
-          <div key={carIndex} className="grid grid-cols-2 gap-3">
-            {car.mediaItems.map((item, index) => (
+          <div key={carIndex} className="grid grid-cols-4 gap-2">
+            {car.mediaItems.slice(0, 4).map((item, index) => (
               <div 
                 key={index}
                 className="relative aspect-video overflow-hidden rounded-md bg-gray-900 cursor-pointer group"

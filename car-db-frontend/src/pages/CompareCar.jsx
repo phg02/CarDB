@@ -53,6 +53,18 @@ const CompareCar = () => {
       {
         title: "Dimensions",
         specs: car.specifications?.leftColumn?.[3]?.items || []
+      },
+      {
+        title: "Fuel Efficiency",
+        specs: car.specifications?.leftColumn?.[4]?.items || []
+      },
+      {
+        title: "Exterior & Interior Colors",
+        specs: car.specifications?.leftColumn?.[5]?.items || []
+      },
+      {
+        title: "Vehicle History",
+        specs: car.specifications?.leftColumn?.[6]?.items || []
       }
     ],
     mediaItems: (car.images || []).slice(0, 4).map(img => ({ type: "image", src: img })),
@@ -127,11 +139,20 @@ const CompareCar = () => {
               title="Dimensions"
               cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[3].specs } : { specs: [] })}
             />
+            <ComparisonRow 
+              title="Fuel Efficiency"
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[4].specs } : { specs: [] })}
+            />
+            <ComparisonRow 
+              title="Exterior & Interior Colors"
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[5].specs } : { specs: [] })}
+            />
             <MediaComparisonRow 
               cars={[0, 1, 2].map(i => comparisonList[i] ? { mediaItems: formatCarForComparison(comparisonList[i]).mediaItems } : { mediaItems: [] })}
             />
-            <VehicleHistoryRow 
-              cars={[0, 1, 2].map(i => comparisonList[i] ? { vehicleHistoryId: formatCarForComparison(comparisonList[i]).vehicleHistoryId } : { vehicleHistoryId: '' })}
+            <ComparisonRow 
+              title="Vehicle History"
+              cars={[0, 1, 2].map(i => comparisonList[i] ? { specs: formatCarForComparison(comparisonList[i]).sections[6].specs } : { specs: [] })}
             />
           </div>
         )}

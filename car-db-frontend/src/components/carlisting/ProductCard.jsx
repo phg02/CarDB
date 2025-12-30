@@ -79,25 +79,25 @@ function ProductCard({ children, to, ...props }) {
                     {
                         items: [
                             { label: 'Year', value: props.year },
-                            { label: 'Body Type', value: 'Sedan' },
-                            { label: 'Color', value: 'Black' },
-                            { label: 'Doors', value: '4' },
+                            { label: 'Body Type', value: props.body_type || 'N/A' },
+                            { label: 'Doors', value: props.doors ? `${props.doors} doors` : 'N/A' },
                             { label: 'Fuel Type', value: props.fuel }
                         ]
                     },
                     {
                         items: [
-                            { label: 'Roof Type', value: 'Hardtop' },
+                            { label: 'Vehicle Type', value: props.vehicle_type || 'N/A' },
                             { label: 'Drivetrain', value: props.wheel },
                             { label: 'Seats', value: props.seats },
-                            { label: 'Transmission', value: 'Automatic' }
+                            { label: 'Transmission', value: props.transmission || 'N/A' }
                         ]
                     },
                     {
                         items: [
                             { label: 'Engine Type', value: props.fuel === 'Electric' ? 'Electric Motor' : 'Internal Combustion' },
-                            { label: 'Horsepower', value: 'N/A' },
-                            { label: 'Torque', value: 'N/A' }
+                            { label: 'Engine Size', value: props.engine_size ? `${props.engine_size} L` : 'N/A' },
+                            { label: 'Engine Block', value: props.engine_block || 'N/A' },
+                            { label: 'Cylinders', value: props.cylinders || 'N/A' }
                         ]
                     },
                     {
@@ -106,10 +106,28 @@ function ProductCard({ children, to, ...props }) {
                             { label: 'Width', value: props.overall_width ? `${props.overall_width} mm` : 'N/A' },
                             { label: 'Height', value: props.overall_height ? `${props.overall_height} mm` : 'N/A' }
                         ]
+                    },
+                    {
+                        items: [
+                            { label: 'Highway MPG', value: props.highway_mpg ? `${props.highway_mpg} mpg` : 'N/A' },
+                            { label: 'City MPG', value: props.city_mpg ? `${props.city_mpg} mpg` : 'N/A' }
+                        ]
+                    },
+                    {
+                        items: [
+                            { label: 'Exterior Color', value: props.exterior_color || 'N/A' },
+                            { label: 'Interior Color', value: props.interior_color || 'N/A' }
+                        ]
+                    },
+                    {
+                        items: [
+                            { label: 'Clean Title', value: props.carfax_clean_title ? 'Yes' : 'No' },
+                            { label: 'Inventory Type', value: props.inventory_type ? props.inventory_type.charAt(0).toUpperCase() + props.inventory_type.slice(1) : 'N/A' }
+                        ]
                     }
                 ]
             },
-            images: [props.img]
+            images: props.photo_links || [props.img]
         };
         
         existingCompare.push(carData);
@@ -233,7 +251,7 @@ function ProductCard({ children, to, ...props }) {
                         }
                     ]
                 },
-                images: [props.img]
+                images: props.photo_links || [props.img]
             };
             
             existingCompare.push(carData);

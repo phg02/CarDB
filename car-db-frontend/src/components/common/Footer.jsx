@@ -1,7 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from '../../assets/logo.svg';
 
 function Footer() {
+  const location = useLocation();
+
+  const handleSmoothScroll = (e, targetId) => {
+    e.preventDefault();
+    
+    // If not on homepage, navigate there first
+    if (location.pathname !== '/') {
+      window.location.href = `/#${targetId}`;
+      return;
+    }
+
+    // Smooth scroll to the section
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-gray-800 text-white rounded-base shadow-xs">
         <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
@@ -11,14 +29,14 @@ function Footer() {
                 </Link>
                 <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-body sm:mb-0">
                     <li>
-                        <a href="#" className="hover:underline me-4 md:me-6">ABOUT US</a>
+                        <a href="#about-us" onClick={(e) => handleSmoothScroll(e, 'about-us')} className="hover:underline me-4 md:me-6">ABOUT US</a>
                     </li>
                     <li>
                         <Link to="/faq" className="hover:underline me-4 md:me-6">FAQ</Link>
                     
                     </li>
                     <li>
-                        <a href="#" className="hover:underline">Contact</a>
+                        <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="hover:underline">CONTACT</a>
                     </li>
                 </ul>
             </div>

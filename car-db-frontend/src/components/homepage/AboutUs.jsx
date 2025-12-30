@@ -2,7 +2,7 @@ import React from "react";
 
 const AboutUs = () => {
   return (
-    <section className="bg-card py-20">
+    <section id="about-us" className="bg-card py-20">
       <div className="container mx-auto px-4 md:px-6">
         <h2 className="text-3xl font-bold mb-8">About Us</h2>
 

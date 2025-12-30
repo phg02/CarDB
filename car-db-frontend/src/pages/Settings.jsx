@@ -65,12 +65,6 @@ const Settings = () => {
     navigate('/login');
   };
 
-  const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      console.log('Deleting account...');
-    }
-  };
-
   const renderContent = () => {
     switch (activeTab) {
       case 'edit-profile':
@@ -141,16 +135,7 @@ const Settings = () => {
                   <LogOut className="w-5 h-5" />
                   <span className="text-sm font-medium">Logout</span>
                 </button>
-                
-                <button
-                  onClick={handleDeleteAccount}
-                  className="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete account</span>
-                  </div>
-                </button>
+              
               </div>
             </div>
           </div>
@@ -214,15 +199,6 @@ const Settings = () => {
                     <span className="text-sm font-medium">Logout</span>
                   </button>
                   
-                  <button
-                    onClick={handleDeleteAccount}
-                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete account</span>
-                    </div>
-                  </button>
                 </div>
               </div>
             </>

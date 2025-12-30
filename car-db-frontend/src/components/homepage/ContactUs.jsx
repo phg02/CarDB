@@ -3,7 +3,7 @@ import { Phone, Mail, MapPin } from "lucide-react";
 
 const ContactUs = () => {
   return (
-    <section className="relative bg-darker py-20 mt-20">
+    <section id="contact-us" className="relative bg-darker py-20 mt-20">
       <div className="absolute inset-0 z-0">
         <img
           src="https://picsum.photos/id/366/1920/800"

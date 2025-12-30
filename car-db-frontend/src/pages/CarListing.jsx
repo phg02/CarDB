@@ -241,6 +241,8 @@ function CarListing() {
                   price={formatPrice(car.price)}
                   location={car.dealer ? `${car.dealer.city || ''}, ${car.dealer.state || ''}, ${car.dealer.country || ''}`.replace(/^, |, $/, '') : 'Location not specified'}
                   year={car.year}
+                  make={car.make}
+                  model={car.model}
                   wheel={car.drivetrain || 'Unknown'}
                   fuel={car.fuel_type || 'Unknown'}
                   seats={car.std_seating || 5}

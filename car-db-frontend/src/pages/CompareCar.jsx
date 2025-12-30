@@ -27,13 +27,13 @@ const CompareCar = () => {
 
   // Convert car data to comparison format
   const formatCarForComparison = (car) => ({
-    name: car.name,
+    name: car.name && car.name !== 'N/A' && car.name !== 'N/A N/A' ? car.name : `${car.year || ''} ${car.make || ''} ${car.model || ''}`.trim() || 'Unknown Car',
     // image is set below with a placeholder fallback
     price: car.price,
     location: car.dealer?.location || "Unknown",
     quickSpecs: [
       { label: "Year", value: car.specifications?.leftColumn?.[0]?.items?.[0]?.value || "N/A" },
-      { label: "Fuel Type", value: car.specifications?.leftColumn?.[0]?.items?.[4]?.value || "N/A" },
+      { label: "Fuel Type", value: car.specifications?.leftColumn?.[0]?.items?.[3]?.value || "N/A" },
       { label: "Transmission", value: car.specifications?.leftColumn?.[1]?.items?.[3]?.value || "N/A" },
       { label: "Drivetrain", value: car.specifications?.leftColumn?.[1]?.items?.[1]?.value || "N/A" },
     ],

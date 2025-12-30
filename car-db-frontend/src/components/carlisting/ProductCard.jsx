@@ -67,6 +67,9 @@ function ProductCard({ children, to, ...props }) {
         const carData = {
             id: props.id,
             name: props.name,
+            year: props.year,
+            make: props.make,
+            model: props.model,
             heroImage: props.img,
             price: props.price,
             dealer: { location: props.location },

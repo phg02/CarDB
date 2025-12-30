@@ -70,8 +70,9 @@ router.get('/refresh', refreshToken);
 /**
  * Logout user
  * POST /api/auth/logout
- * Requires: valid JWT token
+ * Clears the refresh token cookie. No access token required so users can logout
+ * even when their access token has expired.
  */
-router.post('/logout', verifyToken, logout);
+router.post('/logout', logout);
 
 export default router;

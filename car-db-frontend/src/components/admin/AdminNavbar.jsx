@@ -28,12 +28,16 @@ export default function AdminNavbar(props) {
       await axios.post('/api/auth/logout', {}, {
         withCredentials: true
       });
+      try { localStorage.clear(); } catch (e) {}
       setAuth(null);
+      try { window.dispatchEvent(new CustomEvent('app:loggedOut')); } catch (e) {}
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
       // Even if logout fails, clear local auth state
+      try { localStorage.clear(); } catch (e) {}
       setAuth(null);
+      try { window.dispatchEvent(new CustomEvent('app:loggedOut')); } catch (e) {}
       navigate('/login');
     }
   };

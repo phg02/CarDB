@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { User, ShoppingBag, Heart, Car, LogOut, Trash2, Menu, X } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import EditProfile from '../components/settings/EditProfile';
 import PurchaseHistory from '../components/settings/PurchaseHistory';
 import FavoriteList from '../components/settings/FavoriteList';
 import MyListedCar from '../components/settings/MyListedCar';
 
 const Settings = () => {
-  const { auth } = useAuth();
+  const { auth, setAuth } = useAuth();
   const [activeTab, setActiveTab] = useState('edit-profile');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,9 +52,17 @@ const Settings = () => {
         { id: 'my-listed-car', label: 'My listed car', icon: Car },
       ];
 
-  const handleLogout = () => {
-    // Implement logout logic
-    console.log('Logging out...');
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/auth/logout', {}, { withCredentials: true });
+    } catch (err) {
+      console.error('Logout request failed', err);
+    }
+    try { localStorage.clear(); } catch (e) {}
+    try { setAuth(null); } catch (e) {}
+    try { window.dispatchEvent(new CustomEvent('app:loggedOut')); } catch (e) {}
+    navigate('/login');
   };
 
   const handleDeleteAccount = () => {

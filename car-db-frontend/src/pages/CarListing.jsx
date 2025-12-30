@@ -260,7 +260,6 @@ function CarListing() {
                   transmission={car.transmission}
                   highway_mpg={car.highway_mpg}
                   city_mpg={car.city_mpg}
-                  exterior_color={car.exterior_color}
                   interior_color={car.interior_color}
                   carfax_clean_title={car.carfax_clean_title}
                   inventory_type={car.inventory_type}

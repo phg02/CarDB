@@ -244,6 +244,10 @@ function CarListing() {
                   wheel={car.drivetrain || 'Unknown'}
                   fuel={car.fuel_type || 'Unknown'}
                   seats={car.std_seating || 5}
+                  overall_length={car.overall_length}
+                  overall_width={car.overall_width}
+                  overall_height={car.overall_height}
+                  std_seating={car.std_seating}
                 />
               ))}
             </div>

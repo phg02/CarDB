@@ -70,6 +70,10 @@ function ProductCard({ children, to, ...props }) {
             heroImage: props.img,
             price: props.price,
             dealer: { location: props.location },
+            overall_length: props.overall_length,
+            overall_width: props.overall_width,
+            overall_height: props.overall_height,
+            std_seating: props.std_seating,
             specifications: {
                 leftColumn: [
                     {
@@ -98,9 +102,9 @@ function ProductCard({ children, to, ...props }) {
                     },
                     {
                         items: [
-                            { label: 'Length', value: 'N/A' },
-                            { label: 'Width', value: 'N/A' },
-                            { label: 'Height', value: 'N/A' }
+                            { label: 'Length', value: props.overall_length ? `${props.overall_length} mm` : 'N/A' },
+                            { label: 'Width', value: props.overall_width ? `${props.overall_width} mm` : 'N/A' },
+                            { label: 'Height', value: props.overall_height ? `${props.overall_height} mm` : 'N/A' }
                         ]
                     }
                 ]
@@ -190,6 +194,10 @@ function ProductCard({ children, to, ...props }) {
                 heroImage: props.img,
                 price: props.price,
                 dealer: { location: props.location },
+                overall_length: props.overall_length,
+                overall_width: props.overall_width,
+                overall_height: props.overall_height,
+                std_seating: props.std_seating,
                 specifications: {
                     leftColumn: [
                         {
@@ -218,9 +226,9 @@ function ProductCard({ children, to, ...props }) {
                         },
                         {
                             items: [
-                                { label: 'Length', value: 'N/A' },
-                                { label: 'Width', value: 'N/A' },
-                                { label: 'Height', value: 'N/A' }
+                                { label: 'Length', value: props.overall_length ? `${props.overall_length} mm` : 'N/A' },
+                                { label: 'Width', value: props.overall_width ? `${props.overall_width} mm` : 'N/A' },
+                                { label: 'Height', value: props.overall_height ? `${props.overall_height} mm` : 'N/A' }
                             ]
                         }
                     ]

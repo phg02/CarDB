@@ -1,19 +1,22 @@
 import { useState } from "react";
 import PriceRange from "../carlisting/PriceRange";
 
-function DeliveredFilter() {
+function DeliveredFilter({ onStatusChange, statusOptions = ["Delivered", "Not Delivered"] }) {
     const [status, setOpenStatus] = useState(false);
 
     const [statuses, setStatuses] = useState([]);
 
-    const statusOptions = ["Delivered", "Not Delivered"];
-
     const toggleStatus = (value) => {
-        setStatuses((prev) =>
-            prev.includes(value)
-                ? prev.filter((v) => v !== value)
-                : [...prev, value]
-        );
+        const newStatuses = statuses.includes(value)
+            ? statuses.filter((v) => v !== value)
+            : [...statuses, value];
+        
+        setStatuses(newStatuses);
+        
+        // Call parent callback if provided
+        if (onStatusChange) {
+            onStatusChange(newStatuses);
+        }
     }
 
     return (

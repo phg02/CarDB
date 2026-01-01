@@ -196,7 +196,7 @@ router.get('/vnpay/return', async (req, res) => {
       // Redirect to frontend with success status
       const redirectUrl = recordType === 'posting_fee'
         ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?payment_status=success&redirect=settings&tab=my-listed-car`
-        : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`;
+        : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?payment_status=success&redirect=settings&tab=my-purchases`;
 
       res.redirect(redirectUrl);
     } else {
@@ -218,7 +218,7 @@ router.get('/vnpay/return', async (req, res) => {
       // Redirect to frontend with failed status
       const redirectUrl = recordType === 'posting_fee'
         ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?payment_status=failed&redirect=settings&tab=my-listed-car`
-        : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failed`;
+        : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?payment_status=failed&redirect=settings&tab=my-purchases`;
 
       res.redirect(redirectUrl);
     }

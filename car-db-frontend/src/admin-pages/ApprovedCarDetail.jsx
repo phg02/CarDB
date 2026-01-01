@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import CarHeroSection from '../components/cardetails/CarHeroSection';
 import CarImageGallery from '../components/cardetails/CarImageGallery';
 import CarPriceActions from '../components/cardetails/CarPriceActions';
@@ -9,8 +10,10 @@ import axios from 'axios';
 
 const ApprovedCarDetail = () => {
   const { id } = useParams();
+  const { auth } = useAuth();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [carData, setCarData] = useState(null);
+  const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -130,6 +133,24 @@ const ApprovedCarDetail = () => {
         } else {
           setError('Failed to load car details');
         }
+
+        // If car is sold, fetch order/buyer info
+        if (response.data.data?.sold) {
+          try {
+            const orderResponse = await axios.get(`/api/orders/car/${id}`, {
+              headers: {
+                'Authorization': `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true
+            });
+
+            if (orderResponse.data.success && orderResponse.data.data) {
+              setOrderData(orderResponse.data.data);
+            }
+          } catch (err) {
+            console.log('Could not fetch order info for sold car:', err);
+          }
+        }
       } catch (err) {
         console.error('Error fetching car data:', err);
         setError(err.response?.data?.message || 'Failed to load car details');
@@ -141,7 +162,7 @@ const ApprovedCarDetail = () => {
     if (id) {
       fetchCarData();
     }
-  }, [id]);
+  }, [id, auth]);
 
   if (loading) {
     return (
@@ -179,8 +200,62 @@ const ApprovedCarDetail = () => {
             <CarSpecifications specifications={carData.specifications} />
           </div>
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-8">
+            <div className="lg:sticky lg:top-8 space-y-6">
               <DealerInfo dealer={carData.dealer} />
+              
+              {/* Buyer Information (if sold) */}
+              {orderData && (
+                <div className="bg-gray-800 border border-blue-500/30 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-white mb-4">Buyer Information</h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-gray-400">Name</p>
+                      <p className="text-white font-semibold">{orderData.firstName} {orderData.lastName}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Email</p>
+                      <p className="text-white font-semibold break-all">{orderData.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Phone</p>
+                      <p className="text-white font-semibold">{orderData.phone || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Shipping Location (if sold) */}
+              {orderData && (
+                <div className="bg-gray-800 border border-green-500/30 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-white mb-4">Shipping Location</h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-gray-400">Address</p>
+                      <p className="text-white font-semibold">{orderData.address}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-400">City</p>
+                        <p className="text-white font-semibold">{orderData.city}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">State</p>
+                        <p className="text-white font-semibold">{orderData.state || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-400">Country</p>
+                        <p className="text-white font-semibold">{orderData.country}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">ZIP Code</p>
+                        <p className="text-white font-semibold">{orderData.zipCode || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

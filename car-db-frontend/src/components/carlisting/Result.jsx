@@ -26,8 +26,6 @@ function Result({ count = 0, onSortChange, sort = 'default' }) {
                             className="rounded-[3px] text-white bg-gray-700 px-2 py-2 cursor-pointer hover:bg-gray-600 transition-colors"
                         >
                             <option value="default">Sort by</option>
-                            <option value="price_low">Price: Low → High</option>
-                            <option value="price_high">Price: High → Low</option>
                             <option value="year_new">Year: Newest first</option>
                             <option value="year_old">Year: Oldest first</option>
                         </select>

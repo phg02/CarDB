@@ -147,7 +147,10 @@ router.get('/', carPostController.getAllCarPosts);
 
 /**
  * Get all car posts for admin (including unverified)
- * GET /api/cars/admin/all?page=1&limit=12&verified=false
+ * Supports filtering by: verified, sold, status, price range, make, model, year, body_type, transmission, fuel_type, drivetrain, exterior_color, city, seats
+ * GET /api/cars/admin/all?page=1&limit=12&verified=false&sold=true
+ * GET /api/cars/admin/all?sold=true&verified=true (get all sold/verified cars)
+ * GET /api/cars/admin/all?sold=false (get all available cars)
  */
 router.get('/admin/all', verifyToken, isAdmin, carPostController.getAllCarPostsAdmin);
 

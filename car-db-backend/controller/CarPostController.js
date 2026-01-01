@@ -231,8 +231,8 @@ export const getAllCarPosts = async (req, res) => {
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    // Only show verified posts (admin approved)
-    const filter = { isDeleted: false, verified: true };
+    // Only show verified posts (admin approved) and not sold
+    const filter = { isDeleted: false, verified: true, $or: [{ sold: false }, { sold: { $exists: false } }] };
 
     // Apply filters - Status (New/Used)
     if (status) filter.inventory_type = status.toLowerCase();
@@ -315,6 +315,7 @@ export const getAllCarPostsAdmin = async (req, res) => {
       page = 1, 
       limit = 12, 
       verified = 'all',
+      sold = 'all',
       status, 
       minPrice, 
       maxPrice, 
@@ -341,6 +342,14 @@ export const getAllCarPostsAdmin = async (req, res) => {
       filter.verified = false;
     }
     // If 'all' or undefined, no verified filter is applied
+
+    // Apply sold filter: 'true' (sold), 'false' (available), 'all' (both)
+    if (sold === 'true') {
+      filter.sold = true;
+    } else if (sold === 'false') {
+      filter.sold = false;
+    }
+    // If 'all' or undefined, no sold filter is applied
 
     // Apply filters - Status (New/Used)
     if (status) filter.inventory_type = status.toLowerCase();
@@ -466,7 +475,7 @@ export const getCarPostById = async (req, res) => {
     const { id } = req.params;
 
     const carPost = await CarPost.findById(id)
-      .populate('seller', 'name email phone');
+      .populate('seller', 'name email phone _id');
 
     if (!carPost || carPost.isDeleted) {
       return res.status(404).json({

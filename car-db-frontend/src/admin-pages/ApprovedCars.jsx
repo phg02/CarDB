@@ -232,12 +232,21 @@ function ApprovedCar() {
                   fuel={car.fuel_type || 'Unknown'}
                   seats={car.std_seating || 5}
                 >
-                  <button
-                    onClick={() => handleDelete(car._id)}
-                    className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition"
-                  >
-                    Delete
-                  </button>
+                  {car.sold ? (
+                    <button
+                      disabled
+                      className="w-full py-2 text-green-400 border border-green-400 rounded bg-green-500/20 cursor-not-allowed"
+                    >
+                      ✓ SOLD
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDelete(car._id)}
+                      className="w-full py-2 text-red-400 border border-red-400 rounded hover:bg-red-500 hover:text-white transition"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </ProductCard>
               ))}
             </div>

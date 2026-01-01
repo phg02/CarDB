@@ -48,6 +48,14 @@ export const createOrder = async (req, res) => {
         });
       }
 
+      // Prevent customer from buying their own car
+      if (customer.toString() === item.seller.toString()) {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot purchase your own listed car",
+        });
+      }
+
       const itemTotal = carPost.price * (item.quantity || 1);
       total += itemTotal;
 
@@ -157,7 +165,7 @@ export const getCustomerOrders = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const orders = await Order.find({ customer: customerId, isDeleted: false })
-      .populate("items.carPost", "title make model year price")
+      .populate("items.carPost", "title heading make model year price photo_links fuel_type drivetrain transmission std_seating body_type engine_size overall_length overall_width overall_height carfax_clean_title inventory_type")
       .populate("items.seller", "name email")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -183,6 +191,66 @@ export const getCustomerOrders = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to retrieve orders",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get order by car ID (for checking if a car is sold)
+ * @route GET /api/orders/car/:carId
+ */
+export const getOrderByCarId = async (req, res) => {
+  const { carId } = req.params;
+
+  try {
+    const order = await Order.findOne({
+      'items.carPost': carId,
+      isDeleted: false
+    })
+      .populate('customer', 'name email')
+      .populate('items.carPost', 'heading make model year price')
+      .populate('items.seller', 'name email')
+      .sort({ createdAt: -1 });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'No order found for this car',
+      });
+    }
+
+    // Format the response to include all necessary fields for frontend
+    const formattedOrder = {
+      _id: order._id,
+      orderId: order._id,
+      firstName: order.firstName,
+      lastName: order.lastName,
+      email: order.email,
+      phone: order.phone,
+      address: order.address,
+      city: order.city,
+      state: order.state || '',
+      country: order.country,
+      zipCode: order.zipCode || '',
+      orderStatus: order.orderStatus || 'pending',
+      paymentStatus: order.paymentStatus,
+      total: order.total,
+      items: order.items,
+      customer: order.customer,
+      createdAt: order.createdAt,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: 'Order retrieved successfully',
+      data: formattedOrder,
+    });
+  } catch (error) {
+    console.error('Error getting order by car ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve order',
       error: error.message,
     });
   }
@@ -228,9 +296,15 @@ export const updatePaymentDetailsVNPay = async (req, res) => {
       order.paymentStatus = true;
       order.orderStatus = "confirmed";
       order.paymentId = paymentId;
+      
+      // Mark car posts as sold only after successful payment
+      for (const item of order.items) {
+        await CarPost.findByIdAndUpdate(item.carPost, { sold: true, status: 'Sold' });
+      }
     } else {
       order.paymentStatus = false;
       order.orderStatus = "cancelled";
+      // Payment failed - don't mark cars as sold, keep them available
     }
 
     await order.save();
@@ -354,11 +428,7 @@ export const deleteOrder = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { isDeleted: true },
-      { new: true }
-    );
+    const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({
@@ -367,11 +437,33 @@ export const deleteOrder = async (req, res) => {
       });
     }
 
+    // Prevent cancellation if order is in transit or delivered
+    if (order.orderStatus === 'shipped' || order.orderStatus === 'delivered') {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot cancel orders that are in transit or have been delivered",
+      });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { 
+        isDeleted: true,
+        orderStatus: 'cancelled'
+      },
+      { new: true }
+    );
+
+    // Mark car posts as available again
+    for (const item of updatedOrder.items) {
+      await CarPost.findByIdAndUpdate(item.carPost, { sold: false, status: 'Available' });
+    }
+
     res.status(200).json({
       success: true,
-      message: "Order deleted successfully",
+      message: "Order cancelled successfully",
       data: {
-        order,
+        order: updatedOrder,
       },
     });
   } catch (error) {

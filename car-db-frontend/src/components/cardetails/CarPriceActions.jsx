@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus }) => {
+const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus, isPurchased, purchaseInfo, isOwnCar, isSold, soldDate }) => {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const [showNotification, setShowNotification] = useState('');
@@ -25,43 +25,51 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
       setTimeout(() => setShowLoginNotification(false), 3000);
       return;
     }
-    // Navigate to order summary page with car data
-    navigate('/order-summary', {
+    
+    // Extract mileage value safely
+    const mileageStr = carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value || '0';
+    const milesValue = mileageStr ? parseInt(mileageStr.replace(/[^\d]/g, '')) : 0;
+    
+    // Navigate to order form page with car data
+    navigate('/order', {
       state: {
         carData: {
+          _id: carId,
+          id: carId,
+          name: carData.name,
           heading: carData.name,
           price: parseFloat(price.replace(/[^0-9.-]+/g, '')) || 0,
-          miles: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value?.replace(' mi', '') || 0,
-          condition: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Mileage')?.value === '0 mi' ? 'new' : 'used',
-          vehicle_type: 'car', // Default value
+          miles: milesValue,
+          condition: milesValue === 0 ? 'new' : 'used',
+          vehicle_type: 'car',
           year: parseInt(carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Year')?.value) || 0,
-          make: 'Unknown', // Would need to be extracted from car name or API
+          make: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Make')?.value || 'Unknown',
           model: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Model')?.value || 'Unknown',
-          trim: 'Unknown', // Not available in current data
-          made_in: 'Unknown', // Not available in current data
+          trim: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Trim')?.value || 'Unknown',
+          made_in: 'Unknown',
           body_type: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Body Type')?.value || 'Unknown',
-          body_subtype: 'Unknown', // Not available in current data
-          doors: parseInt(carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Doors')?.value) || 0,
-          engine: 'Unknown', // Not available in current data
+          body_subtype: 'Unknown',
+          doors: parseInt(carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Doors')?.value?.replace(' doors', '')) || 0,
+          engine: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine')?.value || 'Unknown',
           fuel_type: carData.specifications?.leftColumn?.[0]?.items?.find(item => item.label === 'Fuel Type')?.value || 'Unknown',
-          transmission: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
-          drivetrain: carData.specifications?.leftColumn?.[1]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
-          highway_mpg: 0, // Not available in current data
-          city_mpg: 0, // Not available in current data
-          combined_mpg: 0, // Not available in current data
+          transmission: carData.specifications?.rightColumn?.[0]?.items?.find(item => item.label === 'Transmission')?.value || 'Unknown',
+          drivetrain: carData.specifications?.rightColumn?.[0]?.items?.find(item => item.label === 'Drivetrain')?.value || 'Unknown',
+          highway_mpg: parseInt(carData.specifications?.rightColumn?.[1]?.items?.find(item => item.label === 'Highway MPG')?.value?.replace(' mpg', '')) || 0,
+          city_mpg: parseInt(carData.specifications?.rightColumn?.[1]?.items?.find(item => item.label === 'City MPG')?.value?.replace(' mpg', '')) || 0,
+          combined_mpg: 0,
           exterior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Exterior Color')?.value || 'Unknown',
           interior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Interior Color')?.value || 'Unknown',
           base_exterior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Base Exterior Color')?.value || 'Unknown',
           base_interior_color: carData.specifications?.rightColumn?.[2]?.items?.find(item => item.label === 'Base Interior Color')?.value || 'Unknown',
-          previous_owners: parseInt(carData.specifications?.rightColumn?.[3]?.items?.find(item => item.label === 'Previous Owner')?.value) || 0,
+          previous_owners: 0,
           clean_title: carData.specifications?.rightColumn?.[3]?.items?.find(item => item.label === 'Clean Title')?.value === 'Yes',
           height: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Height')?.value || 'Unknown',
           length: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Length')?.value || 'Unknown',
           width: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Overall Width')?.value || 'Unknown',
-          cargo_capacity: carData.specifications?.leftColumn?.[3]?.items?.find(item => item.label === 'Cargo Capacity')?.value || 'Unknown',
-          powertrain_type: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Powertrain Type')?.value || 'Unknown',
+          cargo_capacity: 'Unknown',
+          powertrain_type: 'Unknown',
           cylinders: parseInt(carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Cylinders')?.value) || 0,
-          engine_size: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine Size')?.value || 'Unknown',
+          engine_size: carData.specifications?.leftColumn?.[2]?.items?.find(item => item.label === 'Engine Size')?.value?.replace(' L', '') || 'Unknown',
         }
       }
     });
@@ -193,7 +201,7 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
           <p className="text-3xl font-bold text-blue-500">{price}</p>
         </div>
 
-        {isUser && (
+        {isUser && !isPurchased && !isOwnCar && !isSold && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
             <button 
               onClick={handleBuy}
@@ -207,6 +215,36 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
             >
               Compare Car
             </button>
+          </div>
+        )}
+
+        {isOwnCar && (
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6">
+            <div className="text-center">
+              <p className="text-sm text-blue-400 mb-2 font-semibold">✓ YOUR LISTING</p>
+              <p className="text-lg text-white font-semibold">This is your car listing</p>
+              <p className="text-xs text-gray-400 mt-2">You cannot purchase your own car</p>
+            </div>
+          </div>
+        )}
+
+        {isSold && !isPurchased && (
+          <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-6">
+            <div className="text-center">
+              <p className="text-sm text-green-400 mb-2 font-semibold">✓ SOLD</p>
+              <p className="text-lg text-white font-semibold">Sold on {soldDate}</p>
+              <p className="text-xs text-gray-400 mt-2">This car has been sold</p>
+            </div>
+          </div>
+        )}
+
+        {isPurchased && (
+          <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-6">
+            <div className="text-center">
+              <p className="text-sm text-green-400 mb-2 font-semibold">✓ PURCHASED</p>
+              <p className="text-lg text-white font-semibold">{purchaseInfo?.purchaseDate}</p>
+              <p className="text-xs text-gray-400 mt-2">Order ID: {purchaseInfo?.orderId}</p>
+            </div>
           </div>
         )}
 

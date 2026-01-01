@@ -20,14 +20,20 @@ export const AuthProvider = ({children}) =>{
                 const res = await axios.get("/api/auth/refresh", {
                     withCredentials: true
                 });
+                console.log('AuthContext - Refresh response:', res.data);
+                const userId = res.data.data?.user?.id || res.data.data?.user?._id;
+                console.log('AuthContext - Extracted userId from response:', userId);
+                
                 const newAuth = {
                     accessToken: res.data.accessToken, 
+                    userId: userId,
+                    name: res.data.data.user.name,
                     role: res.data.data.user.role,
                     verified: res.data.data.user.verified,
                     email: res.data.data.user.email,
                     profileImage: res.data.data.user.profileImage
                 };
-                console.log('AuthContext - refresh successful:', { hasToken: !!newAuth.accessToken, role: newAuth.role });
+                console.log('AuthContext - refresh successful:', { hasToken: !!newAuth.accessToken, role: newAuth.role, userId: newAuth.userId });
                 setAuth(newAuth);
             }
             catch(error){

@@ -3,6 +3,7 @@ import {
   createOrder,
   getOrderById,
   getCustomerOrders,
+  getOrderByCarId,
   updatePaymentDetailsVNPay,
   updateOrderStatus,
   cancelOrder,
@@ -29,6 +30,13 @@ router.post('/create', verifyToken, createOrder);
  * SECURITY: Requires authenticated user - retrieves their own orders
  */
 router.get('/customer', verifyToken, getCustomerOrders);
+
+/**
+ * Get order by car ID (for checking if a car is sold)
+ * GET /api/orders/car/:carId
+ * SECURITY: Requires authentication - admin only to see buyer info
+ */
+router.get('/car/:carId', verifyToken, getOrderByCarId);
 
 /**
  * Get order by ID

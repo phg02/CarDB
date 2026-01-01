@@ -9,18 +9,53 @@ function OrderSummary() {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const token = auth?.accessToken;
+  const userId = auth?.userId;
   const [loading, setLoading] = useState(false);
+  const [sellerId, setSellerId] = useState(null);
+  const [fetchingSellerInfo, setFetchingSellerInfo] = useState(false);
 
-  const { carData, imagePreviews, isPurchase, isPaymentForExistingPost, postingFeeId } = (location && location.state) || {};
+  const { carData, imagePreviews, isPurchase, isPaymentForExistingPost, postingFeeId, city, country, firstName: formFirstName, lastName: formLastName } = (location && location.state) || {};
   const { phone, address } = (location && location.state) || {};
   const [agreed, setAgreed] = useState(false);
 
-  // Redirect back to sell car if no data
+  // Redirect if no data
   useEffect(() => {
     if (!carData) {
-      navigate('/sell-car');
+      navigate(isPurchase ? '/carlisting' : '/sell-car');
     }
-  }, [carData, navigate]);
+  }, [carData, navigate, isPurchase]);
+
+  // Fetch seller ID for purchase orders
+  useEffect(() => {
+    if (isPurchase && carData?._id) {
+      setFetchingSellerInfo(true);
+      axios.get(`/api/cars/${carData._id}`, {
+        withCredentials: true
+      })
+        .then(res => {
+          console.log('Car details response:', res.data);
+          if (res.data.success && res.data.data) {
+            const seller = res.data.data.seller;
+            if (seller) {
+              const sellerId = typeof seller === 'string' ? seller : seller._id;
+              console.log('Seller ID extracted:', sellerId);
+              setSellerId(sellerId);
+            } else {
+              console.error('No seller found in response');
+              toast.error('Seller information not found for this car');
+            }
+          } else {
+            console.error('Invalid response structure:', res.data);
+            toast.error('Failed to load car information');
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching seller info:', err.response?.data || err.message);
+          toast.error(err.response?.data?.message || 'Failed to fetch seller information');
+        })
+        .finally(() => setFetchingSellerInfo(false));
+    }
+  }, [isPurchase, carData?._id]);
 
   const handlePayment = async () => {
     if (!carData) {
@@ -39,9 +74,136 @@ function OrderSummary() {
       }
 
       if (isPurchase) {
-        // For purchases, show a message that this feature is coming soon
-        toast.info("Purchase functionality is coming soon!");
-        setLoading(false);
+        // Handle purchase order
+        console.log('Auth object:', auth);
+        
+        // Decode userId from JWT token if not in auth object
+        let customerUserId = auth?.userId;
+        if (!customerUserId && token) {
+          try {
+            const tokenParts = token.split('.');
+            const decoded = JSON.parse(atob(tokenParts[1]));
+            customerUserId = decoded.userId;
+            console.log('Decoded userId from JWT:', customerUserId);
+          } catch (err) {
+            console.error('Failed to decode token:', err);
+          }
+        }
+        
+        if (!phone || !address || !city || !country) {
+          toast.error("Please provide all delivery information");
+          setLoading(false);
+          return;
+        }
+
+        if (!sellerId) {
+          toast.error("Seller information not found. Please try again.");
+          setLoading(false);
+          return;
+        }
+        
+        if (!customerUserId) {
+          toast.error("User information not found. Please login again.");
+          setLoading(false);
+          return;
+        }
+        
+        // Use names from the form if provided, otherwise fallback
+        const firstName = formFirstName || 'Customer';
+        const lastName = formLastName || '';
+        
+        if (!firstName || !lastName) {
+          toast.error("Please provide your first and last name.");
+          setLoading(false);
+          return;
+        }
+
+        const orderPayload = {
+          customer: customerUserId,
+          firstName,
+          lastName,
+          email: auth?.email || '',
+          phone,
+          address,
+          city,
+          country,
+          items: [
+            {
+              carPost: carData._id || carData.id,
+              seller: sellerId,
+              quantity: 1,
+            }
+          ],
+          notes: '',
+        };
+
+        console.log('Order payload being sent:', orderPayload);
+
+        // Create order via API
+        const orderResponse = await axios.post('/api/orders/create', orderPayload, {
+          withCredentials: true,
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log('Order response:', orderResponse.data);
+
+        if (orderResponse.data.success) {
+          const orderId = orderResponse.data.data.order._id;
+          const orderAmount = carData.price;
+          
+          console.log('Order created, initiating VNPay payment:', { orderId, orderAmount });
+          
+          // Now create VNPay checkout session
+          const vnpayResponse = await axios.post('/api/payments/vnpay/create-checkout', 
+            {
+              orderId: orderId,
+              type: 'order',
+              billingInfo: {
+                firstName,
+                lastName,
+                email: auth?.email || '',
+                phone,
+                address,
+                city,
+                country,
+              }
+            },
+            {
+              withCredentials: true,
+              headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          console.log('VNPay checkout response:', vnpayResponse.data);
+          console.log('Full VNPay response data object:', JSON.stringify(vnpayResponse.data.data, null, 2));
+
+          if (vnpayResponse.data.success) {
+            const paymentUrl = vnpayResponse.data.data?.url || vnpayResponse.data.url;
+            console.log('Payment URL extracted:', paymentUrl);
+            console.log('All keys in data:', Object.keys(vnpayResponse.data.data || {}));
+            
+            if (paymentUrl) {
+              // Redirect to VNPay payment URL
+              toast.success('Redirecting to payment...');
+              setTimeout(() => {
+                window.location.href = paymentUrl;
+              }, 500);
+            } else {
+              console.error('Payment URL not found in response:', vnpayResponse.data);
+              toast.error('Payment URL not generated. Please try again.');
+            }
+          } else {
+            toast.error('Failed to initiate payment. Please try again.');
+          }
+        } else {
+          toast.error(orderResponse.data.message || 'Failed to create order');
+        }
         return;
       }
 
@@ -102,8 +264,10 @@ function OrderSummary() {
       console.log('Redirecting to:', paymentResponse.data.data.url);
       window.location.href = paymentResponse.data.data.url;
     } catch (err) {
-      console.error("Error initiating payment:", err);
-      toast.error(err.message || "An error occurred while processing payment");
+      console.error("Full error response:", err.response);
+      console.error("Error details:", err.response?.data || err.message);
+      const errorMessage = err.response?.data?.message || err.message || "An error occurred while processing payment";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -159,22 +323,35 @@ function OrderSummary() {
                 {isPaymentForExistingPost ? 'Car Details' : 'Listing Details'}
               </h4>
 
+              {/* Delivery Information Section (for purchases) */}
+              {isPurchase && (phone || address || city || country) && (
+                <div className="bg-gray-800 p-4 rounded-lg mb-6">
+                  <h5 className="font-medium text-white mb-3">Delivery Information</h5>
+                  <div className="space-y-1 text-sm text-gray-300">
+                    <p><span className="font-medium">Phone:</span> {phone || 'N/A'}</p>
+                    <p><span className="font-medium">Address:</span> {address || 'N/A'}</p>
+                    <p><span className="font-medium">City:</span> {city || 'N/A'}</p>
+                    <p><span className="font-medium">Country:</span> {country || 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h5 className="font-medium text-white mb-2">Basic Information</h5>
                   <div className="space-y-1 text-sm text-gray-300">
-                    <p><span className="font-medium">Title:</span> {carData?.heading}</p>
+                    <p><span className="font-medium">Title:</span> {carData?.heading || carData?.name || 'Unknown Car'}</p>
                     <p><span className="font-medium">Price:</span> VND {carData?.price?.toLocaleString()}</p>
                     <p><span className="font-medium">Condition:</span> {carData?.condition === 'new' ? 'New' : 'Used'}</p>
                     <p>
                       <span className="font-medium">Mileage:</span>{' '}
-                      {carData?.miles != null && carData?.miles !== ''
+                      {carData?.miles !== undefined && carData?.miles !== null && !isNaN(carData?.miles) && carData?.miles !== ''
                         ? `${Number(carData.miles).toLocaleString()} miles`
-                        : carData?.km != null && carData?.km !== ''
+                        : carData?.km != null && carData?.km !== '' && !isNaN(carData?.km)
                         ? `${Number(carData.km).toLocaleString()} km`
                         : 'N/A'}
                     </p>
-                    <p><span className="font-medium">Year:</span> {carData?.year}</p>
+                    <p><span className="font-medium">Year:</span> {carData?.year || 'N/A'}</p>
                   </div>
                 </div>
 
@@ -200,13 +377,15 @@ function OrderSummary() {
                   </div>
                 </div>
 
-                <div>
-                  <h5 className="font-medium text-white mb-2">Contact Information</h5>
-                  <div className="space-y-1 text-sm text-gray-300">
-                    <p><span className="font-medium">Phone:</span> {carData?.phone}</p>
-                    <p><span className="font-medium">Address:</span> {carData?.dealer?.street}, {carData?.dealer?.city}, {carData?.dealer?.state}, {carData?.dealer?.country}</p>
+                {!isPurchase && (
+                  <div>
+                    <h5 className="font-medium text-white mb-2">Contact Information</h5>
+                    <div className="space-y-1 text-sm text-gray-300">
+                      <p><span className="font-medium">Phone:</span> {carData?.phone}</p>
+                      <p><span className="font-medium">Address:</span> {carData?.dealer?.street}, {carData?.dealer?.city}, {carData?.dealer?.state}, {carData?.dealer?.country}</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Car Images */}
@@ -248,14 +427,14 @@ function OrderSummary() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-white">{isPurchase ? `$${carData?.price?.toLocaleString()}` : '15,000 VND'}</p>
+                    <p className="text-lg font-bold text-white">{isPurchase ? `VND ${carData?.price?.toLocaleString()}` : '15,000 VND'}</p>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-gray-900 dark:text-white">Total Amount</span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">{isPurchase ? `$${carData?.price?.toLocaleString()}` : '15,000 VND'}</span>
+                    <span className="text-lg font-bold text-gray-900 dark:text-white">{isPurchase ? `VND ${carData?.price?.toLocaleString()}` : '15,000 VND'}</span>
                   </div>
                 </div>
               </div>

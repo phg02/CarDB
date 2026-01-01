@@ -1,410 +1,242 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 import CarHeroSection from '../components/cardetails/CarHeroSection';
 import CarImageGallery from '../components/cardetails/CarImageGallery';
 import CarPriceActions from '../components/cardetails/CarPriceActions';
 import CarSpecifications from '../components/cardetails/CarSpecifications';
 import DealerInfo from '../components/cardetails/DealerInfo';
 
-const CarDetails = () => {
+const BoughtCarDetail = () => {
   const { id } = useParams();
+  const { auth } = useAuth();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [carData, setCarData] = useState(null);
+  const [dealerData, setDealerData] = useState(null);
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [orderStatus, setOrderStatus] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Sample data - replace with API call using the id
-  const allCarsData = [
-    {
-      name: "Tesla Model 3 Standard Range Plus",
-      heroImage: "https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg",
-      images: [
-        "https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg",
-        "https://www.thedrive.com/wp-content/uploads/images-by-url-td/content/archive-images/031116-mercedes-amg-e43-hero.jpg?quality=85",
-        "https://www.clinkardcars.co.uk/blobs/Images/Stock/247/befd7306-8ffb-4463-a549-a7fb596cf5ef.JPG?width=2000&height=1333",
-        "https://www.autoblog.com/.image/w_3840,q_auto:good,c_limit/MjA5MTMwNzQ5NDQ3MTg2Mjc2/image-placeholder-title.jpg",
-        "https://cdn.dealeraccelerate.com/mankato/1/4085/309291/1920x1440/1967-mercedes-benz-250sl-pagoda",
-      ],
-      price: "700,000,000 vnd",
-      specifications: {
-        leftColumn: [
-          {
-            title: "Basic Car Details",
-            items: [
-              { label: "Year", value: "2021" },
-              { label: "Model", value: "Model 3" },
-              { label: "Mileage", value: "0 mi" },
-              { label: "Color", value: "Red" },
-              { label: "Fuel Type", value: "Electric" },
-              { label: "Doors", value: "4 doors" },
-            ]
-          },
-          {
-            title: "Body & Exterior Type",
-            items: [
-              { label: "Body Type", value: "Sedan" },
-              { label: "Drivetrain", value: "All-Wheel Drive" },
-              { label: "Doors", value: "4" },
-              { label: "Transmission", value: "Automatic" },
-            ]
-          },
-          {
-            title: "Engine & Powertrain",
-            items: [
-              { label: "Engine", value: "55.0 kWh" },
-              { label: "Engine Size", value: "0.0 kWh" },
-              { label: "Engine Block", value: "100.2" },
-              { label: "Cylinders", value: "331 mi" },
-              { label: "Fuel Type", value: "Electric" },
-              { label: "Powertrain Type", value: "331 mi" },
-            ]
-          },
-          {
-            title: "Dimensions & Capacity",
-            items: [
-              { label: "Overall Height", value: "4694 mm" },
-              { label: "Overall Length", value: "1649 mm" },
-              { label: "Overall Width", value: "1445 mm" },
-              { label: "Cargo Capacity", value: "12.3" },
-            ]
-          }
-        ],
-        rightColumn: [
-          {
-            title: "Drivetrain & Transmission",
-            items: [
-              { label: "Transmission", value: "55.0 kWh" },
-              { label: "Drivetrain", value: "0.0 kWh" },
-            ]
-          },
-          {
-            title: "Fuel Efficiency",
-            items: [
-              { label: "Highway Fuel", value: "4694 mm" },
-              { label: "City Fuel", value: "1649 mm" },
-            ]
-          },
-          {
-            title: "Exterior & Interior Color",
-            items: [
-              { label: "Exterior Color", value: "Red Multi-Coat" },
-              { label: "Interior Color", value: "Black" },
-              { label: "Base Exterior Color", value: "Red" },
-              { label: "Base Interior Color", value: "Black" },
-            ]
-          },
-          {
-            title: "Vehicle History",
-            items: [
-              { label: "Previous Owner", value: "None" },
-              { label: "Clean Title", value: "Yes" },
-            ]
-          }
-        ]
-      },
-      dealer: {
-        name: "Alberto Gouse",
-        title: "Car Dealer",
-        photo: null,
-        phone: "260-863-9770",
-        email: "alfred@gmail.com",
-        location: "9595 E Tesla Mansion Dr, Friant, CA, 93626, Kansas, USA"
-      }
-    },
-    {
-      name: "BMW i4 M50",
-      heroImage: "https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg",
-      images: [
-        "https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg",
-        "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-        "https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp",
-        "https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg",
-      ],
-      price: "1,200,000,000 vnd",
-      specifications: {
-        leftColumn: [
-          {
-            title: "Basic Car Details",
-            items: [
-              { label: "Year", value: "2022" },
-              { label: "Model", value: "i4 M50" },
-              { label: "Mileage", value: "5,000 mi" },
-              { label: "Color", value: "Blue" },
-              { label: "Fuel Type", value: "Electric" },
-              { label: "Doors", value: "4 doors" },
-            ]
-          },
-          {
-            title: "Body & Exterior Type",
-            items: [
-              { label: "Body Type", value: "Gran Coupe" },
-              { label: "Drivetrain", value: "All-Wheel Drive" },
-              { label: "Doors", value: "4" },
-              { label: "Transmission", value: "Automatic" },
-            ]
-          },
-          {
-            title: "Engine & Powertrain",
-            items: [
-              { label: "Engine", value: "83.9 kWh" },
-              { label: "Motor Power", value: "536 hp" },
-              { label: "Torque", value: "795 Nm" },
-              { label: "Battery", value: "83.9 kWh" },
-              { label: "Fuel Type", value: "Electric" },
-              { label: "Range", value: "510 km" },
-            ]
-          },
-          {
-            title: "Dimensions & Capacity",
-            items: [
-              { label: "Overall Height", value: "1448 mm" },
-              { label: "Overall Length", value: "4783 mm" },
-              { label: "Overall Width", value: "1852 mm" },
-              { label: "Cargo Capacity", value: "470 L" },
-            ]
-          }
-        ],
-        rightColumn: [
-          {
-            title: "Drivetrain & Transmission",
-            items: [
-              { label: "Transmission", value: "Single-Speed" },
-              { label: "Drivetrain", value: "AWD" },
-            ]
-          },
-          {
-            title: "Fuel Efficiency",
-            items: [
-              { label: "Combined", value: "18.0 kWh/100km" },
-              { label: "City", value: "16.5 kWh/100km" },
-            ]
-          },
-          {
-            title: "Exterior & Interior Color",
-            items: [
-              { label: "Exterior Color", value: "Portimao Blue" },
-              { label: "Interior Color", value: "Black" },
-              { label: "Base Exterior Color", value: "Blue" },
-              { label: "Base Interior Color", value: "Black" },
-            ]
-          },
-          {
-            title: "Vehicle History",
-            items: [
-              { label: "Previous Owner", value: "1" },
-              { label: "Clean Title", value: "Yes" },
-            ]
-          }
-        ]
-      },
-      dealer: {
-        name: "Michael Schmidt",
-        title: "BMW Specialist",
-        photo: null,
-        phone: "310-555-0199",
-        email: "mschmidt@bmw-dealer.com",
-        location: "1234 Sunset Blvd, Los Angeles, CA, 90026, USA"
-      }
-    },
-    {
-      name: "Mercedes-Benz C-Class 300",
-      heroImage: "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-      images: [
-        "https://www.topgear.com/sites/default/files/cars-car/image/2025/05/Original-49014-mercedes-e53-amg-saloon-0002.jpg",
-        "https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg",
-        "https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp",
-      ],
-      price: "900,000,000 vnd",
-      specifications: {
-        leftColumn: [
-          {
-            title: "Basic Car Details",
-            items: [
-              { label: "Year", value: "2021" },
-              { label: "Model", value: "C-Class 300" },
-              { label: "Mileage", value: "12,000 mi" },
-              { label: "Color", value: "Silver" },
-              { label: "Fuel Type", value: "Gasoline" },
-              { label: "Doors", value: "4 doors" },
-            ]
-          },
-          {
-            title: "Body & Exterior Type",
-            items: [
-              { label: "Body Type", value: "Sedan" },
-              { label: "Drivetrain", value: "Rear-Wheel Drive" },
-              { label: "Doors", value: "4" },
-              { label: "Transmission", value: "Automatic" },
-            ]
-          },
-          {
-            title: "Engine & Powertrain",
-            items: [
-              { label: "Engine", value: "2.0L Turbo" },
-              { label: "Cylinders", value: "4" },
-              { label: "Horsepower", value: "255 hp" },
-              { label: "Torque", value: "295 lb-ft" },
-              { label: "Fuel Type", value: "Premium Gasoline" },
-              { label: "0-60 mph", value: "5.9s" },
-            ]
-          },
-          {
-            title: "Dimensions & Capacity",
-            items: [
-              { label: "Overall Height", value: "1442 mm" },
-              { label: "Overall Length", value: "4751 mm" },
-              { label: "Overall Width", value: "1820 mm" },
-              { label: "Cargo Capacity", value: "370 L" },
-            ]
-          }
-        ],
-        rightColumn: [
-          {
-            title: "Drivetrain & Transmission",
-            items: [
-              { label: "Transmission", value: "9-Speed Automatic" },
-              { label: "Drivetrain", value: "RWD" },
-            ]
-          },
-          {
-            title: "Fuel Efficiency",
-            items: [
-              { label: "Highway", value: "35 MPG" },
-              { label: "City", value: "25 MPG" },
-            ]
-          },
-          {
-            title: "Exterior & Interior Color",
-            items: [
-              { label: "Exterior Color", value: "Iridium Silver" },
-              { label: "Interior Color", value: "Black Leather" },
-              { label: "Base Exterior Color", value: "Silver" },
-              { label: "Base Interior Color", value: "Black" },
-            ]
-          },
-          {
-            title: "Vehicle History",
-            items: [
-              { label: "Previous Owner", value: "1" },
-              { label: "Clean Title", value: "Yes" },
-            ]
-          }
-        ]
-      },
-      dealer: {
-        name: "Sarah Johnson",
-        title: "Mercedes-Benz Consultant",
-        photo: null,
-        phone: "212-555-8888",
-        email: "sjohnson@mercedes-dealer.com",
-        location: "789 Park Avenue, New York, NY, 10021, USA"
-      }
-    },
-    {
-      name: "Audi e-tron GT",
-      heroImage: "https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp",
-      images: [
-        "https://img1.oto.com.vn/2024/12/17/OpzfnMD2/audi-a6-gia-xe-058f.webp",
-        "https://photo.znews.vn/w660/Uploaded/bpivptvl/2025_07_07/tesla_models_caranddriver.jpg",
-        "https://bmw-hanoi.com.vn/wp-content/uploads/BMW-840i-Gran-Coupe-BMW-Hanoi.com_.vn10-1.jpg",
-      ],
-      price: "3,500,000,000 vnd",
-      specifications: {
-        leftColumn: [
-          {
-            title: "Basic Car Details",
-            items: [
-              { label: "Year", value: "2023" },
-              { label: "Model", value: "e-tron GT" },
-              { label: "Mileage", value: "2,500 mi" },
-              { label: "Color", value: "Gray" },
-              { label: "Fuel Type", value: "Electric" },
-              { label: "Doors", value: "4 doors" },
-            ]
-          },
-          {
-            title: "Body & Exterior Type",
-            items: [
-              { label: "Body Type", value: "Sedan" },
-              { label: "Drivetrain", value: "All-Wheel Drive" },
-              { label: "Doors", value: "4" },
-              { label: "Transmission", value: "Automatic" },
-            ]
-          },
-          {
-            title: "Engine & Powertrain",
-            items: [
-              { label: "Engine", value: "93.4 kWh" },
-              { label: "Motor Power", value: "637 hp" },
-              { label: "Torque", value: "830 Nm" },
-              { label: "Battery", value: "93.4 kWh" },
-              { label: "Fuel Type", value: "Electric" },
-              { label: "Range", value: "488 km" },
-            ]
-          },
-          {
-            title: "Dimensions & Capacity",
-            items: [
-              { label: "Overall Height", value: "1396 mm" },
-              { label: "Overall Length", value: "4989 mm" },
-              { label: "Overall Width", value: "1964 mm" },
-              { label: "Cargo Capacity", value: "405 L" },
-            ]
-          }
-        ],
-        rightColumn: [
-          {
-            title: "Drivetrain & Transmission",
-            items: [
-              { label: "Transmission", value: "Single-Speed" },
-              { label: "Drivetrain", value: "Quattro AWD" },
-            ]
-          },
-          {
-            title: "Fuel Efficiency",
-            items: [
-              { label: "Combined", value: "19.2 kWh/100km" },
-              { label: "City", value: "17.8 kWh/100km" },
-            ]
-          },
-          {
-            title: "Exterior & Interior Color",
-            items: [
-              { label: "Exterior Color", value: "Daytona Gray" },
-              { label: "Interior Color", value: "Black/Red" },
-              { label: "Base Exterior Color", value: "Gray" },
-              { label: "Base Interior Color", value: "Black" },
-            ]
-          },
-          {
-            title: "Vehicle History",
-            items: [
-              { label: "Previous Owner", value: "None" },
-              { label: "Clean Title", value: "Yes" },
-            ]
-          }
-        ]
-      },
-      dealer: {
-        name: "David Chen",
-        title: "Audi Performance Specialist",
-        photo: null,
-        phone: "415-555-7777",
-        email: "dchen@audi-dealer.com",
-        location: "567 Market Street, San Francisco, CA, 94105, USA"
-      }
-    }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log('BoughtCarDetail - Starting to fetch data for car:', id);
+        setLoading(true);
+        setError(null);
 
-  const carIndex = parseInt(id) - 1;
-  const carData = allCarsData[carIndex] || allCarsData[0];
+        // Fetch car details
+        const carResponse = await axios.get(`/api/cars/${id}`, {
+          withCredentials: true
+        });
+
+        if (carResponse.data.success) {
+          const car = carResponse.data.data;
+          
+          // Transform car data
+          const transformedData = {
+            name: car.heading,
+            heroImage: car.photo_links && car.photo_links.length > 0 ? car.photo_links[0] : '',
+            images: car.photo_links || [],
+            price: `${car.price.toLocaleString()} vnd`,
+            specifications: {
+              leftColumn: [
+                {
+                  title: "Basic Car Details",
+                  items: [
+                    { label: "Year", value: car.year || 'N/A' },
+                    { label: "Make", value: car.make || 'N/A' },
+                    { label: "Model", value: car.model || 'N/A' },
+                    { label: "Mileage", value: `${car.miles?.toLocaleString() || 'N/A'} mi` },
+                    { label: "Fuel Type", value: car.fuel_type || 'N/A' },
+                    { label: "Doors", value: car.doors ? `${car.doors} doors` : 'N/A' },
+                  ]
+                },
+                {
+                  title: "Body & Exterior Type",
+                  items: [
+                    { label: "Body Type", value: car.body_type || 'N/A' },
+                    { label: "Drivetrain", value: car.drivetrain || 'N/A' },
+                    { label: "Transmission", value: car.transmission || 'N/A' },
+                    { label: "Trim", value: car.trim || 'N/A' },
+                  ]
+                },
+                {
+                  title: "Engine & Powertrain",
+                  items: [
+                    { label: "Engine", value: car.engine || 'N/A' },
+                    { label: "Engine Size", value: car.engine_size ? `${car.engine_size} L` : 'N/A' },
+                    { label: "Engine Block", value: car.engine_block || 'N/A' },
+                    { label: "Cylinders", value: car.cylinders || 'N/A' },
+                    { label: "Fuel Type", value: car.fuel_type || 'N/A' },
+                    { label: "Vehicle Type", value: car.vehicle_type || 'N/A' },
+                  ]
+                },
+                {
+                  title: "Dimensions & Capacity",
+                  items: [
+                    { label: "Overall Height", value: car.overall_height ? `${car.overall_height} mm` : 'N/A' },
+                    { label: "Overall Length", value: car.overall_length ? `${car.overall_length} mm` : 'N/A' },
+                    { label: "Overall Width", value: car.overall_width ? `${car.overall_width} mm` : 'N/A' },
+                    { label: "Seating Capacity", value: car.std_seating || 'N/A' },
+                  ]
+                }
+              ],
+              rightColumn: [
+                {
+                  title: "Drivetrain & Transmission",
+                  items: [
+                    { label: "Transmission", value: car.transmission || 'N/A' },
+                    { label: "Drivetrain", value: car.drivetrain || 'N/A' },
+                  ]
+                },
+                {
+                  title: "Fuel Efficiency",
+                  items: [
+                    { label: "Highway MPG", value: car.highway_mpg ? `${car.highway_mpg} mpg` : 'N/A' },
+                    { label: "City MPG", value: car.city_mpg ? `${car.city_mpg} mpg` : 'N/A' },
+                  ]
+                },
+                {
+                  title: "Exterior & Interior Color",
+                  items: [
+                    { label: "Exterior Color", value: car.exterior_color || 'N/A' },
+                    { label: "Interior Color", value: car.interior_color || 'N/A' },
+                    { label: "Base Exterior Color", value: car.base_ext_color || 'N/A' },
+                    { label: "Base Interior Color", value: car.base_int_color || 'N/A' },
+                  ]
+                },
+                {
+                  title: "Vehicle History",
+                  items: [
+                    { label: "Inventory Type", value: car.inventory_type || 'N/A' },
+                    { label: "Clean Title", value: car.carfax_clean_title ? 'Yes' : 'No' },
+                    { label: "Status", value: car.status || 'N/A' },
+                  ]
+                }
+              ]
+            }
+          };
+          
+          // Store dealer/seller info
+          setDealerData({
+            name: car.seller?.name || 'N/A',
+            title: 'Car Seller',
+            photo: null,
+            phone: car.seller?.phone || 'N/A',
+            email: car.seller?.email || 'N/A',
+            location: car.dealer ? 
+              `${car.dealer.street || ''}, ${car.dealer.city || ''}, ${car.dealer.state || ''}, ${car.dealer.country || ''}`.replace(/^, |, $/, '') : 
+              'N/A'
+          });
+          
+          setCarData(transformedData);
+        }
+
+        // Fetch order details using the order endpoint for this car
+        try {
+          const orderResponse = await axios.get(`/api/orders/car/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true
+          });
+
+          console.log('Order response:', orderResponse.data);
+
+          if (orderResponse.data.success && orderResponse.data.data) {
+            const order = orderResponse.data.data;
+            console.log('Order data loaded:', order);
+            setOrderData(order);
+            setOrderStatus(order.orderStatus || 'pending');
+          } else {
+            console.log('Order response not successful or no data:', orderResponse.data);
+          }
+        } catch (err) {
+          console.log('Order fetch error:', err.response?.status, err.response?.data);
+          // 404 is expected if no order found, log but don't break
+          if (err.response?.status === 404) {
+            console.log('No order found for this car (404)');
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err.response?.data?.message || 'Failed to load car details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchData();
+    }
+  }, [id, auth]);
+
+  const handleStatusUpdate = async (newStatus) => {
+    if (!orderData || !orderData._id) {
+      toast.error('Order data not available');
+      return;
+    }
+
+    try {
+      setUpdatingStatus(true);
+      const response = await axios.patch(
+        `/api/orders/${orderData._id}/status`,
+        { orderStatus: newStatus },
+        {
+          headers: {
+            'Authorization': `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data.success) {
+        setOrderStatus(newStatus);
+        toast.success(`Order status updated to ${newStatus}`);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update order status');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading car details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!carData) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Car not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900">
       <CarHeroSection carName={carData.name} heroImage={carData.images[selectedImageIndex]} />
       <CarImageGallery images={carData.images} selectedImage={selectedImageIndex} onImageSelect={setSelectedImageIndex} />
-      <CarPriceActions price={carData.price} carData={carData} carId={carIndex + 1} isAdminStatus={true} />
       
       <div className="container mx-auto px-4 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -412,8 +244,81 @@ const CarDetails = () => {
             <CarSpecifications specifications={carData.specifications} />
           </div>
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-8">
-              <DealerInfo dealer={carData.dealer} />
+            <div className="lg:sticky lg:top-8 space-y-6">
+              {/* Dealer Info */}
+              {dealerData && <DealerInfo dealer={dealerData} />}
+              
+              {/* Buyer Information */}
+              {orderData && (
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-white mb-4">Buyer Information</h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-gray-400">Name</p>
+                      <p className="text-white font-semibold">{orderData.firstName} {orderData.lastName}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Email</p>
+                      <p className="text-white font-semibold break-all">{orderData.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Phone</p>
+                      <p className="text-white font-semibold">{orderData.phone || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Shipping Location */}
+              {orderData && (
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-white mb-4">Shipping Location</h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-gray-400">Address</p>
+                      <p className="text-white font-semibold">{orderData.address}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-400">City</p>
+                        <p className="text-white font-semibold">{orderData.city}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">State</p>
+                        <p className="text-white font-semibold">{orderData.state || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-400">Country</p>
+                        <p className="text-white font-semibold">{orderData.country}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">ZIP Code</p>
+                        <p className="text-white font-semibold">{orderData.zipCode || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Delivery Status */}
+              {orderData && (
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-white mb-4">Delivery Status</h3>
+                  <select
+                    value={orderStatus}
+                    onChange={(e) => handleStatusUpdate(e.target.value)}
+                    disabled={updatingStatus}
+                    className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="processing">Processing</option>
+                    <option value="shipped">In Transit</option>
+                    <option value="delivered">Delivered to Owner</option>
+                  </select>
+                  {updatingStatus && <p className="text-gray-400 text-sm mt-2">Updating...</p>}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -422,4 +327,4 @@ const CarDetails = () => {
   );
 };
 
-export default CarDetails;
+export default BoughtCarDetail;

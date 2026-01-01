@@ -69,15 +69,18 @@ export const LoginForm = () => {
         }
       );
       console.log('Login response:', response.data);
+      const userData = response.data.data.user;
+      console.log('Setting auth with userId:', userData.id);
       setAuth({
         accessToken: response.data.accessToken,
-        role: response.data.data.user.role,
-        verified: response.data.data.user.verified,
-        email: response.data.data.user.email,
-        name: response.data.data.user.name,
-        profileImage: response.data.data.user.profileImage
+        userId: userData.id,
+        role: userData.role,
+        verified: userData.verified,
+        email: userData.email,
+        name: userData.name,
+        profileImage: userData.profileImage
       });
-      console.log('Auth state set:', { accessToken: !!response.data.accessToken, role: response.data.data.user.role });
+      console.log('Auth state set:', { accessToken: !!response.data.accessToken, userId: userData.id, role: userData.role });
       toast.success("Login successful!");
       
       // Redirect to the page they were trying to access, or home if no previous page

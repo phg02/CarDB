@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, ShoppingBag, Heart, Car, LogOut, Trash2, Menu, X } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -14,27 +14,37 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('edit-profile');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const toastShownRef = useRef(false);
 
   // Check for payment status and tab on component mount
   useEffect(() => {
     const paymentStatus = searchParams.get('payment_status');
     const tab = searchParams.get('tab');
 
+    // Only show toast once
+    if (toastShownRef.current) return;
+
     // Handle tab parameter first (for direct navigation)
     if (tab === 'my-listed-car') {
       setActiveTab('my-listed-car');
+      if (paymentStatus === 'success') {
+        toast.success('Payment successful! Your car listing has been published.');
+        toastShownRef.current = true;
+      } else if (paymentStatus === 'failed') {
+        toast.error('Payment failed. Please try again.');
+        toastShownRef.current = true;
+      }
       // Clear the query parameter
       setSearchParams({});
-    }
-    // Then handle payment status
-    else if (paymentStatus === 'success') {
-      toast.success('Payment successful! Your car listing has been published.');
-      setActiveTab('my-listed-car');
-      // Clear the query parameters
-      setSearchParams({});
-    } else if (paymentStatus === 'failed') {
-      toast.error('Payment failed. Please try again.');
-      setActiveTab('my-listed-car');
+    } else if (tab === 'my-purchases') {
+      setActiveTab('purchase-history');
+      if (paymentStatus === 'success') {
+        toast.success('Payment successful! Your purchase has been completed.');
+        toastShownRef.current = true;
+      } else if (paymentStatus === 'failed') {
+        toast.error('Payment failed. Please try again.');
+        toastShownRef.current = true;
+      }
       // Clear the query parameters
       setSearchParams({});
     }

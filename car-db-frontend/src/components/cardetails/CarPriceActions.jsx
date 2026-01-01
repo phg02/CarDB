@@ -228,7 +228,7 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
           </div>
         )}
 
-        {isSold && !isPurchased && (
+        {isSold && !isPurchased && !isAdminApproved && (
           <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-6">
             <div className="text-center">
               <p className="text-sm text-green-400 mb-2 font-semibold">✓ SOLD</p>
@@ -250,11 +250,20 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
 
         {isAdminApproved && (
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center gap-4">
-            <button
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-            >
-              Delete
-            </button>
+            {isSold || carData?.sold ? (
+              <button
+                disabled
+                className="flex-1 bg-green-600 text-white font-semibold px-8 py-3 rounded-lg cursor-not-allowed opacity-75"
+              >
+                ✓ SOLD
+              </button>
+            ) : (
+              <button
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+              >
+                Delete
+              </button>
+            )}
           </div>
         )}
 

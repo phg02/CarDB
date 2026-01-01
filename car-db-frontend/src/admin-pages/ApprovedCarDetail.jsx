@@ -192,7 +192,12 @@ const ApprovedCarDetail = () => {
     <div className="min-h-screen bg-gray-900">
       <CarHeroSection carName={carData.name} heroImage={carData.images[selectedImageIndex]} />
       <CarImageGallery images={carData.images} selectedImage={selectedImageIndex} onImageSelect={setSelectedImageIndex} />
-      <CarPriceActions price={carData.price} carData={carData} isAdminApproved={true} />
+      <CarPriceActions 
+        price={carData.price} 
+        carData={carData} 
+        isAdminApproved={true}
+        isSold={!!orderData}
+      />
       
       <div className="container mx-auto px-4 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -205,7 +210,7 @@ const ApprovedCarDetail = () => {
               
               {/* Buyer Information (if sold) */}
               {orderData && (
-                <div className="bg-gray-800 border border-blue-500/30 rounded-lg p-6">
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                   <h3 className="text-xl font-bold text-white mb-4">Buyer Information</h3>
                   <div className="space-y-3 text-sm">
                     <div>
@@ -226,7 +231,7 @@ const ApprovedCarDetail = () => {
 
               {/* Shipping Location (if sold) */}
               {orderData && (
-                <div className="bg-gray-800 border border-green-500/30 rounded-lg p-6">
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
                   <h3 className="text-xl font-bold text-white mb-4">Shipping Location</h3>
                   <div className="space-y-3 text-sm">
                     <div>

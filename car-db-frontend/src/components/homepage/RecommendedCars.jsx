@@ -106,13 +106,8 @@ const RecommendedCars = () => {
 
               <div className="flex items-baseline gap-3 mb-4">
                 <span className="text-2xl font-bold text-primary">
-                  ${car.price.toLocaleString()}
+                  VND {car.price.toLocaleString()}
                 </span>
-                {car.originalPrice && (
-                  <span className="text-sm text-slate-500 line-through">
-                    ${car.originalPrice.toLocaleString()}
-                  </span>
-                )}
               </div>
 
               <div className="flex items-center gap-2 text-slate-400 text-sm mb-6">

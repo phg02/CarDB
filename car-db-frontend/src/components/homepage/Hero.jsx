@@ -9,25 +9,25 @@ const Hero = () => {
 
   const slides = [
     {
-      image: "https://picsum.photos/id/111/1920/1080",
+      image: "https://www.autoblog.com/.image/w_3840,q_auto:good,c_limit/MjA5NTI4Njk4NTYxNTA0NDI1/IMG_0931.jpg?arena_f_auto",
       title: "Find your dream car",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Experience the thrill of the drive with our premium selection.",
     },
     {
-      image: "https://picsum.photos/id/133/1920/1080",
+      image: "https://hagerty-media-prod.imgix.net/2023/07/24_DarkHourse_RaceRed_Mediadrive-NC_05-scaled.jpeg?auto=format%2Ccompress&ixlib=php-3.3.0",
       title: "Luxury at its finest",
       description:
         "Discover premium vehicles that combine elegance with performance. Your journey to excellence starts here.",
     },
     {
-      image: "https://picsum.photos/id/183/1920/1080",
+      image: "https://www.autoblog.com/.image/c_fill,w_1200,h_1200,g_faces:center/MjA5MDg5MDUxMjE1NDcyMjQw/2024-ford-mustang-dark-horse.jpg",
       title: "Performance redefined",
       description:
         "Experience power and precision with our collection of high-performance vehicles designed for enthusiasts.",
     },
     {
-      image: "https://picsum.photos/id/193/1920/1080",
+      image: "https://di-uploads-pod39.dealerinspire.com/kennyrossfordsouth/uploads/2023/02/Kenny-Ross-Ford-South-Mustang.jpg",
       title: "Adventure awaits",
       description:
         "Embrace the open road with vehicles built for exploration and unforgettable journeys.",

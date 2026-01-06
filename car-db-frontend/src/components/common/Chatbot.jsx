@@ -182,7 +182,7 @@ function Chatbot() {
             <button aria-label="Close chat" onClick={() => setOpen(false)} className="text-white font-bold text-xl">✕</button>
           </div>
 
-          <div ref={messagesRef} className="px-3 py-2 overflow-y-auto space-y-2 bg-gray-800 h-64 sm:h-80" style={{ maxHeight: '400px' }}>
+          <div ref={messagesRef} className="px-3 py-2 overflow-y-auto space-y-2 bg-gray-800 h-96 sm:h-[500px]" style={{ maxHeight: '600px' }}>
             {messages.map((m) => (
               <div key={m.id} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`${m.from === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 rounded-lg max-w-[80%] break-words text-sm`}>

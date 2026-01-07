@@ -58,6 +58,17 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend is working!', timestamp: new Date().toISOString() });
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const healthCheck = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  };
+  res.status(200).json(healthCheck);
+});
+
 app.listen(3000, () => {
       console.log('Server is running on port 3000');
 });

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/axios";
 import { toast } from "react-toastify";
 import SearchBar from "../components/news/SearchBar";
 import NewsCard from "../components/news/NewsCard";
@@ -23,9 +23,8 @@ const AdminNews = () => {
         return;
       }
 
-      const response = await axios.get("/api/news/admin/all", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
-        withCredentials: true,
+      const response = await api.get("/api/news/admin/all", {
+        headers: { Authorization: `Bearer ${auth.accessToken}` }
       });
 
       if (response.data.success) {
@@ -33,9 +32,8 @@ const AdminNews = () => {
           response.data.data.news.map(async (article) => {
             try {
               // Fetch comment count for each article
-              const commentsResponse = await axios.get(
-                `/api/comments/news/${article._id}`,
-                { withCredentials: true }
+              const commentsResponse = await api.get(
+                `/api/comments/news/${article._id}`
               );
 
               const commentCount =

@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+import api from "../lib/axios";
 import { toast } from "react-toastify";
 
 function OrderSummary() {
@@ -29,9 +29,7 @@ function OrderSummary() {
   useEffect(() => {
     if (isPurchase && carData?._id) {
       setFetchingSellerInfo(true);
-      axios.get(`/api/cars/${carData._id}`, {
-        withCredentials: true
-      })
+      api.get(`/api/cars/${carData._id}`)
         .then(res => {
           console.log('Car details response:', res.data);
           if (res.data.success && res.data.data) {
@@ -140,8 +138,7 @@ function OrderSummary() {
         console.log('Order payload being sent:', orderPayload);
 
         // Create order via API
-        const orderResponse = await axios.post('/api/orders/create', orderPayload, {
-          withCredentials: true,
+        const orderResponse = await api.post('/api/orders/create', orderPayload, {
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -157,7 +154,7 @@ function OrderSummary() {
           console.log('Order created, initiating VNPay payment:', { orderId, orderAmount });
           
           // Now create VNPay checkout session
-          const vnpayResponse = await axios.post('/api/payments/vnpay/create-checkout', 
+          const vnpayResponse = await api.post('/api/payments/vnpay/create-checkout', 
             {
               orderId: orderId,
               type: 'order',
@@ -236,8 +233,7 @@ function OrderSummary() {
         }
 
         // Initiate car post
-        const response = await axios.post('/api/cars/initiate', submitData, {
-          withCredentials: true,
+        const response = await api.post('/api/cars/initiate', submitData, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
@@ -249,10 +245,9 @@ function OrderSummary() {
 
       // Initiate VNPay payment
       console.log('Initiating payment for postingFeeId:', postingFeeIdToUse);
-      const paymentResponse = await axios.post('/api/posting-fee/pay/checkout', {
+      const paymentResponse = await api.post('/api/posting-fee/pay/checkout', {
         postingFeeId: postingFeeIdToUse,
       }, {
-        withCredentials: true,
         headers: {
           "Authorization": `Bearer ${token}`,
         },

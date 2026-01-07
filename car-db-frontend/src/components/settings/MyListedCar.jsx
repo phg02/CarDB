@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 import ProductCard from '../carlisting/ProductCard';
-import axios from 'axios';
+import api from '../../lib/axios';
 
 const MyListedCar = () => {
   const [listedCars, setListedCars] = useState([]);
@@ -41,8 +41,7 @@ const MyListedCar = () => {
       }
 
       console.log('MyListedCar - Making API call to fetch cars');
-      const response = await axios.get(`/api/cars/seller?page=${page}&limit=12`, {
-        withCredentials: true,
+      const response = await api.get(`/api/cars/seller?page=${page}&limit=12`, {
         headers: {
           'Authorization': `Bearer ${auth.accessToken}`,
         },

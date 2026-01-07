@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -62,13 +62,10 @@ export const RegisterForm = () => {
     }
 
     try{
-      const response = await axios.post(
+      const response = await api.post(
         "/api/auth/register",
         {
           email: form.email.trim()
-        },
-        {
-          withCredentials: true
         }
       );
       toast.success("OTP sent to your email. Please verify.");

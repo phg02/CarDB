@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/axios";
 import { toast } from "react-toastify";
 import SearchBar from "../components/news/SearchBar";
 import NewsCard from "../components/news/NewsCard";
@@ -19,16 +19,15 @@ const News = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("/api/news", { withCredentials: true });
+      const response = await api.get("/api/news");
 
       if (response.data.success) {
         const newsWithComments = await Promise.all(
           response.data.data.news.map(async (article) => {
             try {
               // Fetch comment count for each article
-              const commentsResponse = await axios.get(
-                `/api/comments/news/${article._id}`,
-                { withCredentials: true }
+              const commentsResponse = await api.get(
+                `/api/comments/news/${article._id}`
               );
 
               // Debug: log the response structure

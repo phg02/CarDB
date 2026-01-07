@@ -3,7 +3,7 @@ import { Upload, X } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import axios from "axios";
+import api from "../lib/axios";
 
 export default function SellCar() {
     const [condition, setCondition] = useState("new");
@@ -40,9 +40,7 @@ export default function SellCar() {
     useEffect(() => {
         const fetchMakes = async () => {
             try {
-                const response = await axios.get('/api/cars/makes', {
-                    withCredentials: true
-                });
+                const response = await api.get('/api/cars/makes');
                 setMakes(response.data.data);
             } catch (error) {
                 console.error('Error fetching makes:', error);
@@ -51,9 +49,7 @@ export default function SellCar() {
 
         const fetchEngines = async () => {
             try {
-                const response = await axios.get('/api/cars/engines', {
-                    withCredentials: true
-                });
+                const response = await api.get('/api/cars/engines');
                 setEngines(response.data.data);
             } catch (error) {
                 console.error('Error fetching engines:', error);
@@ -62,9 +58,7 @@ export default function SellCar() {
 
         const fetchCountries = async () => {
             try {
-                const response = await axios.get('/api/cars/countries', {
-                    withCredentials: true
-                });
+                const response = await api.get('/api/cars/countries');
                 setCountries(response.data.data);
             } catch (error) {
                 console.error('Error fetching countries:', error);
@@ -73,9 +67,7 @@ export default function SellCar() {
 
         const fetchBodyTypes = async () => {
             try {
-                const response = await axios.get('/api/cars/body-types', {
-                    withCredentials: true
-                });
+                const response = await api.get('/api/cars/body-types');
                 setBodyTypes(response.data.data);
             } catch (error) {
                 console.error('Error fetching body types:', error);
@@ -84,9 +76,7 @@ export default function SellCar() {
 
         const fetchFuelTypes = async () => {
             try {
-                const response = await axios.get('/api/cars/fuel-types', {
-                    withCredentials: true
-                });
+                const response = await api.get('/api/cars/fuel-types');
                 setFuelTypes(response.data.data);
             } catch (error) {
                 console.error('Error fetching fuel types:', error);
@@ -108,9 +98,7 @@ export default function SellCar() {
                 return;
             }
             try {
-                const response = await axios.get(`/api/cars/models/${selectedMake}`, {
-                    withCredentials: true
-                });
+                const response = await api.get(`/api/cars/models/${selectedMake}`);
                 setModels(response.data.data);
             } catch (error) {
                 console.error('Error fetching models:', error);

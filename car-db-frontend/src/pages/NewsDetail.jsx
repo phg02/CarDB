@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/axios";
 import { toast } from "react-toastify";
 import {
   MessageSquare,
@@ -29,9 +29,7 @@ const NewsDetail = () => {
   const fetchArticle = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/news/${id}`, {
-        withCredentials: true,
-      });
+      const response = await api.get(`/api/news/${id}`);
 
       if (response.data.success) {
         const newsData = response.data.data.news;
@@ -63,9 +61,7 @@ const NewsDetail = () => {
         });
 
         // Fetch related news
-        const allNewsResponse = await axios.get("/api/news", {
-          withCredentials: true,
-        });
+        const allNewsResponse = await api.get("/api/news");
         if (allNewsResponse.data.success) {
           const related = allNewsResponse.data.data.news
             .filter((n) => n._id !== id)
@@ -101,9 +97,7 @@ const NewsDetail = () => {
 
   const fetchComments = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/comments/news/${id}`, {
-        withCredentials: true,
-      });
+      const response = await api.get(`/api/comments/news/${id}`);
       if (response.data.success) {
         const mappedComments = response.data.data.comments.map((c) => ({
           id: c._id,
@@ -153,12 +147,11 @@ const NewsDetail = () => {
     if (comment.trim()) {
       try {
         const token = auth?.accessToken;
-        const response = await axios.post(
+        const response = await api.post(
           `/api/comments/create/${id}`,
           { content: comment },
           {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
           }
         );
 
@@ -210,9 +203,8 @@ const NewsDetail = () => {
           commentId: commentId,
         });
 
-        const response = await axios.delete(`/api/comments/${commentId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
+        const response = await api.delete(`/api/comments/${commentId}`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         if (response.data.success) {

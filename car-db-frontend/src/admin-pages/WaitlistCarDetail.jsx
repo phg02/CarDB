@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../lib/axios';
 import CarHeroSection from '../components/cardetails/CarHeroSection';
 import CarImageGallery from '../components/cardetails/CarImageGallery';
 import CarPriceActions from '../components/cardetails/CarPriceActions';
@@ -26,11 +26,10 @@ const CarDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get(`/api/cars/${id}`, {
+        const response = await api.get(`/api/cars/${id}`, {
           headers: {
             'Authorization': `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true
+          }
         });
         const car = response.data.data;
 

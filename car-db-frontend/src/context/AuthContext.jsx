@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect  } from "react";
-import axios from "axios";
+import api from "../lib/axios";
 const AuthContext = createContext();
 
 export const AuthProvider = ({children}) =>{
@@ -17,9 +17,7 @@ export const AuthProvider = ({children}) =>{
             setLoading(true);
             try{
                 console.log('AuthContext - Making refresh request');
-                const res = await axios.get("/api/auth/refresh", {
-                    withCredentials: true
-                });
+                const res = await api.get("/api/auth/refresh");
                 console.log('AuthContext - Refresh response:', res.data);
                 const userId = res.data.data?.user?.id || res.data.data?.user?._id;
                 console.log('AuthContext - Extracted userId from response:', userId);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -58,14 +58,11 @@ export const LoginForm = () => {
     }
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "/api/auth/login",
         {
           email: form.email,
           password: form.password,
-        },
-        {
-          withCredentials: true
         }
       );
       console.log('Login response:', response.data);

@@ -6,7 +6,7 @@ import CarImageGallery from '../components/cardetails/CarImageGallery';
 import CarPriceActions from '../components/cardetails/CarPriceActions';
 import CarSpecifications from '../components/cardetails/CarSpecifications';
 import DealerInfo from '../components/cardetails/DealerInfo';
-import axios from 'axios';
+import api from '../lib/axios';
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -73,9 +73,7 @@ const CarDetails = () => {
         setLoading(true);
         setError(null);
         
-        const response = await axios.get(`/api/cars/${id}`, {
-          withCredentials: true
-        });
+        const response = await api.get(`/api/cars/${id}`);
         
         if (response.data.success) {
           const car = response.data.data;
@@ -87,11 +85,10 @@ const CarDetails = () => {
           // If sold, fetch the order to get the sold date
           if (sold) {
             try {
-              const orderResponse = await axios.get(`/api/orders/car/${id}`, {
+              const orderResponse = await api.get(`/api/orders/car/${id}`, {
                 headers: {
                   'Authorization': `Bearer ${auth?.accessToken}`
-                },
-                withCredentials: true
+                }
               });
               if (orderResponse.data.success && orderResponse.data.data) {
                 const soldDateStr = new Date(orderResponse.data.data.createdAt).toLocaleDateString('en-US', {

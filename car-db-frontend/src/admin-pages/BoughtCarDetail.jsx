@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../lib/axios';
 import CarHeroSection from '../components/cardetails/CarHeroSection';
 import CarImageGallery from '../components/cardetails/CarImageGallery';
 import CarPriceActions from '../components/cardetails/CarPriceActions';
@@ -33,9 +33,7 @@ const BoughtCarDetail = () => {
         setError(null);
 
         // Fetch car details
-        const carResponse = await axios.get(`/api/cars/${id}`, {
-          withCredentials: true
-        });
+        const carResponse = await api.get(`/api/cars/${id}`);
 
         if (carResponse.data.success) {
           const car = carResponse.data.data;
@@ -142,11 +140,10 @@ const BoughtCarDetail = () => {
 
         // Fetch order details using the order endpoint for this car
         try {
-          const orderResponse = await axios.get(`/api/orders/car/${id}`, {
+          const orderResponse = await api.get(`/api/orders/car/${id}`, {
             headers: {
               'Authorization': `Bearer ${auth?.accessToken}`
-            },
-            withCredentials: true
+            }
           });
 
           console.log('Order response:', orderResponse.data);
@@ -187,14 +184,13 @@ const BoughtCarDetail = () => {
 
     try {
       setUpdatingStatus(true);
-      const response = await axios.patch(
+      const response = await api.patch(
         `/api/orders/${orderData._id}/status`,
         { orderStatus: newStatus },
         {
           headers: {
             'Authorization': `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true
+          }
         }
       );
 

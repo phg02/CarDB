@@ -1,7 +1,7 @@
 import '../index.css';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../lib/axios';
 import ProductCard from '../components/carlisting/ProductCard';
 import Filter from '../components/carlisting/Filter';
 import Result from '../components/carlisting/Result';
@@ -27,12 +27,11 @@ function ApprovedCar() {
         setIsFiltering(true);
       }
       setError(null);
-      const response = await axios.get('/api/cars/admin/all', {
+      const response = await api.get('/api/cars/admin/all', {
         params: { page, limit: 12, verified: 'true', ...filters },
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
       const data = response.data.data || [];
       setCars(data);
@@ -160,11 +159,10 @@ function ApprovedCar() {
     }
 
     try {
-      await axios.delete(`/api/cars/${carId}`, {
+      await api.delete(`/api/cars/${carId}`, {
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
       toast.success('Car deleted successfully');
       // Remove the car from the list

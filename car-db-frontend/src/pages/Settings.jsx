@@ -3,7 +3,7 @@ import { User, ShoppingBag, Heart, Car, LogOut, Trash2, Menu, X } from 'lucide-r
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../lib/axios';
 import EditProfile from '../components/settings/EditProfile';
 import PurchaseHistory from '../components/settings/PurchaseHistory';
 import FavoriteList from '../components/settings/FavoriteList';
@@ -65,7 +65,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout', {}, { withCredentials: true });
+      await api.post('/api/auth/logout', {});
     } catch (err) {
       console.error('Logout request failed', err);
     }

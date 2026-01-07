@@ -6,7 +6,7 @@ import Chatbot from '../common/Chatbot';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
-import axios from 'axios';
+import api from '../../lib/axios';
 
 const navigation = [
   { name: 'Approved Cars', href: '/approved-cars' },
@@ -25,9 +25,7 @@ export default function AdminNavbar(props) {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout', {}, {
-        withCredentials: true
-      });
+      await api.post('/api/auth/logout', {});
       try { localStorage.clear(); } catch (e) {}
       setAuth(null);
       try { window.dispatchEvent(new CustomEvent('app:loggedOut')); } catch (e) {}

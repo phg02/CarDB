@@ -1,7 +1,7 @@
 import { Heart, Eye, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../lib/axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,7 +16,7 @@ const PurchaseHistoryCard = ({ car, onDelete }) => {
     const checkWishlist = async () => {
       try {
         if (auth?.accessToken) {
-          const res = await axios.get('/api/cars/watchlist', {
+          const res = await api.get('/api/cars/watchlist', {
             headers: { Authorization: `Bearer ${auth.accessToken}` },
           });
           const list = res.data?.data?.watchlist || [];
@@ -39,11 +39,11 @@ const PurchaseHistoryCard = ({ car, onDelete }) => {
 
     try {
       if (isWishlisted) {
-        await axios.delete(`/api/cars/watchlist/${car.id}`, {
+        await api.delete(`/api/cars/watchlist/${car.id}`, {
           headers: { Authorization: `Bearer ${auth.accessToken}` },
         });
       } else {
-        await axios.post(
+        await api.post(
           `/api/cars/watchlist/${car.id}`,
           {},
           {
@@ -84,8 +84,7 @@ const PurchaseHistoryCard = ({ car, onDelete }) => {
   const confirmDelete = async () => {
     setDeleting(true);
     try {
-      await axios.delete(`/api/orders/${car.orderId}`, {
-        withCredentials: true,
+      await api.delete(`/api/orders/${car.orderId}`, {
         headers: { Authorization: `Bearer ${auth?.accessToken}` },
       });
       toast.success('Purchase history deleted successfully');

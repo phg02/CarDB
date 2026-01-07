@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../lib/axios';
 import { toast } from 'react-toastify';
 
 const EditProfile = () => {
@@ -33,8 +33,7 @@ const EditProfile = () => {
       if (!auth?.accessToken) return;
 
       try {
-        const response = await axios.get('/api/users/profile', {
-          withCredentials: true,
+        const response = await api.get('/api/users/profile', {
           headers: {
             Authorization: `Bearer ${auth.accessToken}`
           }
@@ -76,8 +75,7 @@ const EditProfile = () => {
       const formDataObj = new FormData();
       formDataObj.append('profileImage', file);
 
-      const response = await axios.post('/api/users/profile-image', formDataObj, {
-        withCredentials: true,
+      const response = await api.post('/api/users/profile-image', formDataObj, {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`
         },
@@ -118,10 +116,9 @@ const EditProfile = () => {
     setLoading(true);
     try {
       // Update profile name
-      await axios.patch('/api/users/profile', {
+      await api.patch('/api/users/profile', {
         name: formData.username.trim()
       }, {
-        withCredentials: true,
         headers: {
           Authorization: `Bearer ${auth.accessToken}`
         }
@@ -174,12 +171,11 @@ const EditProfile = () => {
 
     setLoading(true);
     try {
-      await axios.post('/api/users/change-password', {
+      await api.post('/api/users/change-password', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
         confirmPassword: formData.confirmPassword
       }, {
-        withCredentials: true,
         headers: {
           Authorization: `Bearer ${auth.accessToken}`
         }

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+import api from "../lib/axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -111,12 +111,9 @@ export default function VerificationCode(props) {
         };
       }
 
-      const res = await axios.post(
+      const res = await api.post(
         "/api/auth/verify-otp",
-        requestData,
-        {
-          withCredentials: true
-        }
+        requestData
       );
 
       if (res.data.success) {
@@ -151,9 +148,7 @@ export default function VerificationCode(props) {
       const endpoint = isRegistration ? "/auth/register" : "/auth/send-otp";
       const requestData = isRegistration ? { email } : { email }; // both endpoints expect email in body
       
-      await axios.post(endpoint, requestData, {
-        withCredentials: true
-      });
+      await api.post(endpoint, requestData);
       toast.success("OTP resent to your email");
       setOtp(Array(6).fill("")); // Clear the OTP inputs
     } catch (error) {

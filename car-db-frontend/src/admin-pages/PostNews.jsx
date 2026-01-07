@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, X } from "lucide-react";
-import axios from "axios";
+import api from "../lib/axios";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 
@@ -83,12 +83,11 @@ function PostNews() {
 
       // Use token from auth context, not localStorage
       const token = auth.accessToken;
-      const response = await axios.post("/api/news/create", formData, {
+      const response = await api.post("/api/news/create", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
+        }
       });
 
       if (response.data.success) {

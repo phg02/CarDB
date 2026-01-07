@@ -1,7 +1,7 @@
 import '../index.css';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../lib/axios';
 import ProductCard from '../components/carlisting/ProductCard';
 import Filter from '../components/carlisting/Filter';
 import Result from '../components/carlisting/Result';
@@ -26,12 +26,11 @@ function WaitlistCar() {
       setError(null);
 
       // Fetch unverified (paid) posts for waitlist
-      const response = await axios.get('/api/cars/admin/unverified', {
+      const response = await api.get('/api/cars/admin/unverified', {
         params: { page, limit: 12 },
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
 
       const data = response.data.data || [];
@@ -96,11 +95,10 @@ function WaitlistCar() {
 
   const handleApprove = async (carId) => {
     try {
-      await axios.patch(`/api/cars/admin/${carId}/approve`, {}, {
+      await api.patch(`/api/cars/admin/${carId}/approve`, {}, {
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
       toast.success('Car approved successfully');
       // Remove the car from the list
@@ -114,13 +112,12 @@ function WaitlistCar() {
 
   const handleReject = async (carId) => {
     try {
-      await axios.patch(`/api/cars/admin/${carId}/reject`, {
+      await api.patch(`/api/cars/admin/${carId}/reject`, {
         reason: 'Rejected by admin'
       }, {
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
       toast.success('Car rejected successfully');
       // Remove the car from the list
@@ -175,10 +172,9 @@ function WaitlistCar() {
     const applyFilters = async () => {
       try {
         setIsFiltering(true);
-        const response = await axios.get('/api/cars/admin/unverified', {
+        const response = await api.get('/api/cars/admin/unverified', {
           params: { page: 1, limit: 1000 },
-          headers: { 'Authorization': `Bearer ${auth?.accessToken}` },
-          withCredentials: true
+          headers: { 'Authorization': `Bearer ${auth?.accessToken}` }
         });
 
         const raw = response.data.data || [];

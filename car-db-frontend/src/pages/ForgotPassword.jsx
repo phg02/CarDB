@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../lib/axios';
 import { toast } from 'react-toastify';
 
 export default function ForgotPassword() {
@@ -11,7 +11,7 @@ export default function ForgotPassword() {
         if (!email) return toast.warn('Please enter your email');
         setLoading(true);
         try {
-            const res = await axios.post('/api/auth/forgot-password', { email });
+            const res = await api.post('/api/auth/forgot-password', { email });
             toast.success(res.data?.message || 'If an account exists, a reset link was sent');
             setEmail('');
         } catch (err) {

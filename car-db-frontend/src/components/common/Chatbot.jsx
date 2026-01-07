@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/axios';
 
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 const STORAGE_KEY = 'chatbot_responses_cache';
@@ -121,9 +121,8 @@ function Chatbot() {
       }
 
       // Call chatbot API
-      const response = await axios.post('/api/chatbot/chat', 
-        { message: text },
-        { withCredentials: true }
+      const response = await api.post('/api/chatbot/chat', 
+        { message: text }
       );
 
       const botReply = response.data.reply || 'Sorry, I could not process your request.';

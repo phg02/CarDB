@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../lib/axios';
 import { toast } from 'react-toastify';
 import PurchaseHistoryCard from './PurchaseHistoryCard';
 
@@ -18,9 +18,8 @@ const PurchaseHistory = () => {
   const fetchCustomerOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/orders/customer', {
+      const response = await api.get('/api/orders/customer', {
         params: { page: currentPage, limit: 9 },
-        withCredentials: true,
         headers: {
           Authorization: `Bearer ${auth?.accessToken}`,
         },

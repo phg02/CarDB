@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../../lib/axios';
 
 const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdminApproved, isAdminWaitlist, isAdminStatus, isPurchased, purchaseInfo, isOwnCar, isSold, soldDate }) => {
   const navigate = useNavigate();
@@ -150,11 +150,10 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
 
   const handleApprove = async () => {
     try {
-      await axios.patch(`/api/cars/admin/${carId}/approve`, {}, {
+      await api.patch(`/api/cars/admin/${carId}/approve`, {}, {
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
       toast.success('Car approved successfully');
       // Navigate back to waitlist or refresh
@@ -166,13 +165,12 @@ const CarPriceActions = ({ price, carData, carId, onStatusChange, isUser, isAdmi
 
   const handleReject = async () => {
     try {
-      await axios.patch(`/api/cars/admin/${carId}/reject`, {
+      await api.patch(`/api/cars/admin/${carId}/reject`, {
         reason: 'Rejected by admin'
       }, {
         headers: {
           'Authorization': `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
+        }
       });
       toast.success('Car rejected successfully');
       // Navigate back to waitlist or refresh

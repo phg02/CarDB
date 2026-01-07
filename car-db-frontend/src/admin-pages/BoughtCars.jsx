@@ -1,6 +1,6 @@
 import '../index.css';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../lib/axios';
 import ProductCard from '../components/carlisting/ProductCard';
 import Result from '../components/carlisting/Result';
 import DeliveredFilter from '../components/admin/DeliveredFilter';
@@ -28,12 +28,11 @@ function BoughtCars() {
     const fetchSoldCars = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/cars/admin/all`, {
+        const response = await api.get(`/api/cars/admin/all`, {
           params: { page: currentPage, limit, sold: 'true' },
           headers: {
             'Authorization': `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true
+          }
         });
 
         if (response.data.success) {
@@ -44,11 +43,10 @@ function BoughtCars() {
               
               // Fetch order data to get actual delivery status
               try {
-                const orderResponse = await axios.get(`/api/orders/car/${car._id}`, {
+                const orderResponse = await api.get(`/api/orders/car/${car._id}`, {
                   headers: {
                     'Authorization': `Bearer ${auth?.accessToken}`
-                  },
-                  withCredentials: true
+                  }
                 });
                 
                 if (orderResponse.data.success && orderResponse.data.data) {

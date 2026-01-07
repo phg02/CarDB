@@ -1,7 +1,7 @@
 import ProductCard from '../carlisting/ProductCard';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../lib/axios';
 
 const FavoriteList = () => {
   const { auth } = useAuth();
@@ -18,7 +18,7 @@ const FavoriteList = () => {
       }
 
         try {
-        const res = await axios.get('/api/cars/watchlist', {
+        const res = await api.get('/api/cars/watchlist', {
           headers: { Authorization: `Bearer ${auth.accessToken}` }
         });
         const list = res.data?.data?.watchlist || [];

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,7 +21,7 @@ function ProductCard({ children, to, ...props }) {
             const check = async () => {
                 if (auth?.accessToken) {
                     try {
-                        const res = await axios.get('/api/cars/watchlist', {
+                        const res = await api.get('/api/cars/watchlist', {
                             headers: { Authorization: `Bearer ${auth.accessToken}` }
                         });
                         const list = res.data?.data?.watchlist || [];
@@ -152,13 +152,13 @@ function ProductCard({ children, to, ...props }) {
         (async () => {
             try {
                 if (isWishlisted) {
-                    await axios.delete(`/api/cars/${props.id}/watchlist/me`, {
+                    await api.delete(`/api/cars/${props.id}/watchlist/me`, {
                         headers: { Authorization: `Bearer ${auth.accessToken}` }
                     });
                     setIsWishlisted(false);
                     setWishlistMessage('Removed from wishlist');
                 } else {
-                    await axios.post(`/api/cars/${props.id}/watchlist/me`, {}, {
+                    await api.post(`/api/cars/${props.id}/watchlist/me`, {}, {
                         headers: { Authorization: `Bearer ${auth.accessToken}` }
                     });
                     setIsWishlisted(true);

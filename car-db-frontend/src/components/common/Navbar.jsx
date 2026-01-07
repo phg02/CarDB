@@ -5,7 +5,7 @@ import Footer from './Footer';
 import Chatbot from './Chatbot';
 import logo from '../../assets/logo.svg';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../lib/axios';
 import { useNavigate } from 'react-router-dom';
 
 const navigation = [
@@ -26,9 +26,7 @@ export default function Navbar(props) {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout', {}, {
-        withCredentials: true
-      });
+      await api.post('/api/auth/logout', {});
       // Clear all local storage to remove cached wishlist, compare lists, etc.
       try { localStorage.clear(); } catch (e) {}
       setAuth(null);

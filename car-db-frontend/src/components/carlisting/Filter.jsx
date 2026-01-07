@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import PriceRange from "./PriceRange";
 
 // Fallback options if API returns empty lists (matching CarPost schema enums)
@@ -78,7 +78,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
         const fetchFilters = async () => {
             try {
                 setLoading(true);
-                    const response = await axios.get("/api/filters/all", { params: { ...apiParams } });
+                    const response = await api.get("/api/filters/all", { params: { ...apiParams } });
                 
                 // Preserve cityOptions; they come from the dedicated /cities endpoint
                 setFilterOptions(prev => ({
@@ -109,7 +109,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
     useEffect(() => {
         const fetchYears = async () => {
             try {
-                const response = await axios.get('/api/filters/years', {
+                const response = await api.get('/api/filters/years', {
                     params: { ...(selectedBrand ? { brand: selectedBrand } : {}), ...apiParams }
                 });
                 setFilterOptions(prev => ({
@@ -140,7 +140,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
 
         const fetchModels = async () => {
             try {
-                const response = await axios.get(`/api/filters/models/${selectedBrand}`, { params: { ...apiParams } });
+                const response = await api.get(`/api/filters/models/${selectedBrand}`, { params: { ...apiParams } });
                 setFilterOptions(prev => ({
                     ...prev,
                     modelOptions: response.data.data || []
@@ -157,7 +157,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
     useEffect(() => {
         const fetchCities = async () => {
             try {
-                const response = await axios.get('/api/filters/cities', {
+                const response = await api.get('/api/filters/cities', {
                     params: { ...(selectedBrand ? { brand: selectedBrand } : {}), ...apiParams }
                 });
                 setFilterOptions(prev => ({
@@ -176,7 +176,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
     useEffect(() => {
         const fetchSeats = async () => {
             try {
-                const response = await axios.get('/api/filters/seats', { params: { ...apiParams } });
+                const response = await api.get('/api/filters/seats', { params: { ...apiParams } });
                 setFilterOptions(prev => ({
                     ...prev,
                     seatsOptions: withFallback(response.data?.data, 'seatsOptions')
@@ -193,7 +193,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
     useEffect(() => {
         const fetchFuelTypes = async () => {
             try {
-                const response = await axios.get('/api/filters/fuel-types', { params: { ...apiParams } });
+                const response = await api.get('/api/filters/fuel-types', { params: { ...apiParams } });
                 setFilterOptions(prev => ({
                     ...prev,
                     fuelTypeOptions: withFallback(response.data?.data, 'fuelTypeOptions')

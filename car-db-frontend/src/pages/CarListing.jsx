@@ -1,7 +1,7 @@
 import '../index.css';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../lib/axios';
 import ProductCard from '../components/carlisting/ProductCard';
 import Filter from '../components/carlisting/Filter';
 import Result from '../components/carlisting/Result';
@@ -28,7 +28,7 @@ function CarListing() {
         setIsFiltering(true);
       }
       setError(null);
-      const response = await axios.get('/api/cars', {
+      const response = await api.get('/api/cars', {
         params: { page, limit: 12, ...filters }
       });
       const data = response.data.data || [];

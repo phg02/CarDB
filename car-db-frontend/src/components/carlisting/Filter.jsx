@@ -308,7 +308,7 @@ function Filter({ onFilterChange, apiParams = {} }) {
     };
 
     return (
-        <div className="w-full lg:max-w-[360px] max-h-none lg:max-h-[880px] bg-gray-800 px-3 py-3 rounded-[3px] mb-6 lg:mb-0">
+        <div className="w-full lg:max-w-[360px] max-h-none lg:max-h-[920px] bg-gray-800 px-3 py-3 rounded-[3px] mb-6 lg:mb-0">
             <div className="flex items-center justify-between mb-4">
                 <p className="text-xl sm:text-2xl text-white">Filters</p>
                 {activeFiltersCount > 0 && (

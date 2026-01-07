@@ -20,10 +20,7 @@ const app = express();
 dotenv.config();
 
 // CORS configuration
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors());
 
 // Body parser middleware - MUST be before routes
 app.use(express.json({ limit: '50mb' }));

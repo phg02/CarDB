@@ -9,11 +9,7 @@ const AboutUs = () => {
         <div className="flex flex-col lg:flex-row gap-16 items-center">
           <div className="lg:w-1/2">
             <p className="text-slate-300 mb-12 leading-relaxed text-justify">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel
-              aliquet tortor ut sit sit. Velit imperdiet integer elementum a
-              scelerisque pulvinar venenatis sodales. Quis nulla euismod feugiat
-              at interdum in. Venenatis arcu semper lectus quis sit in rhoncus
-              auctor.
+              We connect people who want to buy and sell cars easily, safely, and with confidence. Our platform brings together a wide range of quality vehicles and trusted sellers, helping buyers find the right car at the right price. We aim to make the entire process transparent and hassle-free, from listing your car for sale to driving home your next one.
             </p>
 
             <div className="grid grid-cols-2 gap-y-12 gap-x-8">

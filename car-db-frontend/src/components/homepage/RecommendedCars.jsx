@@ -14,7 +14,7 @@ const cars = [
   {
     id: "1",
     title: "Tesla Model 3 Standard Range Plus",
-    price: 56690,
+    price: 1210000000,
     location: "Florida, USA",
     year: 2020,
     transmission: "Rear-wheel Drive",
@@ -27,8 +27,7 @@ const cars = [
   {
     id: "2",
     title: "Ford F-250 Super Duty",
-    price: 82098,
-    originalPrice: 83500,
+    price: 860000000,
     location: "Milan, Italy",
     year: 2021,
     transmission: "Four-wheel Drive",
@@ -41,7 +40,7 @@ const cars = [
   {
     id: "3",
     title: "Honda Pilot Touring 7-Passenger",
-    price: 43735,
+    price: 498000000,
     location: "Caracas, Venezuela",
     year: 2021,
     transmission: "All-wheel Drive",
